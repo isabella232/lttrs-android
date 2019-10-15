@@ -110,7 +110,7 @@ public abstract class QueryDao extends AbstractEntityDao {
     abstract QueryEntity getQueryEntity(String queryString);
 
     @Query("update query_item set position=position+1 where queryId=:queryId and position>=:position ")
-    abstract int incrementAllPositionsFrom(Long queryId, Integer position);
+    abstract int incrementAllPositionsFrom(Long queryId, Long position);
 
     //TODO: is this query safe to run when emailId is not found
     @Query("update query_item set position=position-1 where queryId=:queryId and position>(select position from query_item where emailId=:emailId and queryId=:queryId)")

@@ -73,16 +73,16 @@ public abstract class MailboxDao extends AbstractEntityDao {
     public abstract List<MailboxWithRoleAndName> getMailboxesForThread(String threadId);
 
     @Query("update mailbox set totalEmails=:value where id=:id")
-    public abstract void updateTotalEmails(String id, Integer value);
+    public abstract void updateTotalEmails(String id, Long value);
 
     @Query("update mailbox set unreadEmails=:value where id=:id")
-    public abstract void updateUnreadEmails(String id, Integer value);
+    public abstract void updateUnreadEmails(String id, Long value);
 
     @Query("update mailbox set totalThreads=:value where id=:id")
-    public abstract void updateTotalThreads(String id, Integer value);
+    public abstract void updateTotalThreads(String id, Long value);
 
     @Query("update mailbox set unreadThreads=:value where id=:id")
-    public abstract void updateUnreadThreads(String id, Integer value);
+    public abstract void updateUnreadThreads(String id, Long value);
 
     @Query("delete from mailbox where id=:id")
     public abstract void delete(String id);

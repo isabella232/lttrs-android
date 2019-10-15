@@ -70,7 +70,7 @@ public abstract class LttrsRepository {
                 .username(Credentials.username)
                 .cache(new DatabaseCache(this.database))
                 .sessionCache(new SessionFileCache(application.getCacheDir()))
-                .queryPageSize(20)
+                .queryPageSize(20L)
                 .build();
     }
 

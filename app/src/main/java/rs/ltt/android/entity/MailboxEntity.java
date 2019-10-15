@@ -36,15 +36,15 @@ public class MailboxEntity implements IdentifiableMailboxWithRole {
 
     public Role role;
 
-    public Integer sortOrder;
+    public Long sortOrder;
 
-    public Integer totalEmails;
+    public Long totalEmails;
 
-    public Integer unreadEmails;
+    public Long unreadEmails;
 
-    public Integer totalThreads;
+    public Long totalThreads;
 
-    public Integer unreadThreads;
+    public Long unreadThreads;
 
     @Embedded
     public MailboxRightsEmbed myRights;

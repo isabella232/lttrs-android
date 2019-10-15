@@ -42,12 +42,12 @@ public class QueryItemEntity {
     public Long queryId;
 
     //TODO: delete position; we just needed that for debugging stuff
-    public Integer position;
+    public Long position;
     public String emailId;
     public String threadId;
 
 
-    public QueryItemEntity(@NonNull Long queryId, Integer position, String emailId, String threadId) {
+    public QueryItemEntity(@NonNull Long queryId, Long position, String emailId, String threadId) {
         this.queryId = queryId;
         this.position = position;
         this.emailId = emailId;
@@ -55,7 +55,7 @@ public class QueryItemEntity {
     }
 
 
-    public static List<QueryItemEntity> of(final Long queryId, final QueryResultItem[] items, final int offset) {
+    public static List<QueryItemEntity> of(final Long queryId, final QueryResultItem[] items, final long offset) {
         ImmutableList.Builder<QueryItemEntity> builder = new ImmutableList.Builder<>();
         for (int i = 0; i < items.length; ++i) {
             QueryResultItem item = items[i];
@@ -64,7 +64,7 @@ public class QueryItemEntity {
         return builder.build();
     }
 
-    public static QueryItemEntity of(final Long queryId, Integer position, QueryResultItem item) {
+    public static QueryItemEntity of(final Long queryId, Long position, QueryResultItem item) {
         return new QueryItemEntity(queryId, position, item.getEmailId(), item.getThreadId());
     }
 }

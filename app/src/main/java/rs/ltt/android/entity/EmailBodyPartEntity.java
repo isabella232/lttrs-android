@@ -40,10 +40,10 @@ public class EmailBodyPartEntity {
     @NonNull
     public EmailBodyPartType bodyPartType;
     @NonNull
-    public Integer position;
+    public Long position;
     public String partId;
     public String blobId;
-    public Integer size;
+    public Long size;
     public String name;
     public String type;
     public String charset;
@@ -63,7 +63,7 @@ public class EmailBodyPartEntity {
         return builder.build();
     }
 
-    private static EmailBodyPartEntity of(String emailId, EmailBodyPartType type, int position, EmailBodyPart emailBodyPart) {
+    private static EmailBodyPartEntity of(String emailId, EmailBodyPartType type, long position, EmailBodyPart emailBodyPart) {
         final EmailBodyPartEntity entity = new EmailBodyPartEntity();
         entity.emailId = emailId;
         entity.bodyPartType = type;

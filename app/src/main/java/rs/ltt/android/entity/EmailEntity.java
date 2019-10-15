@@ -34,7 +34,7 @@ public class EmailEntity {
 
     public String threadId;
 
-    public Integer size;
+    public Long size;
 
     public Date receivedAt;
 
