@@ -136,7 +136,6 @@ public class DatabaseCache implements Cache {
     @Override
     public void setQueryResult(String queryString, QueryResult queryResult) {
         database.queryDao().set(queryString, queryResult);
-        Log.d("lttrs", "setting query result for query string '" + queryString + "'");
     }
 
     @Override

@@ -17,13 +17,14 @@ package rs.ltt.android.database.dao;
 
 import android.util.Log;
 
-import java.util.List;
-
 import androidx.paging.DataSource;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Transaction;
+
+import java.util.List;
+
 import rs.ltt.android.entity.EntityType;
 import rs.ltt.android.entity.QueryEntity;
 import rs.ltt.android.entity.QueryItemEntity;
@@ -32,7 +33,6 @@ import rs.ltt.jmap.common.entity.AddedItem;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.TypedState;
 import rs.ltt.jmap.mua.cache.CacheConflictException;
-
 import rs.ltt.jmap.mua.cache.QueryUpdate;
 import rs.ltt.jmap.mua.util.QueryResult;
 import rs.ltt.jmap.mua.util.QueryResultItem;
@@ -41,7 +41,6 @@ import static androidx.room.OnConflictStrategy.REPLACE;
 
 @Dao
 public abstract class QueryDao extends AbstractEntityDao {
-
 
     @Insert(onConflict = REPLACE)
     abstract long insert(QueryEntity entity);
@@ -64,6 +63,9 @@ public abstract class QueryDao extends AbstractEntityDao {
     @Query("select count(id) from query_item where queryId=:queryId")
     abstract int getItemCount(Long queryId);
 
+    @Query("delete from `query` where queryString=:queryString")
+    abstract void deleteQuery(String queryString);
+
     //we inner join on threads here to make sure that we only return items that we actually have
     //due to the delay of fetchMissing we might have query_items that we do not have a corresponding thread for
     @Transaction
@@ -74,7 +76,12 @@ public abstract class QueryDao extends AbstractEntityDao {
     public void set(String queryString, QueryResult queryResult) {
         TypedState<Email> emailState = queryResult.objectState;
         throwOnCacheConflict(EntityType.EMAIL, emailState);
-        //TODO delete old
+
+        if (queryResult.items.length == 0) {
+            deleteQuery(queryString);
+            return;
+        }
+
         long queryId = insert(QueryEntity.of(queryString, queryResult.queryState.getState()));
         insert(QueryItemEntity.of(queryId, queryResult.items, 0));
     }

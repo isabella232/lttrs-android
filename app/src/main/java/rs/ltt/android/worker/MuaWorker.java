@@ -52,7 +52,7 @@ public abstract class MuaWorker extends Worker {
                 .build();
     }
 
-    protected static Result toResult(ExecutionException e) {
+    static Result toResult(ExecutionException e) {
         final Throwable cause = e.getCause();
         if (cause != null) {
             if (cause instanceof MethodErrorResponseException) {

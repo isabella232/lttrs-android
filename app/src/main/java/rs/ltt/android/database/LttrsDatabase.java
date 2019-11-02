@@ -27,7 +27,6 @@ import androidx.room.TypeConverters;
 import rs.ltt.android.database.dao.MailboxDao;
 import rs.ltt.android.database.dao.OverwriteDao;
 import rs.ltt.android.database.dao.QueryDao;
-import rs.ltt.android.database.dao.SearchSuggestionDao;
 import rs.ltt.android.database.dao.StateDao;
 import rs.ltt.android.database.dao.ThreadAndEmailDao;
 import rs.ltt.android.entity.EmailBodyPartEntity;
