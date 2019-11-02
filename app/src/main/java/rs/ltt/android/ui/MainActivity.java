@@ -32,9 +32,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.TranslateAnimation;
 
-import java.util.Arrays;
-import java.util.List;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -43,14 +40,16 @@ import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
-import rs.ltt.android.Credentials;
+
+import java.util.Arrays;
+import java.util.List;
+
 import rs.ltt.android.MainNavigationDirections;
 import rs.ltt.android.R;
-import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.databinding.ActivityMainBinding;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.ui.adapter.MailboxListAdapter;
@@ -61,19 +60,15 @@ import rs.ltt.jmap.common.entity.Role;
 public class MainActivity extends AppCompatActivity implements OnMailboxOpened, SearchQueryFragment.OnTermSearched, NavController.OnDestinationChangedListener, MenuItem.OnActionExpandListener {
 
     private static final int NUM_TOOLBAR_ICON = 1;
-
-    final MailboxListAdapter mailboxListAdapter = new MailboxListAdapter();
-
-    private ActivityMainBinding binding;
-    private MainViewModel mainViewModel;
-    private MenuItem mSearchItem;
-    private SearchView mSearchView;
-
     private static final List<Integer> MAIN_DESTINATIONS = Arrays.asList(
             R.id.inbox,
             R.id.mailbox
     );
-
+    final MailboxListAdapter mailboxListAdapter = new MailboxListAdapter();
+    private ActivityMainBinding binding;
+    private MainViewModel mainViewModel;
+    private MenuItem mSearchItem;
+    private SearchView mSearchView;
     //TODO: move to viewmodel
     private String currentSearchTerm = null;
 
@@ -81,10 +76,18 @@ public class MainActivity extends AppCompatActivity implements OnMailboxOpened, 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+
+        final ViewModelProvider viewModelProvider = new ViewModelProvider(
+                getViewModelStore(),
+                getDefaultViewModelProviderFactory()
+        );
+        mainViewModel = viewModelProvider.get(MainViewModel.class);
         setSupportActionBar(binding.toolbar);
 
-        final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        final NavController navController = Navigation.findNavController(
+                this,
+                R.id.nav_host_fragment
+        );
 
         mailboxListAdapter.setOnMailboxOverviewItemSelectedListener(mailboxOverviewItem -> {
             binding.drawerLayout.closeDrawer(GravityCompat.START);
@@ -139,14 +142,20 @@ public class MainActivity extends AppCompatActivity implements OnMailboxOpened, 
     }
 
     private int getCurrentDestinationId() {
-        final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        final NavController navController = Navigation.findNavController(
+                this,
+                R.id.nav_host_fragment
+        );
         final NavDestination currentDestination = navController.getCurrentDestination();
         return currentDestination == null ? 0 : currentDestination.getId();
     }
 
     @Override
     public void onStart() {
-        final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        final NavController navController = Navigation.findNavController(
+                this,
+                R.id.nav_host_fragment
+        );
         navController.addOnDestinationChangedListener(this);
         super.onStart();
     }
@@ -154,7 +163,10 @@ public class MainActivity extends AppCompatActivity implements OnMailboxOpened, 
     @Override
     public void onStop() {
         super.onStop();
-        final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        final NavController navController = Navigation.findNavController(
+                this,
+                R.id.nav_host_fragment
+        );
         navController.removeOnDestinationChangedListener(this);
     }
 
@@ -174,7 +186,10 @@ public class MainActivity extends AppCompatActivity implements OnMailboxOpened, 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+                final NavController navController = Navigation.findNavController(
+                        this,
+                        R.id.nav_host_fragment
+                );
                 final NavDestination currentDestination = navController.getCurrentDestination();
                 if (currentDestination != null && MAIN_DESTINATIONS.contains(currentDestination.getId())) {
                     binding.drawerLayout.openDrawer(GravityCompat.START);
@@ -199,7 +214,10 @@ public class MainActivity extends AppCompatActivity implements OnMailboxOpened, 
             binding.mailboxList.requestFocus();
 
             mainViewModel.insertSearchSuggestion(query);
-            final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+            final NavController navController = Navigation.findNavController(
+                    this,
+                    R.id.nav_host_fragment
+            );
             navController.navigate(MainNavigationDirections.actionSearch(query));
         }
 
@@ -235,7 +253,10 @@ public class MainActivity extends AppCompatActivity implements OnMailboxOpened, 
     public boolean onMenuItemActionCollapse(MenuItem item) {
         animateCloseSearchToolbar();
         if (getCurrentDestinationId() == R.id.search) {
-            final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+            final NavController navController = Navigation.findNavController(
+                    this,
+                    R.id.nav_host_fragment
+            );
             navController.navigateUp();
         }
         return true;

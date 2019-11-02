@@ -23,7 +23,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
+
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.ui.OnMailboxOpened;
@@ -40,7 +41,11 @@ public abstract class AbstractMailboxQueryFragment extends AbstractQueryFragment
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        this.mailboxQueryViewModel = ViewModelProviders.of(this, new MailboxQueryViewModelFactory(getActivity().getApplication(), getMailboxId())).get(MailboxQueryViewModel.class);
+        final ViewModelProvider viewModelProvider = new ViewModelProvider(
+                getViewModelStore(),
+                new MailboxQueryViewModelFactory(requireActivity().getApplication(), getMailboxId())
+        );
+        this.mailboxQueryViewModel = viewModelProvider.get(MailboxQueryViewModel.class);
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
@@ -52,7 +57,7 @@ public abstract class AbstractMailboxQueryFragment extends AbstractQueryFragment
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mailboxQueryViewModel.getMailbox().observe(this, mailboxOverviewItem -> {
+        mailboxQueryViewModel.getMailbox().observe(getViewLifecycleOwner(), mailboxOverviewItem -> {
             if (mailboxOverviewItem == null) {
                 return;
             }

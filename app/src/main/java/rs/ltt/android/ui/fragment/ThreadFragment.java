@@ -17,7 +17,6 @@ package rs.ltt.android.ui.fragment;
 
 import android.app.Application;
 import android.os.Bundle;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,27 +24,25 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.common.util.concurrent.MoreExecutors;
-
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.paging.PagedList;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
+
+import com.google.common.util.concurrent.MoreExecutors;
+
+import java.util.List;
+
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.FragmentThreadBinding;
 import rs.ltt.android.entity.ExpandedPosition;
 import rs.ltt.android.entity.FullEmail;
-import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.ui.adapter.OnFlaggedToggled;
 import rs.ltt.android.ui.adapter.ThreadAdapter;
 import rs.ltt.android.ui.model.ThreadViewModel;
@@ -74,7 +71,11 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
         final ThreadFragmentArgs arguments = ThreadFragmentArgs.fromBundle(bundle == null ? new Bundle() : bundle);
         final String threadId = arguments.getThread();
         final String label = arguments.getLabel();
-        threadViewModel = ViewModelProviders.of(this, new ThreadViewModelFactory(application, threadId, label)).get(ThreadViewModel.class);
+        final ViewModelProvider viewModelProvider = new ViewModelProvider(
+                getViewModelStore(),
+                new ThreadViewModelFactory(application, threadId, label)
+        );
+        threadViewModel = viewModelProvider.get(ThreadViewModel.class);
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_thread, container, false);
 
         //do we want a custom layout manager that does *NOT* remember scroll position when more
@@ -90,9 +91,9 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
         }
 
         binding.list.setAdapter(threadAdapter);
-        threadViewModel.getEmails().observe(this, this::onEmailsChanged);
-        threadViewModel.getHeader().observe(this, threadAdapter::setThreadHeader);
-        threadViewModel.getMenuConfiguration().observe(this, menuConfiguration -> {
+        threadViewModel.getEmails().observe(getViewLifecycleOwner(), this::onEmailsChanged);
+        threadViewModel.getHeader().observe(getViewLifecycleOwner(), threadAdapter::setThreadHeader);
+        threadViewModel.getMenuConfiguration().observe(getViewLifecycleOwner(), menuConfiguration -> {
             this.menuConfiguration = menuConfiguration;
             getActivity().invalidateOptionsMenu();
         });
@@ -134,7 +135,10 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem menuItem) {
 
-        final NavController navController = Navigation.findNavController(getActivity(), R.id.nav_host_fragment);
+        final NavController navController = Navigation.findNavController(
+                requireActivity(),
+                R.id.nav_host_fragment
+        );
 
         switch (menuItem.getItemId()) {
             case R.id.action_mark_unread:

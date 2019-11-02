@@ -50,7 +50,7 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
         super.onCreateView(inflater, container, savedInstanceState);
         final AbstractQueryViewModel viewModel = getQueryViewModel();
         this.binding = DataBindingUtil.inflate(inflater, R.layout.fragment_thread_list, container, false);
-        viewModel.getThreadOverviewItems().observe(this, threadOverviewItems -> {
+        viewModel.getThreadOverviewItems().observe(getViewLifecycleOwner(), threadOverviewItems -> {
             final RecyclerView.LayoutManager layoutManager = binding.threadList.getLayoutManager();
             final boolean atTop;
             if (layoutManager instanceof LinearLayoutManager) {
@@ -68,13 +68,13 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
         binding.setViewModel(viewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
 
-        binding.swipeToRefresh.setColorScheme(R.color.colorAccent);
+        binding.swipeToRefresh.setColorSchemeResources(R.color.colorAccent);
 
 
         //TODO: do we want to get rid of flicer on changes
         //((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
 
-        viewModel.isRunningPagingRequest().observe(this, threadOverviewAdapter::setLoading);
+        viewModel.isRunningPagingRequest().observe(getViewLifecycleOwner(), threadOverviewAdapter::setLoading);
         threadOverviewAdapter.setOnFlaggedToggledListener(this);
         threadOverviewAdapter.setOnThreadClickedListener(this);
 
@@ -96,7 +96,7 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
 
     @Override
     public void onThreadClicked(String threadId) {
-        final NavController navController = Navigation.findNavController(getActivity(), R.id.nav_host_fragment);
+        final NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
         navController.navigate(MainNavigationDirections.actionToThread(threadId, null));
     }
 

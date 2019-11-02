@@ -23,9 +23,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
+
 import rs.ltt.android.entity.ThreadOverviewItem;
-import rs.ltt.android.ui.OnMailboxOpened;
 import rs.ltt.android.ui.QueryItemTouchHelper;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
 import rs.ltt.android.ui.model.SearchQueryViewModel;
@@ -38,10 +38,13 @@ public class SearchQueryFragment extends AbstractQueryFragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
         final Bundle bundle = getArguments();
         final String term = SearchQueryFragmentArgs.fromBundle(bundle == null ? new Bundle() : bundle).getText();
-        this.searchQueryViewModel = ViewModelProviders.of(this, new SearchQueryViewModelFactory(getActivity().getApplication(), term)).get(SearchQueryViewModel.class);
+        final ViewModelProvider viewModelProvider = new ViewModelProvider(
+                getViewModelStore(),
+                new SearchQueryViewModelFactory(requireActivity().getApplication(), term)
+        );
+        this.searchQueryViewModel = viewModelProvider.get(SearchQueryViewModel.class);
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
@@ -54,7 +57,7 @@ public class SearchQueryFragment extends AbstractQueryFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         binding.fab.setVisibility(View.GONE);
-        searchQueryViewModel.getSearchTerm().observe(this, searchTerm -> {
+        searchQueryViewModel.getSearchTerm().observe(getViewLifecycleOwner(), searchTerm -> {
             if (searchTerm == null) {
                 return;
             }
