@@ -150,7 +150,7 @@
                     android:baselineAlignBottom="true"
                     app:isFlagged="@{thread.showAsFlagged()}"
                     tools:alpha="0.57"
-                    tools:src="@drawable/ic_star_border_black_24dp" />
+                    tools:src="@drawable/ic_star_border_no_padding_black_24dp" />
             </RelativeLayout>
         </FrameLayout>
     </FrameLayout>

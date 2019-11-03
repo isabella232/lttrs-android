@@ -159,10 +159,10 @@ public class BindingAdapters {
     @BindingAdapter("isFlagged")
     public static void setIsFlagged(final ImageView imageView, final boolean isFlagged) {
         if (isFlagged) {
-            imageView.setImageResource(R.drawable.ic_star_black_24dp);
+            imageView.setImageResource(R.drawable.ic_star_black_no_padding_24dp);
             ImageViewCompat.setImageTintList(imageView, ColorStateList.valueOf(ContextCompat.getColor(imageView.getContext(), R.color.colorPrimary)));
         } else {
-            imageView.setImageResource(R.drawable.ic_star_border_black_24dp);
+            imageView.setImageResource(R.drawable.ic_star_border_no_padding_black_24dp);
             ImageViewCompat.setImageTintList(imageView, ColorStateList.valueOf(ContextCompat.getColor(imageView.getContext(), R.color.black54)));
         }
     }
@@ -193,14 +193,26 @@ public class BindingAdapters {
             imageResource = R.drawable.ic_label_black_24dp;
         } else {
             switch (role) {
+                case ALL:
+                    imageResource = R.drawable.ic_all_inbox_24dp;
+                    break;
                 case INBOX:
                     imageResource = R.drawable.ic_inbox_black_24dp;
                     break;
                 case ARCHIVE:
                     imageResource = R.drawable.ic_archive_black_24dp;
                     break;
+                case IMPORTANT:
+                    imageResource = R.drawable.ic_label_important_black_24dp;
+                    break;
+                case JUNK:
+                    imageResource = R.drawable.ic_spam_black_24dp;
+                    break;
                 case DRAFTS:
                     imageResource = R.drawable.ic_drafts_black_24dp;
+                    break;
+                case FLAGGED:
+                    imageResource = R.drawable.ic_star_black_24dp;
                     break;
                 case TRASH:
                     imageResource = R.drawable.ic_delete_black_24dp;
