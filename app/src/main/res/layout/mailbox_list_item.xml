@@ -19,8 +19,8 @@
 
     <data>
         <variable
-            name="mailbox"
-            type="rs.ltt.android.entity.MailboxOverviewItem"/>
+            name="label"
+            type="rs.ltt.jmap.mua.util.Label"/>
     </data>
 
     <LinearLayout
@@ -42,14 +42,14 @@
                 android:layout_centerVertical="true"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="32dp"
-                app:role="@{mailbox.role}"/>
+                app:role="@{label.getRole()}"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_toEndOf="@+id/icon"
-                android:text="@{mailbox.name}"
+                android:text="@{label.getName()}"
                 android:textAppearance="?textAppearanceSubtitle1"/>
             <TextView
                 android:layout_width="wrap_content"
@@ -57,7 +57,7 @@
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="16dp"
-                app:count="@{mailbox.unreadThreads}"
+                app:count="@{label.getCount()}"
                 android:textAppearance="?textAppearanceSubtitle1" />
 
         </RelativeLayout>

@@ -27,6 +27,7 @@ import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
+
 import rs.ltt.android.Credentials;
 import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.entity.KeywordOverwriteEntity;
@@ -48,6 +49,7 @@ public class SearchQueryViewModel extends AbstractQueryViewModel {
     SearchQueryViewModel(final Application application, final String searchTerm) {
         super(application);
         this.searchTerm = new MutableLiveData<>(searchTerm);
+        //TODO do we want to exclude Trash and Junk via inMailboxOtherThan
         this.searchQueryLiveData = Transformations.map(this.searchTerm, text -> EmailQuery.of(EmailFilterCondition.builder().text(text).build(), true));
         this.inbox = queryRepository.getInbox();
         init();

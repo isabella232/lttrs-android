@@ -15,9 +15,9 @@
 
 package rs.ltt.android.ui;
 
-import rs.ltt.android.entity.MailboxOverviewItem;
+import rs.ltt.jmap.mua.util.Label;
 
-public interface OnMailboxOpened {
+public interface OnLabelOpened {
 
-    void onMailboxOpened(MailboxOverviewItem overviewItem);
+    void onLabelOpened(Label label);
 }

@@ -58,12 +58,15 @@ public abstract class LttrsRepository {
 
     protected final LttrsDatabase database;
 
+    protected Application application;
+
     protected final Mua mua;
 
-    protected final Executor ioExecutor = Executors.newSingleThreadExecutor();
+    private final Executor ioExecutor = Executors.newSingleThreadExecutor();
 
 
-    public LttrsRepository(Application application) {
+    LttrsRepository(Application application) {
+        this.application = application;
         this.database = LttrsDatabase.getInstance(application, Credentials.username);
         this.mua = Mua.builder()
                 .password(Credentials.password)
@@ -118,7 +121,7 @@ public abstract class LttrsRepository {
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(RemoveFromMailboxWorker.data(threadId, mailbox))
                     .build();
-            WorkManager workManager = WorkManager.getInstance();
+            WorkManager workManager = WorkManager.getInstance(application);
             workManager.enqueueUniqueWork(MuaWorker.SYNC_LABELS, ExistingWorkPolicy.APPEND, workRequest);
         });
     }
@@ -134,7 +137,7 @@ public abstract class LttrsRepository {
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(ArchiveWorker.data(threadId))
                     .build();
-            WorkManager workManager = WorkManager.getInstance();
+            WorkManager workManager = WorkManager.getInstance(application);
             workManager.enqueueUniqueWork(ArchiveWorker.uniqueName(threadId), ExistingWorkPolicy.REPLACE, workRequest);
         });
     }
@@ -153,7 +156,7 @@ public abstract class LttrsRepository {
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(AbstractMailboxModificationWorker.data(threadId))
                     .build();
-            WorkManager workManager = WorkManager.getInstance();
+            WorkManager workManager = WorkManager.getInstance(application);
             workManager.enqueueUniqueWork(MoveToInboxWorker.uniqueName(threadId), ExistingWorkPolicy.REPLACE, workRequest);
         });
     }
@@ -171,7 +174,7 @@ public abstract class LttrsRepository {
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(MoveToTrashWorker.data(threadId))
                     .build();
-            WorkManager workManager = WorkManager.getInstance();
+            WorkManager workManager = WorkManager.getInstance(application);
             workManager.enqueueUniqueWork(MoveToTrashWorker.uniqueName(threadId), ExistingWorkPolicy.REPLACE, workRequest);
         });
     }
@@ -188,7 +191,7 @@ public abstract class LttrsRepository {
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(ModifyKeywordWorker.data(threadId, keyword, targetState))
                     .build();
-            WorkManager workManager = WorkManager.getInstance();
+            WorkManager workManager = WorkManager.getInstance(application);
             workManager.enqueueUniqueWork(ModifyKeywordWorker.uniqueName(threadId, keyword), ExistingWorkPolicy.REPLACE, workRequest);
         });
     }

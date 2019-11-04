@@ -32,35 +32,38 @@ import androidx.recyclerview.widget.AsyncDifferConfig;
 import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
+
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.MailboxListHeaderBinding;
 import rs.ltt.android.databinding.MailboxListItemBinding;
 import rs.ltt.android.entity.MailboxOverviewItem;
+import rs.ltt.jmap.mua.util.KeywordLabel;
+import rs.ltt.jmap.mua.util.Label;
 
-public class MailboxListAdapter extends RecyclerView.Adapter<MailboxListAdapter.AbstractMailboxViewHolder> {
+public class LabelListAdapter extends RecyclerView.Adapter<LabelListAdapter.AbstractMailboxViewHolder> {
 
     private static final int ITEM_VIEW_TYPE = 1;
     private static final int HEADER_VIEW_TYPE = 2;
 
-    private static final DiffUtil.ItemCallback<MailboxOverviewItem> ITEM_CALLBACK = new DiffUtil.ItemCallback<MailboxOverviewItem>() {
+    private static final DiffUtil.ItemCallback<Label> ITEM_CALLBACK = new DiffUtil.ItemCallback<Label>() {
         @Override
-        public boolean areItemsTheSame(@NonNull MailboxOverviewItem oldItem, @NonNull MailboxOverviewItem newItem) {
-            return oldItem.id.equals(newItem.id);
+        public boolean areItemsTheSame(@NonNull Label oldItem, @NonNull Label newItem) {
+            return LabelListAdapter.same(oldItem, newItem);
         }
 
         @Override
-        public boolean areContentsTheSame(@NonNull MailboxOverviewItem oldItem, @NonNull MailboxOverviewItem newItem) {
+        public boolean areContentsTheSame(@NonNull Label oldItem, @NonNull Label newItem) {
             return oldItem.equals(newItem);
         }
     };
 
-    private final AsyncListDiffer<MailboxOverviewItem> mDiffer =  new AsyncListDiffer<>(new OffsetListUpdateCallback<>(this,1), new AsyncDifferConfig.Builder<>(ITEM_CALLBACK).build());
+    private final AsyncListDiffer<Label> mDiffer = new AsyncListDiffer<>(new OffsetListUpdateCallback<>(this, 1), new AsyncDifferConfig.Builder<>(ITEM_CALLBACK).build());
 
-    private String selectedId = null;
+    private Label selectedLabel = null;
 
-    private OnMailboxOverviewItemSelected onMailboxOverviewItemSelected = null;
+    private OnLabelSelected onLabelSelected = null;
 
-    public MailboxListAdapter() {
+    public LabelListAdapter() {
         super();
     }
 
@@ -84,14 +87,14 @@ public class MailboxListAdapter extends RecyclerView.Adapter<MailboxListAdapter.
         }
         MailboxViewHolder holder = (MailboxViewHolder) abstractHolder;
         final Context context = holder.binding.getRoot().getContext();
-        final MailboxOverviewItem mailbox = getItem(position);
-        holder.binding.setMailbox(mailbox);
+        final Label label = getItem(position);
+        holder.binding.setLabel(label);
         holder.binding.item.setOnClickListener(v -> {
-            if (onMailboxOverviewItemSelected != null) {
-                onMailboxOverviewItemSelected.onMailboxOverviewItemSelected(mailbox);
+            if (onLabelSelected != null) {
+                onLabelSelected.onLabelSelected(label, same(label, this.selectedLabel));
             }
         });
-        if (mailbox.id.equals(this.selectedId)) {
+        if (same(label, this.selectedLabel)) {
             holder.binding.item.setBackgroundColor(ContextCompat.getColor(context, R.color.primary12));
             ImageViewCompat.setImageTintList(holder.binding.icon, ColorStateList.valueOf(ContextCompat.getColor(context, R.color.colorPrimary)));
         } else {
@@ -102,17 +105,13 @@ public class MailboxListAdapter extends RecyclerView.Adapter<MailboxListAdapter.
         }
     }
 
-    public String getSelectedId() {
-        return this.selectedId;
-    }
-
-    public void setSelectedId(final String id) {
-        if ((id == null && this.selectedId == null) || (id != null && id.equals(this.selectedId))) {
+    public void setSelectedLabel(final Label label) {
+        if ((label == null && this.selectedLabel == null) || (same(label, this.selectedLabel))) {
             return;
         }
-        final int previous = getPosition(this.selectedId);
-        final int position = getPosition(id);
-        this.selectedId = id;
+        final int previous = getPosition(this.selectedLabel);
+        final int position = getPosition(label);
+        this.selectedLabel = label;
         if (previous != RecyclerView.NO_POSITION) {
             notifyItemChanged(previous);
         }
@@ -121,13 +120,13 @@ public class MailboxListAdapter extends RecyclerView.Adapter<MailboxListAdapter.
         }
     }
 
-    private int getPosition(final String id) {
-        if (id == null) {
+    private int getPosition(final Label label) {
+        if (label == null) {
             return RecyclerView.NO_POSITION;
         }
-        List<MailboxOverviewItem> items = mDiffer.getCurrentList();
+        final List<Label> items = mDiffer.getCurrentList();
         for (int i = 0; i < items.size(); ++i) {
-            if (id.equals(items.get(i).id)) {
+            if (same(label, items.get(i))) {
                 return i + 1;
             }
         }
@@ -141,28 +140,38 @@ public class MailboxListAdapter extends RecyclerView.Adapter<MailboxListAdapter.
 
     @Override
     public int getItemViewType(int position) {
-        return position == 0 ?  HEADER_VIEW_TYPE : ITEM_VIEW_TYPE;
+        return position == 0 ? HEADER_VIEW_TYPE : ITEM_VIEW_TYPE;
     }
 
-    private MailboxOverviewItem getItem(int position) {
+    private Label getItem(int position) {
         return this.mDiffer.getCurrentList().get(position - 1);
     }
 
-    public void submitList(List<MailboxOverviewItem> items) {
+    public void submitList(List<Label> items) {
         this.mDiffer.submitList(items);
     }
 
-    public void setOnMailboxOverviewItemSelectedListener(OnMailboxOverviewItemSelected listener) {
-        this.onMailboxOverviewItemSelected = listener;
+    public void setOnMailboxOverviewItemSelectedListener(OnLabelSelected listener) {
+        this.onLabelSelected = listener;
     }
 
-    public interface OnMailboxOverviewItemSelected {
-        void onMailboxOverviewItemSelected(MailboxOverviewItem mailboxOverviewItem);
+    private static boolean same(Label a, Label b) {
+        if (a instanceof MailboxOverviewItem && b instanceof MailboxOverviewItem) {
+            return ((MailboxOverviewItem) a).getId().equals(((MailboxOverviewItem) b).getId());
+        }
+        if (a instanceof KeywordLabel && b instanceof KeywordLabel) {
+            return a.getRole() != null && a.getRole().equals(b.getRole());
+        }
+        return false;
+    }
+
+    public interface OnLabelSelected {
+        void onLabelSelected(final Label label, boolean currentlySelected);
     }
 
     class AbstractMailboxViewHolder extends RecyclerView.ViewHolder {
 
-        public AbstractMailboxViewHolder(@NonNull View itemView) {
+        AbstractMailboxViewHolder(@NonNull View itemView) {
             super(itemView);
         }
     }
@@ -179,11 +188,8 @@ public class MailboxListAdapter extends RecyclerView.Adapter<MailboxListAdapter.
 
     class MailboxHeaderViewHolder extends AbstractMailboxViewHolder {
 
-        private final MailboxListHeaderBinding binding;
-
         MailboxHeaderViewHolder(@NonNull MailboxListHeaderBinding binding) {
             super(binding.getRoot());
-            this.binding = binding;
         }
     }
 }

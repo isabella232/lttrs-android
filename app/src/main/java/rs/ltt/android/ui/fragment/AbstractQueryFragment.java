@@ -16,6 +16,7 @@
 package rs.ltt.android.ui.fragment;
 
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,10 +34,12 @@ import rs.ltt.android.MainNavigationDirections;
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.FragmentThreadListBinding;
 import rs.ltt.android.entity.ThreadOverviewItem;
+import rs.ltt.android.ui.OnLabelOpened;
 import rs.ltt.android.ui.QueryItemTouchHelper;
 import rs.ltt.android.ui.adapter.OnFlaggedToggled;
 import rs.ltt.android.ui.adapter.ThreadOverviewAdapter;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
+import rs.ltt.jmap.mua.util.Label;
 
 
 public abstract class AbstractQueryFragment extends Fragment implements OnFlaggedToggled, ThreadOverviewAdapter.OnThreadClicked, QueryItemTouchHelper.OnQueryItemSwipe {
@@ -85,6 +88,13 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
         new ItemTouchHelper(queryItemTouchHelper).attachToRecyclerView(binding.threadList);
 
         return binding.getRoot();
+    }
+
+    protected void onLabelOpened(Label label) {
+        final Activity activity = getActivity();
+        if (activity instanceof OnLabelOpened) {
+            ((OnLabelOpened) activity).onLabelOpened(label);
+        }
     }
 
     @Override

@@ -17,35 +17,39 @@ package rs.ltt.android.ui.model;
 
 import android.app.Application;
 
-import java.util.List;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import rs.ltt.android.Credentials;
-import rs.ltt.android.database.LttrsDatabase;
-import rs.ltt.android.entity.MailboxOverviewItem;
+import androidx.lifecycle.Transformations;
+
+import java.util.List;
+
 import rs.ltt.android.repository.MainRepository;
+import rs.ltt.jmap.mua.util.Label;
+import rs.ltt.jmap.mua.util.LabelUtil;
 
 public class MainViewModel extends AndroidViewModel {
 
+    private final LiveData<List<Label>> navigatableLabels;
     private MainRepository mainRepository;
-
-    private final LiveData<List<MailboxOverviewItem>> mailboxes;
 
 
     public MainViewModel(@NonNull Application application) {
         super(application);
         this.mainRepository = new MainRepository(application);
-        this.mailboxes = this.mainRepository.getMailboxes();
+        this.navigatableLabels = Transformations.map(
+                this.mainRepository.getMailboxes(),
+                LabelUtil::fillUpAndSort
+        );
     }
 
-    public LiveData<List<MailboxOverviewItem>> getMailboxes() {
-        return this.mailboxes;
+    public LiveData<List<Label>> getNavigatableLabels() {
+        return this.navigatableLabels;
     }
 
 
     public void insertSearchSuggestion(String term) {
         this.mainRepository.insertSearchSuggestion(term);
     }
+
 }

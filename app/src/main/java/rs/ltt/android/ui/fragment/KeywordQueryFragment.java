@@ -15,7 +15,7 @@
 
 package rs.ltt.android.ui.fragment;
 
-
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,60 +24,43 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProvider;
 
-import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.ThreadOverviewItem;
+import rs.ltt.android.ui.OnLabelOpened;
 import rs.ltt.android.ui.QueryItemTouchHelper;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
-import rs.ltt.android.ui.model.MailboxQueryViewModel;
-import rs.ltt.android.ui.model.MailboxQueryViewModelFactory;
-import rs.ltt.jmap.common.entity.Role;
+import rs.ltt.android.ui.model.KeywordQueryViewModel;
+import rs.ltt.android.ui.model.KeywordQueryViewModelFactory;
+import rs.ltt.jmap.mua.util.KeywordLabel;
 
+public class KeywordQueryFragment extends AbstractQueryFragment {
 
-public abstract class AbstractMailboxQueryFragment extends AbstractQueryFragment {
-
-    MailboxQueryViewModel mailboxQueryViewModel;
+    private KeywordQueryViewModel keywordQueryViewModel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        final Bundle bundle = getArguments();
+        final KeywordLabel keyword = KeywordQueryFragmentArgs.fromBundle(bundle == null ? new Bundle() : bundle).getKeyword();
         final ViewModelProvider viewModelProvider = new ViewModelProvider(
                 getViewModelStore(),
-                new MailboxQueryViewModelFactory(requireActivity().getApplication(), getMailboxId())
+                new KeywordQueryViewModelFactory(requireActivity().getApplication(), keyword.getKeyword())
         );
-        this.mailboxQueryViewModel = viewModelProvider.get(MailboxQueryViewModel.class);
+        this.keywordQueryViewModel = viewModelProvider.get(KeywordQueryViewModel.class);
+        onLabelOpened(keyword);
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     @Override
     protected AbstractQueryViewModel getQueryViewModel() {
-        return this.mailboxQueryViewModel;
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        mailboxQueryViewModel.getMailbox().observe(getViewLifecycleOwner(), mailboxOverviewItem -> {
-            if (mailboxOverviewItem == null) {
-                return;
-            }
-            onLabelOpened(mailboxOverviewItem);
-        });
+        return keywordQueryViewModel;
     }
 
     @Override
     protected QueryItemTouchHelper.Swipable onQueryItemSwipe(ThreadOverviewItem item) {
-        final MailboxOverviewItem mailbox = mailboxQueryViewModel != null ? mailboxQueryViewModel.getMailbox().getValue() : null;
-        if (mailbox == null) {
-            return QueryItemTouchHelper.Swipable.NO;
-        } else if (mailbox.role == Role.INBOX) {
-            return QueryItemTouchHelper.Swipable.ARCHIVE;
-        } else if (mailbox.role == null) {
-            return QueryItemTouchHelper.Swipable.REMOVE_LABEL;
-        } else {
-            return QueryItemTouchHelper.Swipable.NO;
-        }
+        return null;
     }
 
+    @Override
+    protected void onQueryItemSwiped(ThreadOverviewItem item) {
 
-    protected abstract String getMailboxId();
-
+    }
 }

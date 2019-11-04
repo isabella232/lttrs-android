@@ -52,19 +52,22 @@ import rs.ltt.android.MainNavigationDirections;
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.ActivityMainBinding;
 import rs.ltt.android.entity.MailboxOverviewItem;
-import rs.ltt.android.ui.adapter.MailboxListAdapter;
+import rs.ltt.android.ui.adapter.LabelListAdapter;
 import rs.ltt.android.ui.fragment.SearchQueryFragment;
 import rs.ltt.android.ui.model.MainViewModel;
 import rs.ltt.jmap.common.entity.Role;
+import rs.ltt.jmap.mua.util.KeywordLabel;
+import rs.ltt.jmap.mua.util.Label;
 
-public class MainActivity extends AppCompatActivity implements OnMailboxOpened, SearchQueryFragment.OnTermSearched, NavController.OnDestinationChangedListener, MenuItem.OnActionExpandListener {
+public class MainActivity extends AppCompatActivity implements OnLabelOpened, SearchQueryFragment.OnTermSearched, NavController.OnDestinationChangedListener, MenuItem.OnActionExpandListener {
 
     private static final int NUM_TOOLBAR_ICON = 1;
     private static final List<Integer> MAIN_DESTINATIONS = Arrays.asList(
             R.id.inbox,
-            R.id.mailbox
+            R.id.mailbox,
+            R.id.keyword
     );
-    final MailboxListAdapter mailboxListAdapter = new MailboxListAdapter();
+    final LabelListAdapter labelListAdapter = new LabelListAdapter();
     private ActivityMainBinding binding;
     private MainViewModel mainViewModel;
     private MenuItem mSearchItem;
@@ -89,16 +92,22 @@ public class MainActivity extends AppCompatActivity implements OnMailboxOpened, 
                 R.id.nav_host_fragment
         );
 
-        mailboxListAdapter.setOnMailboxOverviewItemSelectedListener(mailboxOverviewItem -> {
+        labelListAdapter.setOnMailboxOverviewItemSelectedListener((label, currentlySelected) -> {
             binding.drawerLayout.closeDrawer(GravityCompat.START);
-            final boolean navigateToInbox = mailboxOverviewItem.role == Role.INBOX;
-            if (mailboxOverviewItem.id.equals(mailboxListAdapter.getSelectedId())) {
+            if (currentlySelected) {
                 return;
             }
+            final boolean navigateToInbox = label.getRole() == Role.INBOX;
             if (navigateToInbox) {
                 navController.navigate(MainNavigationDirections.actionToInbox());
+            } else if (label instanceof MailboxOverviewItem) {
+                final MailboxOverviewItem mailbox = (MailboxOverviewItem) label;
+                navController.navigate(MainNavigationDirections.actionToMailbox(mailbox.id));
+            } else if (label instanceof KeywordLabel) {
+                final KeywordLabel keyword = (KeywordLabel) label;
+                navController.navigate(MainNavigationDirections.actionToKeyword(keyword));
             } else {
-                navController.navigate(MainNavigationDirections.actionToMailbox(mailboxOverviewItem.id));
+                throw new IllegalStateException(String.format("%s is an unsupported label", label.getClass()));
             }
             if (mSearchItem != null) {
                 mSearchItem.collapseActionView();
@@ -106,8 +115,8 @@ public class MainActivity extends AppCompatActivity implements OnMailboxOpened, 
             //currently unused should remain here in case we bring scrollable toolbar back
             binding.appBarLayout.setExpanded(true, false);
         });
-        binding.mailboxList.setAdapter(mailboxListAdapter);
-        mainViewModel.getMailboxes().observe(this, mailboxListAdapter::submitList);
+        binding.mailboxList.setAdapter(labelListAdapter);
+        mainViewModel.getNavigatableLabels().observe(this, labelListAdapter::submitList);
     }
 
     @Override
@@ -224,9 +233,9 @@ public class MainActivity extends AppCompatActivity implements OnMailboxOpened, 
     }
 
     @Override
-    public void onMailboxOpened(MailboxOverviewItem mailboxOverviewItem) {
-        setTitle(mailboxOverviewItem.name);
-        mailboxListAdapter.setSelectedId(mailboxOverviewItem.id);
+    public void onLabelOpened(Label label) {
+        setTitle(label.getName());
+        labelListAdapter.setSelectedLabel(label);
     }
 
     @Override
@@ -351,6 +360,6 @@ public class MainActivity extends AppCompatActivity implements OnMailboxOpened, 
     public void onTermSearched(String term) {
         this.currentSearchTerm = term;
         Log.d("lttrs", "on term searched " + term);
-        mailboxListAdapter.setSelectedId(null);
+        labelListAdapter.setSelectedLabel(null);
     }
 }

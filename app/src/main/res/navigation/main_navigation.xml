@@ -25,6 +25,11 @@
         app:popUpTo="@+id/inbox" />
 
     <action
+        android:id="@+id/action_to_keyword"
+        app:destination="@+id/keyword"
+        app:popUpTo="@+id/inbox" />
+
+    <action
         android:id="@+id/action_to_inbox"
         app:destination="@+id/inbox"
         app:popUpTo="@+id/inbox"
@@ -54,6 +59,17 @@
         <argument
             android:name="mailbox"
             app:argType="string"
+            app:nullable="false" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/keyword"
+        android:name="rs.ltt.android.ui.fragment.KeywordQueryFragment"
+        android:label="keyword"
+        tools:layout="@layout/fragment_thread_list">
+        <argument
+            android:name="keyword"
+            app:argType="rs.ltt.jmap.mua.util.KeywordLabel"
             app:nullable="false" />
     </fragment>
 

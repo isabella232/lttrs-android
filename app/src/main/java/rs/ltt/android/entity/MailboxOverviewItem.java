@@ -18,10 +18,12 @@ package rs.ltt.android.entity;
 import com.google.common.base.Objects;
 
 import androidx.annotation.NonNull;
+
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.common.entity.Role;
+import rs.ltt.jmap.mua.util.Label;
 
-public class MailboxOverviewItem implements IdentifiableMailboxWithRole {
+public class MailboxOverviewItem implements IdentifiableMailboxWithRole, Label {
 
     @NonNull public String id;
 
@@ -52,6 +54,11 @@ public class MailboxOverviewItem implements IdentifiableMailboxWithRole {
     }
 
     @Override
+    public Integer getCount() {
+        return unreadThreads;
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hashCode(id, parentId, name, role, sortOrder, totalThreads, unreadThreads);
     }
@@ -61,8 +68,14 @@ public class MailboxOverviewItem implements IdentifiableMailboxWithRole {
         return this.role;
     }
 
+    @NonNull
     @Override
     public String getId() {
         return id;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 }
