@@ -29,9 +29,11 @@ public class KeywordQueryViewModel extends AbstractQueryViewModel {
 
     private final LiveData<EmailQuery> emailQueryLiveData;
 
+    private final String keyword;
+
     KeywordQueryViewModel(final Application application, @NonNull final String keyword) {
         super(application);
-
+        this.keyword = keyword;
         //TODO exclude Trash and Junk
         this.emailQueryLiveData = new MutableLiveData<>(
                 EmailQuery.of(
@@ -42,6 +44,9 @@ public class KeywordQueryViewModel extends AbstractQueryViewModel {
         init();
     }
 
+    public String getKeyword() {
+        return this.keyword;
+    }
 
     @Override
     protected LiveData<EmailQuery> getQuery() {

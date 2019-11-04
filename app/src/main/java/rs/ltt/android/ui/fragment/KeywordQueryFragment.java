@@ -15,7 +15,6 @@
 
 package rs.ltt.android.ui.fragment;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,11 +24,11 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProvider;
 
 import rs.ltt.android.entity.ThreadOverviewItem;
-import rs.ltt.android.ui.OnLabelOpened;
 import rs.ltt.android.ui.QueryItemTouchHelper;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
 import rs.ltt.android.ui.model.KeywordQueryViewModel;
 import rs.ltt.android.ui.model.KeywordQueryViewModelFactory;
+import rs.ltt.jmap.common.entity.Keyword;
 import rs.ltt.jmap.mua.util.KeywordLabel;
 
 public class KeywordQueryFragment extends AbstractQueryFragment {
@@ -56,7 +55,11 @@ public class KeywordQueryFragment extends AbstractQueryFragment {
 
     @Override
     protected QueryItemTouchHelper.Swipable onQueryItemSwipe(ThreadOverviewItem item) {
-        return null;
+        if (Keyword.DRAFT.equals(keywordQueryViewModel.getKeyword())) {
+            return QueryItemTouchHelper.Swipable.NO;
+        } else {
+            return QueryItemTouchHelper.Swipable.REMOVE_LABEL;
+        }
     }
 
     @Override

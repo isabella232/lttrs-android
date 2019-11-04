@@ -58,14 +58,14 @@ public abstract class LttrsRepository {
 
     protected final LttrsDatabase database;
 
-    protected Application application;
+    protected final Application application;
 
     protected final Mua mua;
 
-    private final Executor ioExecutor = Executors.newSingleThreadExecutor();
+    private static final Executor IO_EXECUTOR = Executors.newSingleThreadExecutor();
 
 
-    LttrsRepository(Application application) {
+    LttrsRepository(final Application application) {
         this.application = application;
         this.database = LttrsDatabase.getInstance(application, Credentials.username);
         this.mua = Mua.builder()
@@ -115,35 +115,43 @@ public abstract class LttrsRepository {
     }
 
     public void removeFromMailbox(final String threadId, final IdentifiableMailboxWithRole mailbox) {
-        ioExecutor.execute(() -> {
+        IO_EXECUTOR.execute(() -> {
             insertQueryItemOverwrite(threadId, mailbox);
-            OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(RemoveFromMailboxWorker.class)
+            final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(RemoveFromMailboxWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(RemoveFromMailboxWorker.data(threadId, mailbox))
                     .build();
-            WorkManager workManager = WorkManager.getInstance(application);
-            workManager.enqueueUniqueWork(MuaWorker.SYNC_LABELS, ExistingWorkPolicy.APPEND, workRequest);
+            final WorkManager workManager = WorkManager.getInstance(application);
+            workManager.enqueueUniqueWork(
+                    MuaWorker.SYNC_LABELS,
+                    ExistingWorkPolicy.APPEND,
+                    workRequest
+            );
         });
     }
 
     public void archive(final String threadId) {
-        ioExecutor.execute(() -> {
+        IO_EXECUTOR.execute(() -> {
             Log.d("lttrs","archiving "+threadId);
             insertQueryItemOverwrite(threadId, Role.INBOX);
             deleteQueryItemOverwrite(threadId, Role.ARCHIVE);
             database.overwriteDao().insert(MailboxOverwriteEntity.of(threadId, Role.INBOX, false));
             database.overwriteDao().insert(MailboxOverwriteEntity.of(threadId, Role.ARCHIVE, true));
-            OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ArchiveWorker.class)
+            final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ArchiveWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(ArchiveWorker.data(threadId))
                     .build();
-            WorkManager workManager = WorkManager.getInstance(application);
-            workManager.enqueueUniqueWork(ArchiveWorker.uniqueName(threadId), ExistingWorkPolicy.REPLACE, workRequest);
+            final WorkManager workManager = WorkManager.getInstance(application);
+            workManager.enqueueUniqueWork(
+                    ArchiveWorker.uniqueName(threadId),
+                    ExistingWorkPolicy.REPLACE,
+                    workRequest
+            );
         });
     }
 
     public void moveToInbox(final String threadId) {
-        ioExecutor.execute(() -> {
+        IO_EXECUTOR.execute(() -> {
             insertQueryItemOverwrite(threadId, Role.ARCHIVE);
             insertQueryItemOverwrite(threadId, Role.TRASH);
             deleteQueryItemOverwrite(threadId, Role.INBOX);
@@ -152,17 +160,21 @@ public abstract class LttrsRepository {
             database.overwriteDao().insert(MailboxOverwriteEntity.of(threadId, Role.ARCHIVE, false));
             database.overwriteDao().insert(MailboxOverwriteEntity.of(threadId, Role.TRASH, false));
 
-            OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MoveToInboxWorker.class)
+            final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MoveToInboxWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(AbstractMailboxModificationWorker.data(threadId))
                     .build();
-            WorkManager workManager = WorkManager.getInstance(application);
-            workManager.enqueueUniqueWork(MoveToInboxWorker.uniqueName(threadId), ExistingWorkPolicy.REPLACE, workRequest);
+            final WorkManager workManager = WorkManager.getInstance(application);
+            workManager.enqueueUniqueWork(
+                    MoveToInboxWorker.uniqueName(threadId),
+                    ExistingWorkPolicy.REPLACE,
+                    workRequest
+            );
         });
     }
 
     public void moveToTrash(final String threadId) {
-        ioExecutor.execute(() -> {
+        IO_EXECUTOR.execute(() -> {
             for (MailboxWithRoleAndName mailbox : database.mailboxDao().getMailboxesForThread(threadId)) {
                 if (mailbox.role != Role.TRASH) {
                     insertQueryItemOverwrite(threadId, mailbox);
@@ -170,12 +182,16 @@ public abstract class LttrsRepository {
             }
             database.overwriteDao().insert(MailboxOverwriteEntity.of(threadId, Role.INBOX, false));
             database.overwriteDao().insert(MailboxOverwriteEntity.of(threadId, Role.TRASH, true));
-            OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MoveToTrashWorker.class)
+            final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MoveToTrashWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(MoveToTrashWorker.data(threadId))
                     .build();
-            WorkManager workManager = WorkManager.getInstance(application);
-            workManager.enqueueUniqueWork(MoveToTrashWorker.uniqueName(threadId), ExistingWorkPolicy.REPLACE, workRequest);
+            final WorkManager workManager = WorkManager.getInstance(application);
+            workManager.enqueueUniqueWork(
+                    MoveToTrashWorker.uniqueName(threadId),
+                    ExistingWorkPolicy.REPLACE,
+                    workRequest
+            );
         });
     }
 
@@ -184,15 +200,21 @@ public abstract class LttrsRepository {
     }
 
     private void toggleKeyword(final String threadId, final String keyword, final boolean targetState) {
-        ioExecutor.execute(() -> {
+        IO_EXECUTOR.execute(() -> {
+            //TODO if targetState==false insert QueryItemOverwrite for keyword search
+            //TODO also we probably want to remove prexisting overwrites when targetState==true
             final KeywordOverwriteEntity keywordOverwriteEntity = new KeywordOverwriteEntity(threadId, keyword, targetState);
             insert(keywordOverwriteEntity);
-            OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ModifyKeywordWorker.class)
+            final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ModifyKeywordWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(ModifyKeywordWorker.data(threadId, keyword, targetState))
                     .build();
-            WorkManager workManager = WorkManager.getInstance(application);
-            workManager.enqueueUniqueWork(ModifyKeywordWorker.uniqueName(threadId, keyword), ExistingWorkPolicy.REPLACE, workRequest);
+            final WorkManager workManager = WorkManager.getInstance(application);
+            workManager.enqueueUniqueWork(
+                    ModifyKeywordWorker.uniqueName(threadId, keyword),
+                    ExistingWorkPolicy.REPLACE,
+                    workRequest
+            );
         });
     }
 
