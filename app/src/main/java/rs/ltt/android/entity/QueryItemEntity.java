@@ -41,7 +41,6 @@ public class QueryItemEntity {
     @NonNull
     public Long queryId;
 
-    //TODO: delete position; we just needed that for debugging stuff
     public Long position;
     public String emailId;
     public String threadId;

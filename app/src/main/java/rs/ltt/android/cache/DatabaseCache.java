@@ -139,8 +139,8 @@ public class DatabaseCache implements Cache {
     }
 
     @Override
-    public void addQueryResult(String queryString, QueryResult queryResult) throws CacheWriteException, CacheConflictException {
-        database.queryDao().add(queryString, queryResult);
+    public void addQueryResult(String queryString, String afterEmailId, QueryResult queryResult) throws CacheWriteException, CacheConflictException {
+        database.queryDao().add(queryString, afterEmailId, queryResult);
     }
 
     @Override

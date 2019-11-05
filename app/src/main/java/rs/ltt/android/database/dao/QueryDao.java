@@ -27,12 +27,14 @@ import java.util.List;
 
 import rs.ltt.android.entity.EntityType;
 import rs.ltt.android.entity.QueryEntity;
+import rs.ltt.android.entity.QueryItem;
 import rs.ltt.android.entity.QueryItemEntity;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.jmap.common.entity.AddedItem;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.TypedState;
 import rs.ltt.jmap.mua.cache.CacheConflictException;
+import rs.ltt.jmap.mua.cache.CorruptCacheException;
 import rs.ltt.jmap.mua.cache.QueryUpdate;
 import rs.ltt.jmap.mua.util.QueryResult;
 import rs.ltt.jmap.mua.util.QueryResultItem;
@@ -57,8 +59,8 @@ public abstract class QueryDao extends AbstractEntityDao {
     @Query("select * from `query` where queryString=:queryString limit 1")
     public abstract QueryEntity get(String queryString);
 
-    @Query("select max(position) from query_item where queryId=:queryId")
-    abstract int getMaxPosition(Long queryId);
+    @Query("select position,emailId from query_item where queryId=:queryId order by position desc limit 1")
+    abstract QueryItem getLastQueryItem(Long queryId);
 
     @Query("select count(id) from query_item where queryId=:queryId")
     abstract int getItemCount(Long queryId);
@@ -87,7 +89,7 @@ public abstract class QueryDao extends AbstractEntityDao {
     }
 
     @Transaction
-    public void add(String queryString, QueryResult queryResult) {
+    public void add(String queryString, String afterEmailId, QueryResult queryResult) {
 
         final QueryEntity queryEntity = get(queryString);
 
@@ -99,14 +101,18 @@ public abstract class QueryDao extends AbstractEntityDao {
             throw new CacheConflictException("Unable to append to Query. Cached query state did not meet our expectations");
         }
 
-        int currentMaxPosition = getMaxPosition(queryEntity.id);
-
-        if (currentMaxPosition != queryResult.position - 1) {
-            throw new CacheConflictException(String.format("Unexpected QueryPage. Cache has %d items. Page starts at position %d", currentMaxPosition, queryResult.position));
-        }
-
         TypedState<Email> emailState = queryResult.objectState;
         throwOnCacheConflict(EntityType.EMAIL, emailState);
+
+        final QueryItem lastQueryItem = getLastQueryItem(queryEntity.id);
+
+        if (!lastQueryItem.emailId.equals(afterEmailId)) {
+            throw new CacheConflictException(String.format("Current last email id in cache (%s) doesn't match afterId (%s) from request", lastQueryItem.emailId, afterEmailId));
+        }
+
+        if (lastQueryItem.position != queryResult.position - 1) {
+            throw new CorruptCacheException(String.format("Unexpected QueryPage. Cache ends with position %d. Page starts at position %d", lastQueryItem.position, queryResult.position));
+        }
 
         if (queryResult.items.length > 0) {
             insert(QueryItemEntity.of(queryEntity.id, queryResult.items, queryResult.position));
