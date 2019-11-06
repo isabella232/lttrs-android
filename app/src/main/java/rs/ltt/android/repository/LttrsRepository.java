@@ -90,8 +90,27 @@ public abstract class LttrsRepository {
     }
 
     private void insertQueryItemOverwrite(final String threadId, final IdentifiableMailboxWithRole mailbox) {
-        final String queryString = EmailQuery.of(EmailFilterCondition.builder().inMailbox(mailbox.getId()).build(), true).toQueryString();
-        QueryEntity queryEntity = database.queryDao().get(queryString);
+        insertQueryItemOverwrite(threadId,
+                EmailQuery.of(
+                        EmailFilterCondition.builder()
+                                .inMailbox(mailbox.getId())
+                                .build(),
+                        true));
+    }
+
+    private void insertQueryItemOverwrite(final String threadId, final String keyword) {
+        insertQueryItemOverwrite(threadId,
+                EmailQuery.of(
+                        EmailFilterCondition.builder()
+                                .hasKeyword(keyword)
+                                .build(),
+                        true)
+        );
+    }
+
+    private void insertQueryItemOverwrite(final String threadId, final EmailQuery emailQuery) {
+        final String queryString = emailQuery.toQueryString();
+        final QueryEntity queryEntity = database.queryDao().get(queryString);
         if (queryEntity != null) {
             database.overwriteDao().insert(new QueryItemOverwriteEntity(queryEntity.id, threadId));
         } else {
@@ -107,7 +126,27 @@ public abstract class LttrsRepository {
     }
 
     private void deleteQueryItemOverwrite(final String threadId, final IdentifiableMailboxWithRole mailbox) {
-        final String queryString = EmailQuery.of(EmailFilterCondition.builder().inMailbox(mailbox.getId()).build(), true).toQueryString();
+        deleteQueryItemOverwrite(threadId,
+                EmailQuery.of(
+                        EmailFilterCondition.builder().
+                                inMailbox(mailbox.getId())
+                                .build(),
+                        true)
+        );
+    }
+
+    private void deleteQueryItemOverwrite(final String threadId, final String keyword) {
+        deleteQueryItemOverwrite(threadId,
+                EmailQuery.of(
+                        EmailFilterCondition.builder()
+                                .hasKeyword(keyword)
+                                .build(),
+                        true)
+        );
+    }
+
+    private void deleteQueryItemOverwrite(final String threadId, final EmailQuery emailQuery) {
+        final String queryString = emailQuery.toQueryString();
         QueryEntity queryEntity = database.queryDao().get(queryString);
         if (queryEntity != null) {
             database.overwriteDao().delete(new QueryItemOverwriteEntity(queryEntity.id, threadId));
@@ -199,12 +238,19 @@ public abstract class LttrsRepository {
         toggleKeyword(threadId, Keyword.FLAGGED, targetState);
     }
 
+    public void removeKeyword(final String threadId, final String keyword) {
+        toggleKeyword(threadId, keyword, false);
+    }
+
     private void toggleKeyword(final String threadId, final String keyword, final boolean targetState) {
         IO_EXECUTOR.execute(() -> {
-            //TODO if targetState==false insert QueryItemOverwrite for keyword search
-            //TODO also we probably want to remove prexisting overwrites when targetState==true
             final KeywordOverwriteEntity keywordOverwriteEntity = new KeywordOverwriteEntity(threadId, keyword, targetState);
             insert(keywordOverwriteEntity);
+            if (targetState) {
+                deleteQueryItemOverwrite(threadId, keyword);
+            } else {
+                insertQueryItemOverwrite(threadId, keyword);
+            }
             final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ModifyKeywordWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(ModifyKeywordWorker.data(threadId, keyword, targetState))

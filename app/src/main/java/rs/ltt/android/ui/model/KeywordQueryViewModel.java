@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 
@@ -51,5 +52,9 @@ public class KeywordQueryViewModel extends AbstractQueryViewModel {
     @Override
     protected LiveData<EmailQuery> getQuery() {
         return emailQueryLiveData;
+    }
+
+    public void removeKeyword(ThreadOverviewItem item) {
+        queryRepository.removeKeyword(item.threadId, this.keyword);
     }
 }

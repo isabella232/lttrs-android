@@ -58,12 +58,12 @@ public class KeywordQueryFragment extends AbstractQueryFragment {
         if (Keyword.DRAFT.equals(keywordQueryViewModel.getKeyword())) {
             return QueryItemTouchHelper.Swipable.NO;
         } else {
-            return QueryItemTouchHelper.Swipable.REMOVE_LABEL;
+            return QueryItemTouchHelper.Swipable.REMOVE_LABEL; //TODO: do we want a REMOVE_STAR to make it look nice
         }
     }
 
     @Override
     protected void onQueryItemSwiped(ThreadOverviewItem item) {
-
+        keywordQueryViewModel.removeKeyword(item);
     }
 }
