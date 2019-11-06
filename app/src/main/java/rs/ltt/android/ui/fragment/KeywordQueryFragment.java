@@ -57,8 +57,10 @@ public class KeywordQueryFragment extends AbstractQueryFragment {
     protected QueryItemTouchHelper.Swipable onQueryItemSwipe(ThreadOverviewItem item) {
         if (Keyword.DRAFT.equals(keywordQueryViewModel.getKeyword())) {
             return QueryItemTouchHelper.Swipable.NO;
+        } else if (Keyword.FLAGGED.equals(keywordQueryViewModel.getKeyword())) {
+            return QueryItemTouchHelper.Swipable.REMOVE_FLAGGED;
         } else {
-            return QueryItemTouchHelper.Swipable.REMOVE_LABEL; //TODO: do we want a REMOVE_STAR to make it look nice
+            return QueryItemTouchHelper.Swipable.REMOVE_LABEL;
         }
     }
 

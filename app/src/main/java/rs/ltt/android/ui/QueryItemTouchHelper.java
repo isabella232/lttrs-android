@@ -47,9 +47,21 @@ public class QueryItemTouchHelper extends ItemTouchHelper.SimpleCallback {
                 if (swipable == Swipable.NO) {
                     return 0;
                 }
-                @DrawableRes int swipableIndicatorResource = swipable == Swipable.ARCHIVE ? R.drawable.ic_archive_white_24dp : R.drawable.ic_label_off_white_24dp;
-                threadOverviewViewHolder.binding.endSwipeActionIndicator.setImageResource(swipableIndicatorResource);
-                threadOverviewViewHolder.binding.startSwipeActionIndicator.setImageResource(swipableIndicatorResource);
+                @DrawableRes final int resource;
+                switch (swipable) {
+                    case ARCHIVE:
+                        resource = R.drawable.ic_archive_white_24dp;
+                        break;
+                    case REMOVE_FLAGGED:
+                        resource = R.drawable.ic_star_border_white_24dp;
+                        break;
+                    default:
+                        resource = R.drawable.ic_label_off_white_24dp;
+                        break;
+
+                }
+                threadOverviewViewHolder.binding.endSwipeActionIndicator.setImageResource(resource);
+                threadOverviewViewHolder.binding.startSwipeActionIndicator.setImageResource(resource);
                 return ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT;
             }
         }
@@ -84,7 +96,7 @@ public class QueryItemTouchHelper extends ItemTouchHelper.SimpleCallback {
     }
 
     public enum Swipable {
-        NO, ARCHIVE, REMOVE_LABEL
+        NO, ARCHIVE, REMOVE_LABEL, REMOVE_FLAGGED
     }
 
     public interface OnQueryItemSwipe {

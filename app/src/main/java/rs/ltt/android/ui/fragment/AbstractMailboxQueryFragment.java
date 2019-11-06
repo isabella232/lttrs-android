@@ -70,6 +70,8 @@ public abstract class AbstractMailboxQueryFragment extends AbstractQueryFragment
             return QueryItemTouchHelper.Swipable.NO;
         } else if (mailbox.role == Role.INBOX) {
             return QueryItemTouchHelper.Swipable.ARCHIVE;
+        } else if (mailbox.role == Role.FLAGGED) {
+            return QueryItemTouchHelper.Swipable.REMOVE_FLAGGED;
         } else if (mailbox.role == null) {
             return QueryItemTouchHelper.Swipable.REMOVE_LABEL;
         } else {
