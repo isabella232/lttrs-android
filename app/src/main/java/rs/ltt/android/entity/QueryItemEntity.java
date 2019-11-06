@@ -29,7 +29,8 @@ import rs.ltt.jmap.mua.util.QueryResultItem;
 @Entity(tableName = "query_item",
         foreignKeys = {@ForeignKey(entity = QueryEntity.class,
                 parentColumns = {"id"},
-                childColumns = {"queryId"}
+                childColumns = {"queryId"},
+                onDelete = ForeignKey.CASCADE
         )},
         indices = {@Index(value = "queryId")}
 )

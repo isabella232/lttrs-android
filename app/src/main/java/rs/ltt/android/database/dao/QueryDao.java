@@ -56,7 +56,7 @@ public abstract class QueryDao extends AbstractEntityDao {
     @Query("delete from query_item_overwrite where executed=1 and queryId=:queryId")
     abstract int deleteAllExecuted(Long queryId);
 
-    @Query("select * from `query` where queryString=:queryString limit 1")
+    @Query("select * from `query` where queryString=:queryString and valid=1 limit 1")
     public abstract QueryEntity get(String queryString);
 
     @Query("select position,emailId from query_item where queryId=:queryId order by position desc limit 1")
@@ -93,6 +93,9 @@ public abstract class QueryDao extends AbstractEntityDao {
 
         final QueryEntity queryEntity = get(queryString);
 
+
+        //TODO not having a state is fine; we still want to be able to page
+        //TODO compare queryEntity.state only when it is not null
         if (queryEntity == null || queryEntity.state == null) {
             throw new CacheConflictException("Unable to append items to Query. Cached query state is unknown");
         }

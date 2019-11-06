@@ -53,11 +53,14 @@ public abstract class StateDao {
         return new ObjectsState(mailboxState, threadState, emailState);
     }
 
-    @Query("select state from `query` where queryString=:queryString")
+    @Query("select state from `query` where queryString=:queryString and valid=1")
     abstract String getQueryState(String queryString);
 
     @Query("select emailId from `query` join query_item on `query`.id = queryId  where queryString=:queryString order by position desc limit 1")
     abstract String getUpTo(String queryString);
+
+    @Query("update `query` set valid=0 where queryString=:queryString")
+    public abstract void invalidateQueryState(String queryString);
 
     @Transaction
     public QueryStateWrapper getQueryStateWrapper(String queryString) {

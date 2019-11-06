@@ -78,7 +78,8 @@ public class DatabaseCache implements Cache {
     }
 
     @Override
-    public void setMailboxes(TypedState<Mailbox> mailboxTypedState, Mailbox[] mailboxes) {
+    public void setMailboxes(final TypedState<Mailbox> mailboxTypedState,
+                             final Mailbox[] mailboxes) {
         final List<MailboxEntity> mailboxEntities = new ArrayList<>();
         for (Mailbox mailbox : mailboxes) {
             mailboxEntities.add(MailboxEntity.of(mailbox));
@@ -87,7 +88,8 @@ public class DatabaseCache implements Cache {
     }
 
     @Override
-    public void updateMailboxes(Update<Mailbox> update, String[] updatedProperties) throws CacheWriteException, CacheConflictException {
+    public void updateMailboxes(final Update<Mailbox> update,
+                                final String[] updatedProperties) throws CacheWriteException, CacheConflictException {
         try {
             database.mailboxDao().update(update, updatedProperties);
         } catch (IllegalArgumentException e) {
@@ -101,56 +103,74 @@ public class DatabaseCache implements Cache {
     }
 
     @Override
-    public void setThreadsAndEmails(TypedState<Thread> threadState, Thread[] threads, TypedState<Email> emailState, Email[] emails) {
+    public void setThreadsAndEmails(final TypedState<Thread> threadState,
+                                    final Thread[] threads,
+                                    final TypedState<Email> emailState,
+                                    final Email[] emails) {
         database.threadAndEmailDao().set(threadState, threads, emailState, emails);
     }
 
     @Override
-    public void addThreadsAndEmail(TypedState<Thread> threadState, Thread[] threads, TypedState<Email> emailState, Email[] emails) {
+    public void addThreadsAndEmail(final TypedState<Thread> threadState,
+                                   final Thread[] threads,
+                                   final TypedState<Email> emailState,
+                                   final Email[] emails) {
         database.threadAndEmailDao().add(threadState,threads, emailState, emails);
     }
 
 
     @Override
-    public void updateThreads(Update<Thread> update) throws CacheWriteException {
+    public void updateThreads(final Update<Thread> update) throws CacheWriteException {
         database.threadAndEmailDao().update(update);
         Log.d("lttrs", "updated some threads "+update.toString());
     }
 
 
     @Override
-    public void updateEmails(Update<Email> update, String[] updatedProperties) throws CacheWriteException {
+    public void updateEmails(final Update<Email> update,
+                             final String[] updatedProperties) throws CacheWriteException {
         database.threadAndEmailDao().updateEmails(update, updatedProperties);
     }
 
     @Override
-    public void setIdentities(TypedState<Identity> identityTypedState, Identity[] identities) {
+    public void setIdentities(final TypedState<Identity> identityTypedState,
+                              final Identity[] identities) {
 
     }
 
     @Override
-    public void updateIdentities(Update<Identity> update) throws CacheWriteException {
+    public void updateIdentities(final Update<Identity> update) throws CacheWriteException {
 
     }
 
     @Override
-    public void setQueryResult(String queryString, QueryResult queryResult) {
+    public void setQueryResult(final String queryString,
+                               final QueryResult queryResult) {
         database.queryDao().set(queryString, queryResult);
     }
 
     @Override
-    public void addQueryResult(String queryString, String afterEmailId, QueryResult queryResult) throws CacheWriteException, CacheConflictException {
+    public void addQueryResult(final String queryString,
+                               final String afterEmailId,
+                               final QueryResult queryResult) throws CacheConflictException {
         database.queryDao().add(queryString, afterEmailId, queryResult);
     }
 
     @Override
-    public void updateQueryResults(String queryString, QueryUpdate<Email, QueryResultItem> queryUpdate, TypedState<Email> emailTypedState) throws CacheWriteException, CacheConflictException {
+    public void updateQueryResults(final String queryString,
+                                   final QueryUpdate<Email, QueryResultItem> queryUpdate,
+                                   final TypedState<Email> emailTypedState) throws CacheConflictException {
         Log.d("lttrs", "updating query results "+queryUpdate);
         database.queryDao().updateQueryResults(queryString, queryUpdate, emailTypedState);
     }
 
     @Override
-    public Missing getMissing(String query) throws CacheReadException {
+    public void invalidateQueryResult(final String queryString) {
+        database.stateDao().invalidateQueryState(queryString);
+    }
+
+    @Override
+    public Missing getMissing(final String query) throws CacheReadException {
         Missing missing = database.threadAndEmailDao().getMissing(query);
         Log.d("lttrs", "cache reported " + missing.threadIds.size() + " missing threads");
         return missing;
