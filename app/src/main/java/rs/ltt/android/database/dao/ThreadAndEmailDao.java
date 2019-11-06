@@ -206,7 +206,7 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
     @Query("delete from mailbox_overwrite where threadId=(select threadId from email where id=:emailId)")
     protected abstract void deleteMailboxOverwrite(String emailId);
 
-    @Query("update query_item_overwrite set executed=1 where threadId IN(select email.threadid from email where email.id=:emailId)")
+    @Query("update query_item_overwrite set executed=1 where executed=0 and threadId IN(select email.threadid from email where email.id=:emailId)")
     protected abstract int markAsExecuted(String emailId);
 
     @Transaction
