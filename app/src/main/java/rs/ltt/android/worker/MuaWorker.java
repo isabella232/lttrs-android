@@ -34,6 +34,8 @@ import rs.ltt.jmap.mua.Mua;
 
 public abstract class MuaWorker extends Worker {
 
+    public static final String TAG_EMAIL_MODIFICATION = "email_modification";
+
     public static final String SYNC = "sync";
     public static final String SYNC_LABELS = "sync_labels";
 

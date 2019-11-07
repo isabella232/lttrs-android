@@ -22,24 +22,29 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 import androidx.paging.PagedList;
+import androidx.work.WorkManager;
 
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.repository.QueryRepository;
+import rs.ltt.android.util.WorkInfoUtil;
+import rs.ltt.android.worker.MuaWorker;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 
 public abstract class AbstractQueryViewModel extends AndroidViewModel {
 
     final QueryRepository queryRepository;
-
+    private final LiveData<Boolean> emailModificationWorkInfo;
     private LiveData<PagedList<ThreadOverviewItem>> threads;
-
     private LiveData<Boolean> refreshing;
-
     private LiveData<Boolean> runningPagingRequest;
 
     AbstractQueryViewModel(@NonNull Application application) {
         super(application);
+
+        final WorkManager workManager = WorkManager.getInstance(application);
+
         this.queryRepository = new QueryRepository(application);
+        this.emailModificationWorkInfo = Transformations.map(workManager.getWorkInfosByTagLiveData(MuaWorker.TAG_EMAIL_MODIFICATION), WorkInfoUtil::allDone);
     }
 
     void init() {
@@ -72,12 +77,24 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
         return liveData;
     }
 
+    public LiveData<Boolean> getEmailModificationWorkInfo() {
+        return emailModificationWorkInfo;
+    }
+
     public void onRefresh() {
         final EmailQuery emailQuery = getQuery().getValue();
         if (emailQuery != null) {
             queryRepository.refresh(emailQuery);
         }
     }
+
+    public void refreshInBackground() {
+        final EmailQuery emailQuery = getQuery().getValue();
+        if (emailQuery != null) {
+            queryRepository.refreshInBackground(emailQuery);
+        }
+    }
+
 
     protected abstract LiveData<EmailQuery> getQuery();
 

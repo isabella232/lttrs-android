@@ -31,7 +31,6 @@ import rs.ltt.android.entity.EmailWithMailboxes;
 
 public abstract class AbstractMailboxModificationWorker extends MuaWorker {
 
-
     private static final String THREAD_ID_KEY = "threadId";
 
     protected final String threadId;
@@ -50,6 +49,7 @@ public abstract class AbstractMailboxModificationWorker extends MuaWorker {
         try {
             Boolean result = modify(emails).get();
             Log.d("lttrs", getClass().getSimpleName() + ": made changes to " + threadId + ": " + result);
+            //TODO only if we haven’t made changes?
             database.overwriteDao().deleteMailboxOverwritesByThread(threadId);
             return Result.success();
         } catch (ExecutionException e) {

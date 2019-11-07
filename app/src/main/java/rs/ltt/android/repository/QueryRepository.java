@@ -28,6 +28,9 @@ import androidx.paging.PagedList;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -38,6 +41,8 @@ import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 
 public class QueryRepository extends LttrsRepository {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueryRepository.class);
 
 
     private final Set<String> runningQueries = new HashSet<>();
@@ -106,6 +111,18 @@ public class QueryRepository extends LttrsRepository {
             }
             runningQueriesLiveData.postValue(runningQueries);
         }, MoreExecutors.directExecutor());
+    }
+
+    public void refreshInBackground(final EmailQuery emailQuery) {
+        final String queryString = emailQuery.toQueryString();
+        synchronized (this) {
+            if (runningQueries.contains(queryString) || runningPagingRequests.contains(queryString)) {
+                LOGGER.debug("skipping background refresh");
+                return;
+            }
+            LOGGER.info("started background refresh");
+            mua.query(emailQuery);
+        }
     }
 
 

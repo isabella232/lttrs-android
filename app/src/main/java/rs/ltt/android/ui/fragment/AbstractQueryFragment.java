@@ -18,6 +18,7 @@ package rs.ltt.android.ui.fragment;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,10 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.work.WorkInfo;
+
+import java.util.List;
+
 import rs.ltt.android.MainNavigationDirections;
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.FragmentThreadListBinding;
@@ -78,6 +83,9 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
         //((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
 
         viewModel.isRunningPagingRequest().observe(getViewLifecycleOwner(), threadOverviewAdapter::setLoading);
+
+        viewModel.getEmailModificationWorkInfo().observe(getViewLifecycleOwner(), this::emailModification);
+
         threadOverviewAdapter.setOnFlaggedToggledListener(this);
         threadOverviewAdapter.setOnThreadClickedListener(this);
 
@@ -88,6 +96,12 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
         new ItemTouchHelper(queryItemTouchHelper).attachToRecyclerView(binding.threadList);
 
         return binding.getRoot();
+    }
+
+    private void emailModification(boolean allDone) {
+        if (allDone) {
+            getQueryViewModel().refreshInBackground();
+        }
     }
 
     protected void onLabelOpened(Label label) {

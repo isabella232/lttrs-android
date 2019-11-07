@@ -159,6 +159,7 @@ public abstract class LttrsRepository {
             final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(RemoveFromMailboxWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(RemoveFromMailboxWorker.data(threadId, mailbox))
+                    .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
                     .build();
             final WorkManager workManager = WorkManager.getInstance(application);
             workManager.enqueueUniqueWork(
@@ -179,6 +180,7 @@ public abstract class LttrsRepository {
             final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ArchiveWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(ArchiveWorker.data(threadId))
+                    .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
                     .build();
             final WorkManager workManager = WorkManager.getInstance(application);
             workManager.enqueueUniqueWork(
@@ -202,6 +204,7 @@ public abstract class LttrsRepository {
             final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MoveToInboxWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(AbstractMailboxModificationWorker.data(threadId))
+                    .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
                     .build();
             final WorkManager workManager = WorkManager.getInstance(application);
             workManager.enqueueUniqueWork(
@@ -224,6 +227,7 @@ public abstract class LttrsRepository {
             final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MoveToTrashWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(MoveToTrashWorker.data(threadId))
+                    .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
                     .build();
             final WorkManager workManager = WorkManager.getInstance(application);
             workManager.enqueueUniqueWork(
@@ -254,6 +258,7 @@ public abstract class LttrsRepository {
             final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ModifyKeywordWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(ModifyKeywordWorker.data(threadId, keyword, targetState))
+                    .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
                     .build();
             final WorkManager workManager = WorkManager.getInstance(application);
             workManager.enqueueUniqueWork(
