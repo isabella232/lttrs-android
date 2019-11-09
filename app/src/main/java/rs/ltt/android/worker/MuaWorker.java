@@ -48,6 +48,7 @@ public abstract class MuaWorker extends Worker {
         this.mua = Mua.builder()
                 .password(Credentials.password)
                 .username(Credentials.username)
+                .accountId(Credentials.accountId)
                 .cache(new DatabaseCache(this.database))
                 .sessionCache(new SessionFileCache(getApplicationContext().getCacheDir()))
                 .queryPageSize(20)

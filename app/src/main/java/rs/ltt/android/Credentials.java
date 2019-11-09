@@ -19,6 +19,7 @@ public final class Credentials {
 
     public static final String username = "";
     public static final String password = "";
+    public static final String accountId = "";
 
     private Credentials() {
 

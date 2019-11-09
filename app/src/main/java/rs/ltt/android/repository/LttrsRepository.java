@@ -71,6 +71,7 @@ public abstract class LttrsRepository {
         this.mua = Mua.builder()
                 .password(Credentials.password)
                 .username(Credentials.username)
+                .accountId(Credentials.accountId)
                 .cache(new DatabaseCache(this.database))
                 .sessionCache(new SessionFileCache(application.getCacheDir()))
                 .queryPageSize(20L)

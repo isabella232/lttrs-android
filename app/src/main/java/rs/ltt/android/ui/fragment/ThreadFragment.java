@@ -160,6 +160,9 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
                 threadViewModel.moveToTrash();
                 navController.popBackStack();
                 return true;
+            case R.id.action_mark_important:
+
+                return true;
             default:
                 return super.onOptionsItemSelected(menuItem);
         }
