@@ -46,10 +46,10 @@ public abstract class OverwriteDao {
     public abstract void delete(QueryItemOverwriteEntity queryItemOverwriteEntity);
 
     @Query("delete from mailbox_overwrite where threadId=:threadId")
-    public abstract void deleteMailboxOverwritesByThread(String threadId);
+    public abstract int deleteMailboxOverwritesByThread(String threadId);
 
     @Query("delete from keyword_overwrite where threadId=:threadId")
-    public abstract void deleteKeywordOverwritesByThread(String threadId);
+    public abstract int deleteKeywordOverwritesByThread(String threadId);
 
     @Query("select * from keyword_overwrite where threadId=:threadId")
     public abstract ListenableFuture<KeywordOverwriteEntity> getKeywordOverwrite(String threadId);

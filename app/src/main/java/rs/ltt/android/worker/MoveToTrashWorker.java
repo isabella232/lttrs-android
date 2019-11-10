@@ -23,9 +23,15 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.work.WorkerParameters;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import rs.ltt.android.entity.EmailWithMailboxes;
 
 public class MoveToTrashWorker extends AbstractMailboxModificationWorker {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MoveToTrashWorker.class);
 
     public MoveToTrashWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -33,6 +39,7 @@ public class MoveToTrashWorker extends AbstractMailboxModificationWorker {
 
     @Override
     protected ListenableFuture<Boolean> modify(List<EmailWithMailboxes> emails) {
+        LOGGER.info("Modifying {} emails in thread {}", emails.size(), threadId);
         return mua.moveToTrash(emails);
     }
 }

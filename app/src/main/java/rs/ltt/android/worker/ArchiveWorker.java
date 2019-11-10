@@ -23,9 +23,15 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.work.WorkerParameters;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import rs.ltt.android.entity.EmailWithMailboxes;
 
 public class ArchiveWorker extends AbstractMailboxModificationWorker {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveWorker.class);
 
 
     public ArchiveWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
@@ -34,6 +40,7 @@ public class ArchiveWorker extends AbstractMailboxModificationWorker {
 
     @Override
     protected ListenableFuture<Boolean> modify(List<EmailWithMailboxes> emails) {
+        LOGGER.info("Modifying {} emails in thread {}", emails.size(), threadId);
         return mua.archive(emails);
     }
 }

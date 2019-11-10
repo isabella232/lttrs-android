@@ -51,7 +51,6 @@ public abstract class MuaWorker extends Worker {
                 .accountId(Credentials.accountId)
                 .cache(new DatabaseCache(this.database))
                 .sessionCache(new SessionFileCache(getApplicationContext().getCacheDir()))
-                .queryPageSize(20)
                 .build();
     }
 

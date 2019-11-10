@@ -18,7 +18,6 @@ package rs.ltt.android.worker;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
-import androidx.work.Data;
 import androidx.work.WorkerParameters;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -29,31 +28,23 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 import rs.ltt.android.entity.EmailWithMailboxes;
-import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 
-public class RemoveFromMailboxWorker extends AbstractMailboxModificationWorker {
+public class MarkImportantWorker extends AbstractMailboxModificationWorker {
 
-    private static final String THREAD_ID_KEY = "threadId";
-    private static final String MAILBOX_ID_KEY = "mailboxId";
-    private static Logger LOGGER = LoggerFactory.getLogger(RemoveFromMailboxWorker.class);
-    private final String mailboxId;
+    private static final Logger LOGGER = LoggerFactory.getLogger(MarkImportantWorker.class);
 
-    public RemoveFromMailboxWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+
+    public MarkImportantWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        final Data data = getInputData();
-        this.mailboxId = data.getString(MAILBOX_ID_KEY);
-    }
-
-    public static Data data(String threadId, IdentifiableMailboxWithRole mailbox) {
-        return new Data.Builder()
-                .putString(THREAD_ID_KEY, threadId)
-                .putString(MAILBOX_ID_KEY, mailbox.getId())
-                .build();
     }
 
     @Override
     protected ListenableFuture<Boolean> modify(List<EmailWithMailboxes> emails) {
         LOGGER.info("Modifying {} emails in thread {}", emails.size(), threadId);
-        return mua.removeFromMailbox(emails, this.mailboxId);
+        return mua.copyToImportant(emails);
+    }
+
+    public static String uniqueName(String threadId) {
+        return "important-toggle-" + threadId;
     }
 }

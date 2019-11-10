@@ -27,9 +27,15 @@ import java.util.concurrent.ExecutionException;
 import androidx.annotation.NonNull;
 import androidx.work.Data;
 import androidx.work.WorkerParameters;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import rs.ltt.android.entity.EmailWithMailboxes;
 
 public abstract class AbstractMailboxModificationWorker extends MuaWorker {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMailboxModificationWorker.class);
 
     private static final String THREAD_ID_KEY = "threadId";
 
@@ -45,12 +51,14 @@ public abstract class AbstractMailboxModificationWorker extends MuaWorker {
     @Override
     public Result doWork() {
         List<EmailWithMailboxes> emails = threadId == null ? Collections.emptyList() : database.threadAndEmailDao().getEmailsWithMailboxes(threadId);
-        Log.d("lttrs", getClass().getSimpleName() + ": threadId=" + threadId + " (" + emails.size() + ")");
         try {
-            Boolean result = modify(emails).get();
-            Log.d("lttrs", getClass().getSimpleName() + ": made changes to " + threadId + ": " + result);
-            //TODO only if we haven’t made changes?
-            database.overwriteDao().deleteMailboxOverwritesByThread(threadId);
+            final boolean madeChanges = modify(emails).get();
+            if (!madeChanges) {
+                final int deletedOverwrites = database.overwriteDao().deleteMailboxOverwritesByThread(threadId);
+                if (deletedOverwrites > 0) {
+                    LOGGER.info("Deleted {} overwrites after not making any changes to thread {}", deletedOverwrites, threadId);
+                }
+            }
             return Result.success();
         } catch (ExecutionException e) {
             return toResult(e);

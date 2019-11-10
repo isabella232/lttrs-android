@@ -21,11 +21,13 @@ import android.util.Log;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import androidx.core.util.Preconditions;
 import androidx.work.Constraints;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
+
 import rs.ltt.android.Credentials;
 import rs.ltt.android.cache.DatabaseCache;
 import rs.ltt.android.database.LttrsDatabase;
@@ -37,6 +39,7 @@ import rs.ltt.android.entity.QueryEntity;
 import rs.ltt.android.entity.QueryItemOverwriteEntity;
 import rs.ltt.android.worker.AbstractMailboxModificationWorker;
 import rs.ltt.android.worker.ArchiveWorker;
+import rs.ltt.android.worker.MarkImportantWorker;
 import rs.ltt.android.worker.ModifyKeywordWorker;
 import rs.ltt.android.worker.MoveToInboxWorker;
 import rs.ltt.android.worker.MoveToTrashWorker;
@@ -156,6 +159,10 @@ public abstract class LttrsRepository {
 
     public void removeFromMailbox(final String threadId, final IdentifiableMailboxWithRole mailbox) {
         IO_EXECUTOR.execute(() -> {
+            if (mailbox.getRole() == Role.IMPORTANT) {
+                markNotImportant(threadId, mailbox);
+                return;
+            }
             insertQueryItemOverwrite(threadId, mailbox);
             final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(RemoveFromMailboxWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
@@ -173,7 +180,7 @@ public abstract class LttrsRepository {
 
     public void archive(final String threadId) {
         IO_EXECUTOR.execute(() -> {
-            Log.d("lttrs","archiving "+threadId);
+            Log.d("lttrs", "archiving " + threadId);
             insertQueryItemOverwrite(threadId, Role.INBOX);
             deleteQueryItemOverwrite(threadId, Role.ARCHIVE);
             database.overwriteDao().insert(MailboxOverwriteEntity.of(threadId, Role.INBOX, false));
@@ -237,6 +244,55 @@ public abstract class LttrsRepository {
                     workRequest
             );
         });
+    }
+
+    public void markImportant(final String threadId) {
+        IO_EXECUTOR.execute(() -> {
+            database.overwriteDao().insert(
+                    MailboxOverwriteEntity.of(threadId, Role.IMPORTANT, true)
+            );
+            deleteQueryItemOverwrite(threadId, Role.IMPORTANT);
+            final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MarkImportantWorker.class)
+                    .setConstraints(CONNECTED_CONSTRAINT)
+                    .setInputData(MarkImportantWorker.data(threadId))
+                    .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
+                    .build();
+            final WorkManager workManager = WorkManager.getInstance(application);
+            workManager.enqueueUniqueWork(
+                    MarkImportantWorker.uniqueName(threadId),
+                    ExistingWorkPolicy.REPLACE,
+                    workRequest
+            );
+        });
+    }
+
+    public void markNotImportant(final String threadId) {
+        IO_EXECUTOR.execute(() -> {
+            final MailboxWithRoleAndName mailbox = Preconditions.checkNotNull(
+                    database.mailboxDao().getMailbox(Role.IMPORTANT),
+                    "No mailbox with role=IMPORTANT found in cache"
+            );
+            markNotImportant(threadId, mailbox);
+        });
+    }
+
+    private void markNotImportant(String threadId, IdentifiableMailboxWithRole mailbox) {
+        Preconditions.checkArgument(mailbox.getRole() == Role.IMPORTANT);
+        insertQueryItemOverwrite(threadId, mailbox);
+        database.overwriteDao().insert(
+                MailboxOverwriteEntity.of(threadId, Role.IMPORTANT, false)
+        );
+        final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(RemoveFromMailboxWorker.class)
+                .setConstraints(CONNECTED_CONSTRAINT)
+                .setInputData(RemoveFromMailboxWorker.data(threadId, mailbox))
+                .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
+                .build();
+        final WorkManager workManager = WorkManager.getInstance(application);
+        workManager.enqueueUniqueWork(
+                MarkImportantWorker.uniqueName(threadId),
+                ExistingWorkPolicy.REPLACE,
+                workRequest
+        );
     }
 
     public void toggleFlagged(final String threadId, final boolean targetState) {

@@ -17,18 +17,16 @@ package rs.ltt.android.repository;
 
 import android.app.Application;
 
-import com.google.common.util.concurrent.AsyncFunction;
+import androidx.lifecycle.LiveData;
+import androidx.paging.LivePagedListBuilder;
+import androidx.paging.PagedList;
+
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
-
 import java.util.List;
 
-import androidx.lifecycle.LiveData;
-import androidx.paging.LivePagedListBuilder;
-import androidx.paging.PagedList;
 import rs.ltt.android.entity.ExpandedPosition;
 import rs.ltt.android.entity.FullEmail;
 import rs.ltt.android.entity.KeywordOverwriteEntity;

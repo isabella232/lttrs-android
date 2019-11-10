@@ -16,22 +16,23 @@
 package rs.ltt.android.worker;
 
 import android.content.Context;
-import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.work.Data;
+import androidx.work.WorkerParameters;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import androidx.annotation.NonNull;
-import androidx.work.Data;
-import androidx.work.WorkerParameters;
 import rs.ltt.android.entity.EmailWithKeywords;
-import rs.ltt.jmap.client.api.MethodErrorResponseException;
-import rs.ltt.jmap.common.entity.Keyword;
-import rs.ltt.jmap.common.method.MethodErrorResponse;
-import rs.ltt.jmap.common.method.error.StateMismatchMethodErrorResponse;
 
 public class ModifyKeywordWorker extends MuaWorker {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ModifyKeywordWorker.class);
 
     private static final String THREAD_ID_KEY = "threadId";
     private static final String KEYWORD_KEY = "keyword";
@@ -49,32 +50,8 @@ public class ModifyKeywordWorker extends MuaWorker {
         this.target = data.getBoolean(TARGET_STATE_KEY, false);
     }
 
-    @NonNull
-    @Override
-    public Result doWork() {
-        Log.d("lttrs","ModifyKeywordWorker. threadId="+threadId+" target="+target);
-        List<EmailWithKeywords> emails = threadId == null ? Collections.emptyList() : database.threadAndEmailDao().getEmailsWithKeywords(threadId);
-        try {
-            final boolean madeChanges;
-            if (target) {
-                madeChanges = mua.setKeyword(emails, keyword).get();
-            } else {
-                madeChanges = mua.removeKeyword(emails, keyword).get();
-            }
-            Log.d("lttrs","made changes to "+threadId+": "+madeChanges);
-            if (!madeChanges) {
-                database.overwriteDao().deleteKeywordOverwritesByThread(threadId);
-            }
-            return Result.success();
-        } catch (ExecutionException e) {
-            return toResult(e);
-        } catch (InterruptedException e) {
-            return Result.failure();
-        }
-    }
-
     public static String uniqueName(String threadId, String keyword) {
-        return "toggle-keyword-" + keyword+ "-" + threadId;
+        return "toggle-keyword-" + keyword + "-" + threadId;
     }
 
     public static Data data(final String threadId, final String keyword, final boolean targetState) {
@@ -83,5 +60,35 @@ public class ModifyKeywordWorker extends MuaWorker {
                 .putString(KEYWORD_KEY, keyword)
                 .putBoolean(TARGET_STATE_KEY, targetState)
                 .build();
+    }
+
+    @NonNull
+    @Override
+    public Result doWork() {
+        List<EmailWithKeywords> emails = threadId == null ? Collections.emptyList() : database.threadAndEmailDao().getEmailsWithKeywords(threadId);
+        if (target) {
+            LOGGER.info("Setting keyword {} for {} emails in thread {}", keyword, emails.size(), threadId);
+        } else {
+            LOGGER.info("Removing keyword {} for {} emails in thread {}", keyword, emails.size(), threadId);
+        }
+        try {
+            final boolean madeChanges;
+            if (target) {
+                madeChanges = mua.setKeyword(emails, keyword).get();
+            } else {
+                madeChanges = mua.removeKeyword(emails, keyword).get();
+            }
+            if (!madeChanges) {
+                final int deletedOverwrites = database.overwriteDao().deleteKeywordOverwritesByThread(threadId);
+                if (deletedOverwrites > 0) {
+                    LOGGER.info("Deleted {} overwrites after not making any changes to thread {}", deletedOverwrites, threadId);
+                }
+            }
+            return Result.success();
+        } catch (ExecutionException e) {
+            return toResult(e);
+        } catch (InterruptedException e) {
+            return Result.failure();
+        }
     }
 }

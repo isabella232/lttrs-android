@@ -51,4 +51,9 @@
         android:title="@string/mark_important"
         app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/action_mark_not_important"
+        android:title="@string/mark_not_important"
+        app:showAsAction="never"/>
+
 </menu>

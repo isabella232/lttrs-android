@@ -77,7 +77,7 @@ public class QueryRepository extends LttrsRepository {
     }
 
     public ListenableFuture<MailboxWithRoleAndName> getInbox() {
-        return database.mailboxDao().getMailbox(Role.INBOX);
+        return database.mailboxDao().getMailboxFuture(Role.INBOX);
     }
 
 

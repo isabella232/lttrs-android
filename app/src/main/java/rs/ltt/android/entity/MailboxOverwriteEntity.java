@@ -66,12 +66,20 @@ public class MailboxOverwriteEntity {
 
 
     public static boolean hasOverwrite(Collection<MailboxOverwriteEntity> overwriteEntities, Role role) {
-        for (MailboxOverwriteEntity overwriteEntity : overwriteEntities) {
-            if (role.toString().equals(overwriteEntity.role)) {
-                return overwriteEntity.value;
-            }
+        MailboxOverwriteEntity mailboxOverwriteEntity = find(overwriteEntities, role);
+        if (mailboxOverwriteEntity != null) {
+            return mailboxOverwriteEntity.value;
         }
         return false;
+    }
+
+    public static MailboxOverwriteEntity find(Collection<MailboxOverwriteEntity> overwriteEntities, Role role) {
+        for (MailboxOverwriteEntity overwriteEntity : overwriteEntities) {
+            if (role.toString().equals(overwriteEntity.role)) {
+                return overwriteEntity;
+            }
+        }
+        return null;
     }
 
     @Override

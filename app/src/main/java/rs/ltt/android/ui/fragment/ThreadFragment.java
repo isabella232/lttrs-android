@@ -129,6 +129,8 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
         removeLabelItem.setTitle(getString(R.string.remove_label_x, threadViewModel.getLabel()));
         menu.findItem(R.id.action_move_to_inbox).setVisible(menuConfiguration.moveToInbox);
         menu.findItem(R.id.action_move_to_trash).setVisible(menuConfiguration.moveToTrash);
+        menu.findItem(R.id.action_mark_important).setVisible(menuConfiguration.markImportant);
+        menu.findItem(R.id.action_mark_not_important).setVisible(menuConfiguration.markNotImportant);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -161,7 +163,10 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
                 navController.popBackStack();
                 return true;
             case R.id.action_mark_important:
-
+                threadViewModel.markImportant();
+                return true;
+            case R.id.action_mark_not_important:
+                threadViewModel.markNotImportant();
                 return true;
             default:
                 return super.onOptionsItemSelected(menuItem);
