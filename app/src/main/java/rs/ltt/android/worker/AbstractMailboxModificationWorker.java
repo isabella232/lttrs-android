@@ -54,7 +54,7 @@ public abstract class AbstractMailboxModificationWorker extends MuaWorker {
             final boolean madeChanges = modify(emails).get();
             if (!madeChanges) {
                 LOGGER.info("No changes were made to thread {}", threadId);
-                database.overwriteDao().deleteOverwritesForMailboxModification(threadId);
+                database.overwriteDao().revertMailboxOverwrites(threadId);
             }
             return Result.success();
         } catch (ExecutionException e) {
@@ -62,7 +62,7 @@ public abstract class AbstractMailboxModificationWorker extends MuaWorker {
             if (shouldRetry(e)) {
                 return Result.retry();
             } else {
-                database.overwriteDao().deleteOverwritesForMailboxModification(threadId);
+                database.overwriteDao().revertMailboxOverwrites(threadId);
                 return Result.failure();
             }
         } catch (InterruptedException e) {

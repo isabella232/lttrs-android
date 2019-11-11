@@ -80,7 +80,7 @@ public class ModifyKeywordWorker extends MuaWorker {
             }
             if (!madeChanges) {
                 LOGGER.info("No changes were made to thread {}", threadId);
-                database.overwriteDao().deleteOverwritesForKeywordModification(threadId);
+                database.overwriteDao().revertKeywordOverwrites(threadId);
             }
             return Result.success();
         } catch (ExecutionException e) {
@@ -88,7 +88,7 @@ public class ModifyKeywordWorker extends MuaWorker {
             if (shouldRetry(e)) {
                 return Result.retry();
             } else {
-                database.overwriteDao().deleteOverwritesForKeywordModification(threadId);
+                database.overwriteDao().revertKeywordOverwrites(threadId);
                 return Result.failure();
             }
         } catch (InterruptedException e) {

@@ -62,7 +62,7 @@ public abstract class OverwriteDao {
     protected abstract int deleteKeywordOverwritesByThread(String threadId);
 
     @Transaction
-    public void deleteOverwritesForKeywordModification(String threadId) {
+    public void revertKeywordOverwrites(String threadId) {
         int keywordOverwrites = deleteKeywordOverwritesByThread(threadId);
         int queryOverwrites = markAsExecuted(threadId); //mark as executed instead
         if (keywordOverwrites > 0 || queryOverwrites > 0) {
@@ -71,7 +71,7 @@ public abstract class OverwriteDao {
     }
 
     @Transaction
-    public void deleteOverwritesForMailboxModification(String threadId) {
+    public void revertMailboxOverwrites(String threadId) {
         int mailboxOverwrites = deleteMailboxOverwritesByThread(threadId);
         int queryOverwrites = markAsExecuted(threadId);
         if (mailboxOverwrites > 0 || queryOverwrites > 0) {
