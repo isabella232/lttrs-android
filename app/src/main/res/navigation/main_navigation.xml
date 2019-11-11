@@ -86,6 +86,10 @@
             android:name="label"
             app:argType="string"
             app:nullable="true" />
+        <argument
+            android:name="trigger_read"
+            app:argType="boolean"
+            app:nullable="false"/>
     </fragment>
 
     <fragment

@@ -119,9 +119,13 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
     protected abstract AbstractQueryViewModel getQueryViewModel();
 
     @Override
-    public void onThreadClicked(String threadId) {
+    public void onThreadClicked(String threadId, boolean everyHasSeen) {
         final NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
-        navController.navigate(MainNavigationDirections.actionToThread(threadId, null));
+        navController.navigate(MainNavigationDirections.actionToThread(
+                threadId,
+                null,
+                !everyHasSeen
+        ));
     }
 
     @Override

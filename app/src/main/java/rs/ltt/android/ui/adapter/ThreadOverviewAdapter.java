@@ -94,7 +94,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
             Touch.expandTouchArea(threadOverviewHolder.binding.getRoot(), threadOverviewHolder.binding.starToggle, 16);
             threadOverviewHolder.binding.getRoot().setOnClickListener(v -> {
                 if (onThreadClicked != null) {
-                    onThreadClicked.onThreadClicked(item.threadId);
+                    onThreadClicked.onThreadClicked(item.threadId, item.everyHasSeenKeyword());
                 }
             });
         }
@@ -160,6 +160,6 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
     }
 
     public interface OnThreadClicked {
-        void onThreadClicked(String threadId);
+        void onThreadClicked(String threadId, boolean everyHasSeen);
     }
 }

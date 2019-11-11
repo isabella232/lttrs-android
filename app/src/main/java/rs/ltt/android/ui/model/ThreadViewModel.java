@@ -16,7 +16,6 @@
 package rs.ltt.android.ui.model;
 
 import android.app.Application;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -54,7 +53,7 @@ public class ThreadViewModel extends AndroidViewModel {
     private LiveData<MenuConfiguration> menuConfiguration;
 
 
-    ThreadViewModel(@NonNull Application application, String threadId, String label) {
+    ThreadViewModel(@NonNull Application application, String threadId, String label, boolean triggerRead) {
         super(application);
         this.threadId = threadId;
         this.label = label;
@@ -63,7 +62,11 @@ public class ThreadViewModel extends AndroidViewModel {
         this.emails = this.threadRepository.getEmails(threadId);
         this.mailboxes = this.threadRepository.getMailboxes(threadId);
         this.expandedPositions = this.threadRepository.getExpandedPositions(threadId);
-        this.expandedPositions.addListener(() -> this.threadRepository.markRead(threadId), MoreExecutors.directExecutor());
+        this.expandedPositions.addListener(() -> {
+            if (triggerRead) {
+                threadRepository.markRead(threadId);
+            }
+        }, MoreExecutors.directExecutor());
 
         LiveData<List<MailboxOverwriteEntity>> overwriteEntityLiveData = this.threadRepository.getMailboxOverwrites(threadId);
 
@@ -72,9 +75,6 @@ public class ThreadViewModel extends AndroidViewModel {
         this.menuConfiguration = Transformations.map(combined, pair -> {
             List<MailboxOverwriteEntity> overwrites = pair.first;
             List<MailboxWithRoleAndName> list = pair.second;
-
-            Log.d("lttrs", "num mailbox overwrites = " + overwrites.size());
-
             boolean wasPutInArchiveOverwrite = MailboxOverwriteEntity.hasOverwrite(overwrites, Role.ARCHIVE);
             boolean wasPutInTrashOverwrite = MailboxOverwriteEntity.hasOverwrite(overwrites, Role.TRASH);
             boolean wasPutInInboxOverwrite = MailboxOverwriteEntity.hasOverwrite(overwrites, Role.INBOX);

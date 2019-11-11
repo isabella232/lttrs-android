@@ -52,8 +52,8 @@ public abstract class OverwriteDao {
     @Delete
     public abstract void delete(QueryItemOverwriteEntity queryItemOverwriteEntity);
 
-    @Query("delete from query_item_overwrite where threadId=:threadId")
-    protected abstract int deleteQueryOverwritesByThread(String threadId);
+    @Query("update query_item_overwrite set executed=1 where executed=0 and threadId=:threadId")
+    protected abstract int markAsExecuted(String threadId);
 
     @Query("delete from mailbox_overwrite where threadId=:threadId")
     protected abstract int deleteMailboxOverwritesByThread(String threadId);
@@ -64,18 +64,18 @@ public abstract class OverwriteDao {
     @Transaction
     public void deleteOverwritesForKeywordModification(String threadId) {
         int keywordOverwrites = deleteKeywordOverwritesByThread(threadId);
-        int queryOverwrites = deleteQueryOverwritesByThread(threadId);
+        int queryOverwrites = markAsExecuted(threadId); //mark as executed instead
         if (keywordOverwrites > 0 || queryOverwrites > 0) {
-            LOGGER.info("Deleted {} keyword overwrites and {} query overwrites for thread {}", keywordOverwrites, queryOverwrites, threadId);
+            LOGGER.info("Deleted {} keyword overwrites and marked {} query overwrites as executed for thread {}", keywordOverwrites, queryOverwrites, threadId);
         }
     }
 
     @Transaction
     public void deleteOverwritesForMailboxModification(String threadId) {
         int mailboxOverwrites = deleteMailboxOverwritesByThread(threadId);
-        int queryOverwrites = deleteQueryOverwritesByThread(threadId);
+        int queryOverwrites = markAsExecuted(threadId);
         if (mailboxOverwrites > 0 || queryOverwrites > 0) {
-            LOGGER.info("Deleted {} mailbox overwrites and {} query overwrites for thread {}", mailboxOverwrites, queryOverwrites, threadId);
+            LOGGER.info("Deleted {} mailbox overwrites and marked {} query overwrites as executed for thread {}", mailboxOverwrites, queryOverwrites, threadId);
         }
     }
 

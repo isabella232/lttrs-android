@@ -71,9 +71,10 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
         final ThreadFragmentArgs arguments = ThreadFragmentArgs.fromBundle(bundle == null ? new Bundle() : bundle);
         final String threadId = arguments.getThread();
         final String label = arguments.getLabel();
+        final boolean triggerRead = arguments.getTriggerRead();
         final ViewModelProvider viewModelProvider = new ViewModelProvider(
                 getViewModelStore(),
-                new ThreadViewModelFactory(application, threadId, label)
+                new ThreadViewModelFactory(application, threadId, label, triggerRead)
         );
         threadViewModel = viewModelProvider.get(ThreadViewModel.class);
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_thread, container, false);
