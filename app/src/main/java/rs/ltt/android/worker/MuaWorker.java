@@ -54,22 +54,12 @@ public abstract class MuaWorker extends Worker {
                 .build();
     }
 
-    static Result toResult(ExecutionException e) {
+    static boolean shouldRetry(ExecutionException e) {
         final Throwable cause = e.getCause();
-        if (cause != null) {
-            if (cause instanceof MethodErrorResponseException) {
-                MethodErrorResponse methodErrorResponse = ((MethodErrorResponseException) cause).getMethodErrorResponse();
-                if (methodErrorResponse instanceof StateMismatchMethodErrorResponse) {
-                    Log.d("lttrs", "state mismatch; try again");
-                    return Result.retry();
-                }
-                if (methodErrorResponse != null) {
-                    Log.d("lttrs", "method error response " + methodErrorResponse.getType(), e);
-                } else {
-                    Log.d("lttrs", e.getMessage(), e);
-                }
-            }
+        if (cause instanceof MethodErrorResponseException) {
+            MethodErrorResponse methodError = ((MethodErrorResponseException) cause).getMethodErrorResponse();
+            return methodError instanceof StateMismatchMethodErrorResponse;
         }
-        return Result.failure();
+        return false;
     }
 }

@@ -24,6 +24,11 @@ import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.Transaction;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import rs.ltt.android.entity.KeywordOverwriteEntity;
 import rs.ltt.android.entity.MailboxOverwriteEntity;
 import rs.ltt.android.entity.QueryItemOverwriteEntity;
@@ -32,6 +37,8 @@ import static androidx.room.OnConflictStrategy.REPLACE;
 
 @Dao
 public abstract class OverwriteDao {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OverwriteDao.class);
 
     @Insert(onConflict = REPLACE)
     public abstract void insert(KeywordOverwriteEntity keywordToggle);
@@ -45,11 +52,32 @@ public abstract class OverwriteDao {
     @Delete
     public abstract void delete(QueryItemOverwriteEntity queryItemOverwriteEntity);
 
+    @Query("delete from query_item_overwrite where threadId=:threadId")
+    protected abstract int deleteQueryOverwritesByThread(String threadId);
+
     @Query("delete from mailbox_overwrite where threadId=:threadId")
-    public abstract int deleteMailboxOverwritesByThread(String threadId);
+    protected abstract int deleteMailboxOverwritesByThread(String threadId);
 
     @Query("delete from keyword_overwrite where threadId=:threadId")
-    public abstract int deleteKeywordOverwritesByThread(String threadId);
+    protected abstract int deleteKeywordOverwritesByThread(String threadId);
+
+    @Transaction
+    public void deleteOverwritesForKeywordModification(String threadId) {
+        int keywordOverwrites = deleteKeywordOverwritesByThread(threadId);
+        int queryOverwrites = deleteQueryOverwritesByThread(threadId);
+        if (keywordOverwrites > 0 || queryOverwrites > 0) {
+            LOGGER.info("Deleted {} keyword overwrites and {} query overwrites for thread {}", keywordOverwrites, queryOverwrites, threadId);
+        }
+    }
+
+    @Transaction
+    public void deleteOverwritesForMailboxModification(String threadId) {
+        int mailboxOverwrites = deleteMailboxOverwritesByThread(threadId);
+        int queryOverwrites = deleteQueryOverwritesByThread(threadId);
+        if (mailboxOverwrites > 0 || queryOverwrites > 0) {
+            LOGGER.info("Deleted {} mailbox overwrites and {} query overwrites for thread {}", mailboxOverwrites, queryOverwrites, threadId);
+        }
+    }
 
     @Query("select * from keyword_overwrite where threadId=:threadId")
     public abstract ListenableFuture<KeywordOverwriteEntity> getKeywordOverwrite(String threadId);

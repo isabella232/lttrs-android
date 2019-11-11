@@ -16,7 +16,6 @@
 package rs.ltt.android.worker;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -54,16 +53,20 @@ public abstract class AbstractMailboxModificationWorker extends MuaWorker {
         try {
             final boolean madeChanges = modify(emails).get();
             if (!madeChanges) {
-                final int deletedOverwrites = database.overwriteDao().deleteMailboxOverwritesByThread(threadId);
-                if (deletedOverwrites > 0) {
-                    LOGGER.info("Deleted {} overwrites after not making any changes to thread {}", deletedOverwrites, threadId);
-                }
+                LOGGER.info("No changes were made to thread {}", threadId);
+                database.overwriteDao().deleteOverwritesForMailboxModification(threadId);
             }
             return Result.success();
         } catch (ExecutionException e) {
-            return toResult(e);
+            LOGGER.warn(String.format("Unable to modify emails in thread %s", threadId), e);
+            if (shouldRetry(e)) {
+                return Result.retry();
+            } else {
+                database.overwriteDao().deleteOverwritesForMailboxModification(threadId);
+                return Result.failure();
+            }
         } catch (InterruptedException e) {
-            return Result.failure();
+            return Result.retry();
         }
     }
 

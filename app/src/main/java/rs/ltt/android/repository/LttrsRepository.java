@@ -18,6 +18,7 @@ package rs.ltt.android.repository;
 import android.app.Application;
 import android.util.Log;
 
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -28,9 +29,13 @@ import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import rs.ltt.android.Credentials;
 import rs.ltt.android.cache.DatabaseCache;
 import rs.ltt.android.database.LttrsDatabase;
+import rs.ltt.android.entity.EmailWithKeywords;
 import rs.ltt.android.entity.KeywordOverwriteEntity;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.MailboxOverwriteEntity;
@@ -52,20 +57,19 @@ import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 import rs.ltt.jmap.mua.Mua;
+import rs.ltt.jmap.mua.util.KeywordUtil;
 
 public abstract class LttrsRepository {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LttrsRepository.class);
 
     private static final Constraints CONNECTED_CONSTRAINT = new Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build();
-
-    protected final LttrsDatabase database;
-
-    protected final Application application;
-
-    protected final Mua mua;
-
     private static final Executor IO_EXECUTOR = Executors.newSingleThreadExecutor();
+    protected final LttrsDatabase database;
+    protected final Application application;
+    protected final Mua mua;
 
 
     LttrsRepository(final Application application) {

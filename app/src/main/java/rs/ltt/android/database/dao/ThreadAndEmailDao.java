@@ -28,6 +28,10 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Transaction;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import rs.ltt.android.entity.EmailBodyPartEntity;
 import rs.ltt.android.entity.EmailBodyValueEntity;
 import rs.ltt.android.entity.EmailEmailAddressEntity;
@@ -51,6 +55,8 @@ import rs.ltt.jmap.mua.cache.Update;
 
 @Dao
 public abstract class ThreadAndEmailDao extends AbstractEntityDao {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ThreadAndEmailDao.class);
 
     @Insert
     abstract void insert(ThreadEntity entity);
@@ -276,8 +282,10 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
 
                 deleteKeywordToggle(email.getId());
                 deleteMailboxOverwrite(email.getId());
-                int count = markAsExecuted(email.getId());
-                Log.d("lttrs","marked "+count+" as executed");
+                final int executed = markAsExecuted(email.getId());
+                if (executed > 0) {
+                    LOGGER.info("Marked {} query item overwrites as executed", executed);
+                }
 
             }
         }
