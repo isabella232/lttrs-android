@@ -175,6 +175,17 @@ public class ThreadOverviewItem {
         return builder.build();
     }
 
+    public boolean isInMailbox(MailboxWithRoleAndName mailbox) {
+        if (mailbox == null) {
+            return false;
+        }
+        MailboxOverwriteEntity overwrite = MailboxOverwriteEntity.find(this.mailboxOverwriteEntities, mailbox.role);
+        if (overwrite != null) {
+            return overwrite.value;
+        }
+        return getMailboxIds().contains(mailbox.id);
+    }
+
     public From[] getFromValues() {
         return getFromMap().values().toArray(new From[0]);
     }

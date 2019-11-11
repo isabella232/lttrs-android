@@ -24,6 +24,9 @@ import androidx.lifecycle.Transformations;
 import androidx.paging.PagedList;
 import androidx.work.WorkManager;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
+import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.repository.QueryRepository;
 import rs.ltt.android.util.WorkInfoUtil;
@@ -37,6 +40,7 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
     private LiveData<PagedList<ThreadOverviewItem>> threads;
     private LiveData<Boolean> refreshing;
     private LiveData<Boolean> runningPagingRequest;
+    private ListenableFuture<MailboxWithRoleAndName> important;
 
     AbstractQueryViewModel(@NonNull Application application) {
         super(application);
@@ -44,6 +48,7 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
         final WorkManager workManager = WorkManager.getInstance(application);
 
         this.queryRepository = new QueryRepository(application);
+        this.important = this.queryRepository.getImportant();
         this.emailModificationWorkInfo = Transformations.map(workManager.getWorkInfosByTagLiveData(MuaWorker.TAG_EMAIL_MODIFICATION), WorkInfoUtil::allDone);
     }
 
@@ -59,6 +64,10 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
             throw new IllegalStateException("LiveData for refreshing not initialized. Forgot to call init()?");
         }
         return refreshing;
+    }
+
+    public ListenableFuture<MailboxWithRoleAndName> getImportant() {
+        return this.important;
     }
 
     public LiveData<Boolean> isRunningPagingRequest() {

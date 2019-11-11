@@ -15,7 +15,6 @@
 
 package rs.ltt.android.ui.adapter;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,14 +24,24 @@ import androidx.databinding.DataBindingUtil;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.common.util.concurrent.ListenableFuture;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.ThreadOverviewItemBinding;
 import rs.ltt.android.databinding.ThreadOverviewItemLoadingBinding;
+import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.ui.BindingAdapters;
 import rs.ltt.android.util.Touch;
 
 public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, ThreadOverviewAdapter.AbstractThreadOverviewViewHolder> {
+
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ThreadOverviewAdapter.class);
 
     private boolean isLoading = false;
 
@@ -41,6 +50,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
 
     private OnFlaggedToggled onFlaggedToggled;
     private OnThreadClicked onThreadClicked;
+    private ListenableFuture<MailboxWithRoleAndName> importantMailbox;
 
 
     public ThreadOverviewAdapter() {
@@ -52,9 +62,6 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
 
             @Override
             public boolean areContentsTheSame(@NonNull ThreadOverviewItem oldItem, @NonNull ThreadOverviewItem newItem) {
-                if (!oldItem.equals(newItem)) {
-                    Log.d("lttrs", oldItem.getSubject() + " was not same as new item");
-                }
                 return oldItem.equals(newItem);
             }
         });
@@ -84,6 +91,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
                 return;
             }
             threadOverviewHolder.binding.setThread(item);
+            threadOverviewHolder.binding.setImportant(item.isInMailbox(getImportantMailbox()));
             threadOverviewHolder.binding.starToggle.setOnClickListener(v -> {
                 if (onFlaggedToggled != null) {
                     final boolean target = !item.showAsFlagged();
@@ -100,12 +108,29 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
         }
     }
 
+    private MailboxWithRoleAndName getImportantMailbox() {
+        if(this.importantMailbox != null && this.importantMailbox.isDone()) {
+            try {
+                return this.importantMailbox.get();
+            } catch (Exception e) {
+                return null;
+            }
+        } else {
+            LOGGER.warn("Mailbox with IMPORTANT role was not available for rendering");
+            return null;
+        }
+    }
+
     public void setLoading(final boolean loading) {
         final boolean before = this.isLoading;
         this.isLoading = loading;
         if (before != loading) {
             notifyItemChanged(super.getItemCount());
         }
+    }
+
+    public void setImportantMailbox(ListenableFuture<MailboxWithRoleAndName> importantMailbox) {
+        this.importantMailbox = importantMailbox;
     }
 
     @Override

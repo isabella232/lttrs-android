@@ -80,6 +80,9 @@ public class QueryRepository extends LttrsRepository {
         return database.mailboxDao().getMailboxFuture(Role.INBOX);
     }
 
+    public ListenableFuture<MailboxWithRoleAndName> getImportant() {
+        return database.mailboxDao().getMailboxFuture(Role.IMPORTANT);
+    }
 
     public LiveData<Boolean> isRunningQueryFor(final EmailQuery query) {
         return Transformations.map(runningQueriesLiveData, queryStrings -> queryStrings.contains(query.toQueryString()));

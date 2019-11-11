@@ -18,7 +18,6 @@ package rs.ltt.android.ui.fragment;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,9 +30,6 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.work.WorkInfo;
-
-import java.util.List;
 
 import rs.ltt.android.MainNavigationDirections;
 import rs.ltt.android.R;
@@ -79,7 +75,7 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
         binding.swipeToRefresh.setColorSchemeResources(R.color.colorAccent);
 
 
-        //TODO: do we want to get rid of flicer on changes
+        //TODO: do we want to get rid of flicker on changes
         //((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
 
         viewModel.isRunningPagingRequest().observe(getViewLifecycleOwner(), threadOverviewAdapter::setLoading);
@@ -88,6 +84,7 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
 
         threadOverviewAdapter.setOnFlaggedToggledListener(this);
         threadOverviewAdapter.setOnThreadClickedListener(this);
+        threadOverviewAdapter.setImportantMailbox(viewModel.getImportant());
 
         final QueryItemTouchHelper queryItemTouchHelper = new QueryItemTouchHelper();
 
@@ -104,7 +101,7 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
         }
     }
 
-    protected void onLabelOpened(Label label) {
+    void onLabelOpened(Label label) {
         final Activity activity = getActivity();
         if (activity instanceof OnLabelOpened) {
             ((OnLabelOpened) activity).onLabelOpened(label);
