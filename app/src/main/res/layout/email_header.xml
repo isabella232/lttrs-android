@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright 2019 Daniel Gultsch
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -18,14 +17,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-
-        <import type="android.view.View" />
-        <variable
-            name="header"
-            type="rs.ltt.android.entity.ThreadHeader" />
-    </data>
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -35,30 +26,43 @@
         android:paddingTop="12dp"
         android:paddingBottom="12dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@{header.subject}"
-            android:textAppearance="?textAppearanceHeadline5"
-            android:textSize="22sp"
-            android:layout_marginStart="16dp"
-            android:layout_alignParentStart="true"
-            android:layout_toStartOf="@+id/star_toggle"
-            android:layout_centerVertical="true"
-            tools:text="[Jmap] I-D Action: draft-ietf-jmap-mdn-01.txt" />
-
         <ImageView
             android:id="@+id/star_toggle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
             android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="12dp"
-            android:visibility="@{header == null ? View.GONE : View.VISIBLE}"
-            app:isFlagged="@{header.showAsFlagged()}"
+            android:visibility="@{flagged == null ? View.INVISIBLE : View.VISIBLE}"
+            app:isFlagged="@{flagged}"
             tools:alpha="0.57"
             tools:src="@drawable/ic_star_border_no_padding_black_24dp" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="16dp"
+            android:layout_toStartOf="@+id/star_toggle"
+            android:text="@{subject}"
+            android:textAppearance="?textAppearanceHeadline5"
+            android:textSize="22sp"
+            tools:text="[Jmap] I-D Action: draft-ietf-jmap-mdn-01.txt" />
+
     </RelativeLayout>
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="subject"
+            type="rs.ltt.android.entity.SubjectWithImportance" />
+
+        <variable
+            name="flagged"
+            type="Boolean" />
+    </data>
 </layout>

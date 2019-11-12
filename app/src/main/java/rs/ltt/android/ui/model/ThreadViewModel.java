@@ -20,6 +20,7 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.paging.PagedList;
 
@@ -34,6 +35,7 @@ import rs.ltt.android.entity.ExpandedPosition;
 import rs.ltt.android.entity.FullEmail;
 import rs.ltt.android.entity.MailboxOverwriteEntity;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
+import rs.ltt.android.entity.SubjectWithImportance;
 import rs.ltt.android.entity.ThreadHeader;
 import rs.ltt.android.repository.ThreadRepository;
 import rs.ltt.android.util.CombinedListsLiveData;
@@ -48,7 +50,8 @@ public class ThreadViewModel extends AndroidViewModel {
     private final String label;
     private final ThreadRepository threadRepository;
     private LiveData<PagedList<FullEmail>> emails;
-    private LiveData<ThreadHeader> header;
+    private MediatorLiveData<SubjectWithImportance> subjectWithImportance;
+    private LiveData<Boolean> flagged;
     private LiveData<List<MailboxWithRoleAndName>> mailboxes;
     private LiveData<MenuConfiguration> menuConfiguration;
 
@@ -58,7 +61,7 @@ public class ThreadViewModel extends AndroidViewModel {
         this.threadId = threadId;
         this.label = label;
         this.threadRepository = new ThreadRepository(application);
-        this.header = this.threadRepository.getThreadHeader(threadId);
+        final LiveData<ThreadHeader> header = this.threadRepository.getThreadHeader(threadId);
         this.emails = this.threadRepository.getEmails(threadId);
         this.mailboxes = this.threadRepository.getMailboxes(threadId);
         this.expandedPositions = this.threadRepository.getExpandedPositions(threadId);
@@ -95,21 +98,38 @@ public class ThreadViewModel extends AndroidViewModel {
                     markedAsImportant
             );
         });
+
+        final LiveData<Boolean> importance = Transformations.map(combined, pair -> {
+            final List<MailboxOverwriteEntity> overwrites = pair.first;
+            final List<MailboxWithRoleAndName> list = pair.second;
+            final MailboxOverwriteEntity importantOverwrite = MailboxOverwriteEntity.find(overwrites, Role.IMPORTANT);
+            return importantOverwrite != null ? importantOverwrite.value : MailboxWithRoleAndName.isAnyOfRole(list, Role.IMPORTANT);
+        });
+
+        this.subjectWithImportance = new MediatorLiveData<>();
+        this.subjectWithImportance.addSource(importance, important -> subjectWithImportance.setValue(SubjectWithImportance.of(header.getValue(), important)));
+        this.subjectWithImportance.addSource(header, threadHeader -> subjectWithImportance.setValue(SubjectWithImportance.of(threadHeader, importance.getValue())));
+
+        this.flagged = Transformations.map(header, ThreadHeader::showAsFlagged);
     }
 
     public LiveData<PagedList<FullEmail>> getEmails() {
         return emails;
     }
 
-    public LiveData<ThreadHeader> getHeader() {
-        return this.header;
+    public LiveData<SubjectWithImportance> getSubjectWithImportance() {
+        return this.subjectWithImportance;
+    }
+
+    public LiveData<Boolean> getFlagged() {
+        return this.flagged;
     }
 
     public LiveData<MenuConfiguration> getMenuConfiguration() {
         return menuConfiguration;
     }
 
-    public void toggleFlagged(String threadId, boolean target) {
+    public void toggleFlagged(final String threadId, final boolean target) {
         threadRepository.toggleFlagged(threadId, target);
     }
 

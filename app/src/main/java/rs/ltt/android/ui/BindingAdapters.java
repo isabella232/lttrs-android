@@ -19,8 +19,11 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
+import android.text.style.DynamicDrawableSpan;
+import android.text.style.ImageSpan;
 import android.text.style.StyleSpan;
 import android.view.View;
 import android.widget.ImageView;
@@ -36,6 +39,8 @@ import androidx.core.content.ContextCompat;
 import androidx.core.widget.ImageViewCompat;
 import androidx.databinding.BindingAdapter;
 import rs.ltt.android.R;
+import rs.ltt.android.entity.SubjectWithImportance;
+import rs.ltt.android.entity.ThreadHeader;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.jmap.mua.util.EmailAddressUtil;
 import rs.ltt.jmap.common.entity.Role;
@@ -183,6 +188,22 @@ public class BindingAdapters {
         } else {
             textView.setVisibility(View.VISIBLE);
             textView.setText(String.valueOf(integer));
+        }
+    }
+
+    @BindingAdapter("android:text")
+    public static void setText(TextView text, SubjectWithImportance subjectWithImportance) {
+        if (subjectWithImportance == null) {
+            text.setText(null);
+            return;
+        }
+        if (subjectWithImportance.important) {
+            SpannableStringBuilder header = new SpannableStringBuilder(subjectWithImportance.subject);
+            header.append("  ");
+            header.setSpan(new ImageSpan(text.getContext(), R.drawable.ic_important_amber_22sp, DynamicDrawableSpan.ALIGN_BASELINE), header.length() - 1, header.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            text.setText(header);
+        } else {
+            text.setText(subjectWithImportance.subject);
         }
     }
 

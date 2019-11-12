@@ -19,9 +19,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.Collection;
-import java.util.Set;
-
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.paging.AsyncPagedListDiffer;
@@ -29,13 +26,16 @@ import androidx.paging.PagedList;
 import androidx.recyclerview.widget.AsyncDifferConfig;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.Collection;
+import java.util.Set;
+
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.EmailHeaderBinding;
 import rs.ltt.android.databinding.EmailItemBinding;
 import rs.ltt.android.entity.ExpandedPosition;
 import rs.ltt.android.entity.FullEmail;
-import rs.ltt.android.entity.ThreadHeader;
-import rs.ltt.android.entity.ThreadOverviewItem;
+import rs.ltt.android.entity.SubjectWithImportance;
 import rs.ltt.android.ui.BindingAdapters;
 import rs.ltt.android.util.Touch;
 
@@ -57,7 +57,8 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
     private static final int ITEM_VIEW_TYPE = 1;
     private static final int HEADER_VIEW_TYPE = 2;
 
-    private ThreadHeader threadHeader;
+    private SubjectWithImportance subjectWithImportance;
+    private Boolean flagged;
 
     private OnFlaggedToggled onFlaggedToggled;
 
@@ -90,12 +91,13 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
     public void onBindViewHolder(@NonNull AbstractThreadItemViewHolder holder, final int position) {
         if (holder instanceof ThreadHeaderViewHolder) {
             ThreadHeaderViewHolder headerViewHolder = (ThreadHeaderViewHolder) holder;
-            headerViewHolder.binding.setHeader(threadHeader);
+            headerViewHolder.binding.setSubject(subjectWithImportance);
+            headerViewHolder.binding.setFlagged(flagged);
             headerViewHolder.binding.starToggle.setOnClickListener(v -> {
-                if (onFlaggedToggled != null && threadHeader != null) {
-                    final boolean target = !threadHeader.showAsFlagged();
+                if (onFlaggedToggled != null && subjectWithImportance != null) {
+                    final boolean target = !flagged;
                     BindingAdapters.setIsFlagged(headerViewHolder.binding.starToggle, target);
-                    onFlaggedToggled.onFlaggedToggled(threadHeader.threadId, target);
+                    onFlaggedToggled.onFlaggedToggled(subjectWithImportance.threadId, target);
                 }
             });
             Touch.expandTouchArea(headerViewHolder.binding.getRoot(), headerViewHolder.binding.starToggle, 16);
@@ -135,9 +137,14 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
         return position == 0 ? HEADER_VIEW_TYPE : ITEM_VIEW_TYPE;
     }
 
-    public void setThreadHeader(ThreadHeader threadHeader) {
-        this.threadHeader = threadHeader;
+    public void setSubjectWithImportance(SubjectWithImportance subjectWithImportance) {
+        this.subjectWithImportance = subjectWithImportance;
         //TODO notify only if actually changed
+        notifyItemChanged(0);
+    }
+
+    public void setFlagged(Boolean flagged) {
+        this.flagged = flagged;
         notifyItemChanged(0);
     }
 

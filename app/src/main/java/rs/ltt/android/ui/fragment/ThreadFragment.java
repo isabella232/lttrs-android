@@ -93,7 +93,8 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
 
         binding.list.setAdapter(threadAdapter);
         threadViewModel.getEmails().observe(getViewLifecycleOwner(), this::onEmailsChanged);
-        threadViewModel.getHeader().observe(getViewLifecycleOwner(), threadAdapter::setThreadHeader);
+        threadViewModel.getSubjectWithImportance().observe(getViewLifecycleOwner(), threadAdapter::setSubjectWithImportance);
+        threadViewModel.getFlagged().observe(getViewLifecycleOwner(), threadAdapter::setFlagged);
         threadViewModel.getMenuConfiguration().observe(getViewLifecycleOwner(), menuConfiguration -> {
             this.menuConfiguration = menuConfiguration;
             getActivity().invalidateOptionsMenu();
