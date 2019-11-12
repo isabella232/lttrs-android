@@ -193,7 +193,7 @@ public class BindingAdapters {
 
     @BindingAdapter("android:text")
     public static void setText(TextView text, SubjectWithImportance subjectWithImportance) {
-        if (subjectWithImportance == null) {
+        if (subjectWithImportance == null || subjectWithImportance.subject == null) {
             text.setText(null);
             return;
         }
