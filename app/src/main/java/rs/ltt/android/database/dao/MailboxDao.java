@@ -63,6 +63,9 @@ public abstract class MailboxDao extends AbstractEntityDao {
     @Query("select id,role,name from mailbox where role=:role limit 1")
     public abstract MailboxWithRoleAndName getMailbox(Role role);
 
+    @Query("select id,parentid,name,sortOrder,unreadThreads,totalThreads,role from mailbox where id=:id")
+    public abstract MailboxOverviewItem getMailbox(String id);
+
     @Query("select id,parentId,name,sortOrder,unreadThreads,totalThreads,role from mailbox where role=:role limit 1")
     public abstract MailboxOverviewItem getMailboxOverviewItem(Role role);
 

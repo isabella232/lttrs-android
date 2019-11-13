@@ -116,7 +116,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
                 return null;
             }
         } else {
-            LOGGER.warn("Mailbox with IMPORTANT role was not available for renderingr");
+            LOGGER.warn("Mailbox with IMPORTANT role was not available for rendering");
             return null;
         }
     }

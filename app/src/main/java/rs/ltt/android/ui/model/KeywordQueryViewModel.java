@@ -57,4 +57,8 @@ public class KeywordQueryViewModel extends AbstractQueryViewModel {
     public void removeKeyword(ThreadOverviewItem item) {
         queryRepository.removeKeyword(item.threadId, this.keyword);
     }
+
+    public void addKeyword(ThreadOverviewItem item) {
+        queryRepository.addKeyword(item.threadId, this.keyword);
+    }
 }

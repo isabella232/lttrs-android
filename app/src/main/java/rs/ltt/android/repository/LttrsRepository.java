@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import androidx.annotation.NonNull;
 import androidx.core.util.Preconditions;
 import androidx.work.Constraints;
 import androidx.work.ExistingWorkPolicy;
@@ -44,6 +45,7 @@ import rs.ltt.android.entity.QueryEntity;
 import rs.ltt.android.entity.QueryItemOverwriteEntity;
 import rs.ltt.android.worker.AbstractMailboxModificationWorker;
 import rs.ltt.android.worker.ArchiveWorker;
+import rs.ltt.android.worker.CopyToMailboxWorker;
 import rs.ltt.android.worker.MarkImportantWorker;
 import rs.ltt.android.worker.ModifyKeywordWorker;
 import rs.ltt.android.worker.MoveToInboxWorker;
@@ -175,7 +177,28 @@ public abstract class LttrsRepository {
                     .build();
             final WorkManager workManager = WorkManager.getInstance(application);
             workManager.enqueueUniqueWork(
-                    MuaWorker.SYNC_LABELS,
+                    MuaWorker.SYNC_LABELS, //TODO: use 'toggle $thread-id $mailbox-id instead and use replace
+                    ExistingWorkPolicy.APPEND,
+                    workRequest
+            );
+        });
+    }
+
+    public void copyToMailbox(@NonNull final String threadId, @NonNull final IdentifiableMailboxWithRole mailbox) {
+        IO_EXECUTOR.execute(() -> {
+            if (mailbox.getRole() == Role.IMPORTANT) {
+                markImportantNow(threadId);
+                return;
+            }
+            deleteQueryItemOverwrite(threadId, mailbox);
+            final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(CopyToMailboxWorker.class)
+                    .setConstraints(CONNECTED_CONSTRAINT)
+                    .setInputData(CopyToMailboxWorker.data(threadId, mailbox))
+                    .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
+                    .build();
+            final WorkManager workManager = WorkManager.getInstance(application);
+            workManager.enqueueUniqueWork(
+                    MuaWorker.SYNC_LABELS, //TODO: use 'toggle $thread-id $mailbox-id instead and use replace
                     ExistingWorkPolicy.APPEND,
                     workRequest
             );
@@ -189,6 +212,8 @@ public abstract class LttrsRepository {
             deleteQueryItemOverwrite(threadId, Role.ARCHIVE);
             database.overwriteDao().insert(MailboxOverwriteEntity.of(threadId, Role.INBOX, false));
             database.overwriteDao().insert(MailboxOverwriteEntity.of(threadId, Role.ARCHIVE, true));
+
+            //TODO add initial delay to avoid unnecessary undo
             final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ArchiveWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(ArchiveWorker.data(threadId))
@@ -251,23 +276,25 @@ public abstract class LttrsRepository {
     }
 
     public void markImportant(final String threadId) {
-        IO_EXECUTOR.execute(() -> {
-            database.overwriteDao().insert(
-                    MailboxOverwriteEntity.of(threadId, Role.IMPORTANT, true)
-            );
-            deleteQueryItemOverwrite(threadId, Role.IMPORTANT);
-            final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MarkImportantWorker.class)
-                    .setConstraints(CONNECTED_CONSTRAINT)
-                    .setInputData(MarkImportantWorker.data(threadId))
-                    .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
-                    .build();
-            final WorkManager workManager = WorkManager.getInstance(application);
-            workManager.enqueueUniqueWork(
-                    MarkImportantWorker.uniqueName(threadId),
-                    ExistingWorkPolicy.REPLACE,
-                    workRequest
-            );
-        });
+        IO_EXECUTOR.execute(() -> markImportantNow(threadId));
+    }
+
+    private void markImportantNow(final String threadId) {
+        database.overwriteDao().insert(
+                MailboxOverwriteEntity.of(threadId, Role.IMPORTANT, true)
+        );
+        deleteQueryItemOverwrite(threadId, Role.IMPORTANT);
+        final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MarkImportantWorker.class)
+                .setConstraints(CONNECTED_CONSTRAINT)
+                .setInputData(MarkImportantWorker.data(threadId))
+                .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
+                .build();
+        final WorkManager workManager = WorkManager.getInstance(application);
+        workManager.enqueueUniqueWork(
+                MarkImportantWorker.uniqueName(threadId),
+                ExistingWorkPolicy.REPLACE,
+                workRequest
+        );
     }
 
     public void markNotImportant(final String threadId) {
@@ -286,6 +313,8 @@ public abstract class LttrsRepository {
         database.overwriteDao().insert(
                 MailboxOverwriteEntity.of(threadId, Role.IMPORTANT, false)
         );
+
+        //TODO add initial delay to avoid unnecessary undo
         final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(RemoveFromMailboxWorker.class)
                 .setConstraints(CONNECTED_CONSTRAINT)
                 .setInputData(RemoveFromMailboxWorker.data(threadId, mailbox))
@@ -307,7 +336,13 @@ public abstract class LttrsRepository {
         toggleKeyword(threadId, keyword, false);
     }
 
+    public void addKeyword(final String threadId, final String keyword) {
+        toggleKeyword(threadId, keyword, true);
+    }
+
     private void toggleKeyword(final String threadId, final String keyword, final boolean targetState) {
+        Preconditions.checkNotNull(threadId);
+        Preconditions.checkNotNull(keyword);
         IO_EXECUTOR.execute(() -> {
             final KeywordOverwriteEntity keywordOverwriteEntity = new KeywordOverwriteEntity(threadId, keyword, targetState);
             insert(keywordOverwriteEntity);

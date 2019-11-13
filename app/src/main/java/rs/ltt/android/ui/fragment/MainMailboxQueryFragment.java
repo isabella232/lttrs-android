@@ -25,6 +25,6 @@ public class MainMailboxQueryFragment extends AbstractMailboxQueryFragment {
 
     @Override
     protected void onQueryItemSwiped(ThreadOverviewItem item) {
-        mailboxQueryViewModel.archive(item);
+        archive(item);
     }
 }

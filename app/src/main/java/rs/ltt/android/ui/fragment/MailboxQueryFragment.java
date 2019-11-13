@@ -17,12 +17,18 @@ package rs.ltt.android.ui.fragment;
 
 
 import android.os.Bundle;
+import android.view.View;
 
+import androidx.core.util.Preconditions;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+
+import com.google.android.material.snackbar.Snackbar;
+
 import rs.ltt.android.MainNavigationDirections;
 import rs.ltt.android.R;
 import rs.ltt.android.entity.MailboxOverviewItem;
+import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.ThreadOverviewItem;
 
 public class MailboxQueryFragment extends AbstractMailboxQueryFragment {
@@ -48,7 +54,18 @@ public class MailboxQueryFragment extends AbstractMailboxQueryFragment {
     }
 
     @Override
-    protected void onQueryItemSwiped(ThreadOverviewItem item) {
+    protected void onQueryItemSwiped(final ThreadOverviewItem item) {
+        //swipe should be disabled when mailbox is null.
+        final MailboxOverviewItem mailbox = Preconditions.checkNotNull(
+                mailboxQueryViewModel.getMailbox().getValue(),
+                "MailboxQueryViewModel had no information about the mailbox we were viewing"
+        );
         mailboxQueryViewModel.removeFromMailbox(item);
+        final Snackbar snackbar = Snackbar.make(
+                this.binding.getRoot(),getString(R.string.removed_from_x, mailbox.getName()),
+                Snackbar.LENGTH_LONG
+        );
+        snackbar.setAction(R.string.undo, v -> mailboxQueryViewModel.copyToMailbox(item));
+        snackbar.show();
     }
 }

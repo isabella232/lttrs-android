@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.core.util.Preconditions;
 import androidx.lifecycle.ViewModelProvider;
 
 import rs.ltt.android.entity.ThreadOverviewItem;
@@ -75,7 +76,8 @@ public class SearchQueryFragment extends AbstractQueryFragment {
 
     @Override
     protected void onQueryItemSwiped(ThreadOverviewItem item) {
-        this.searchQueryViewModel.archive(item);
+        Preconditions.checkState(searchQueryViewModel.isInInbox(item), "Swiped thread is not in inbox");
+        archive(item);
     }
 
     public interface OnTermSearched {

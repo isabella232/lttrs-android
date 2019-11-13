@@ -25,6 +25,7 @@ import rs.ltt.android.Credentials;
 import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.ThreadOverviewItem;
+import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
@@ -64,6 +65,14 @@ public class MailboxQueryViewModel extends AbstractQueryViewModel {
         Log.d("lttrs", "remove " + item.emailId + " from " + mailbox.name);
 
         queryRepository.removeFromMailbox(item.threadId, mailbox);
+    }
+
+    public void copyToMailbox(ThreadOverviewItem item) {
+        final IdentifiableMailboxWithRole mailbox = this.mailbox.getValue();
+        if (mailbox == null) {
+            throw new IllegalStateException("No mailbox associated with MailboxQueryViewModel");
+        }
+        queryRepository.copyToMailbox(item.threadId, mailbox);
     }
 
     public LiveData<MailboxOverviewItem> getMailbox() {

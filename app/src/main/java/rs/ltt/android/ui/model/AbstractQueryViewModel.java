@@ -114,4 +114,8 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
     public void archive(ThreadOverviewItem item) {
         queryRepository.archive(item.threadId);
     }
+
+    public void moveToInbox(ThreadOverviewItem item) {
+        queryRepository.moveToInbox(item.threadId);
+    }
 }

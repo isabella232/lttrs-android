@@ -23,6 +23,9 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.snackbar.Snackbar;
+
+import rs.ltt.android.R;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.ui.QueryItemTouchHelper;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
@@ -33,18 +36,21 @@ import rs.ltt.jmap.mua.util.KeywordLabel;
 
 public class KeywordQueryFragment extends AbstractQueryFragment {
 
+
+    private KeywordLabel keywordLabel;
     private KeywordQueryViewModel keywordQueryViewModel;
+
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final Bundle bundle = getArguments();
-        final KeywordLabel keyword = KeywordQueryFragmentArgs.fromBundle(bundle == null ? new Bundle() : bundle).getKeyword();
+        this.keywordLabel = KeywordQueryFragmentArgs.fromBundle(bundle == null ? new Bundle() : bundle).getKeyword();
         final ViewModelProvider viewModelProvider = new ViewModelProvider(
                 getViewModelStore(),
-                new KeywordQueryViewModelFactory(requireActivity().getApplication(), keyword.getKeyword())
+                new KeywordQueryViewModelFactory(requireActivity().getApplication(), keywordLabel.getKeyword())
         );
         this.keywordQueryViewModel = viewModelProvider.get(KeywordQueryViewModel.class);
-        onLabelOpened(keyword);
+        onLabelOpened(this.keywordLabel);
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
@@ -67,5 +73,14 @@ public class KeywordQueryFragment extends AbstractQueryFragment {
     @Override
     protected void onQueryItemSwiped(ThreadOverviewItem item) {
         keywordQueryViewModel.removeKeyword(item);
+
+        final Snackbar snackbar = Snackbar.make(
+                this.binding.getRoot(),getString(R.string.removed_from_x, keywordLabel.getName()),
+                Snackbar.LENGTH_LONG
+        );
+
+        snackbar.setAction(R.string.undo, v -> keywordQueryViewModel.addKeyword(item));
+        snackbar.show();
+
     }
 }

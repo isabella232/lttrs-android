@@ -31,6 +31,8 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
+
 import rs.ltt.android.MainNavigationDirections;
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.FragmentThreadListBinding;
@@ -45,9 +47,8 @@ import rs.ltt.jmap.mua.util.Label;
 
 public abstract class AbstractQueryFragment extends Fragment implements OnFlaggedToggled, ThreadOverviewAdapter.OnThreadClicked, QueryItemTouchHelper.OnQueryItemSwipe {
 
-    protected FragmentThreadListBinding binding;
-
     private final ThreadOverviewAdapter threadOverviewAdapter = new ThreadOverviewAdapter();
+    protected FragmentThreadListBinding binding;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -111,6 +112,18 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
     @Override
     public void onFlaggedToggled(String threadId, boolean target) {
         getQueryViewModel().toggleFlagged(threadId, target);
+    }
+
+    protected void archive(ThreadOverviewItem item) {
+        final AbstractQueryViewModel queryViewModel = getQueryViewModel();
+        queryViewModel.archive(item);
+        final Snackbar snackbar = Snackbar.make(
+                this.binding.getRoot(),
+                R.string.archived,
+                Snackbar.LENGTH_LONG
+        );
+        snackbar.setAction(R.string.undo, v -> queryViewModel.moveToInbox(item));
+        snackbar.show();
     }
 
     protected abstract AbstractQueryViewModel getQueryViewModel();
