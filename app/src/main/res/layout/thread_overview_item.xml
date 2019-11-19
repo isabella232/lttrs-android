@@ -26,7 +26,7 @@
             type="rs.ltt.android.entity.ThreadOverviewItem" />
 
         <variable
-            name="important"
+            name="isImportant"
             type="boolean" />
     </data>
 
@@ -89,7 +89,7 @@
                     android:layout_alignBottom="@+id/froms"
                     android:src="@drawable/ic_important_amber_18dp"
                     android:layout_marginEnd="4sp"
-                    android:visibility="@{important ? View.VISIBLE : View.GONE}"
+                    android:visibility="@{isImportant ? View.VISIBLE : View.GONE}"
                     android:layout_toEndOf="@id/avatar" />
 
                 <TextView

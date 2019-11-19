@@ -16,13 +16,13 @@
 package rs.ltt.android.worker;
 
 import android.content.Context;
-import android.util.Log;
-
-import java.util.concurrent.ExecutionException;
 
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
+
+import java.util.concurrent.ExecutionException;
+
 import rs.ltt.android.Credentials;
 import rs.ltt.android.cache.DatabaseCache;
 import rs.ltt.android.database.LttrsDatabase;
@@ -35,9 +35,6 @@ import rs.ltt.jmap.mua.Mua;
 public abstract class MuaWorker extends Worker {
 
     public static final String TAG_EMAIL_MODIFICATION = "email_modification";
-
-    public static final String SYNC = "sync";
-    public static final String SYNC_LABELS = "sync_labels";
 
     protected final LttrsDatabase database;
     protected final Mua mua;

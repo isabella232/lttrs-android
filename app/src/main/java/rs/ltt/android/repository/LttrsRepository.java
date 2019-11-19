@@ -18,10 +18,6 @@ package rs.ltt.android.repository;
 import android.app.Application;
 import android.util.Log;
 
-import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
 import androidx.annotation.NonNull;
 import androidx.core.util.Preconditions;
 import androidx.work.Constraints;
@@ -33,10 +29,13 @@ import androidx.work.WorkManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 import rs.ltt.android.Credentials;
 import rs.ltt.android.cache.DatabaseCache;
 import rs.ltt.android.database.LttrsDatabase;
-import rs.ltt.android.entity.EmailWithKeywords;
 import rs.ltt.android.entity.KeywordOverwriteEntity;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.MailboxOverwriteEntity;
@@ -59,16 +58,19 @@ import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 import rs.ltt.jmap.mua.Mua;
-import rs.ltt.jmap.mua.util.KeywordUtil;
 
 public abstract class LttrsRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LttrsRepository.class);
 
+    private static final Executor IO_EXECUTOR = Executors.newSingleThreadExecutor();
+
+    private static final long INITIAL_DELAY_DURATION = 4;
+    private static final TimeUnit INITIAL_DELAY_TIME_UNIT = TimeUnit.SECONDS;
     private static final Constraints CONNECTED_CONSTRAINT = new Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build();
-    private static final Executor IO_EXECUTOR = Executors.newSingleThreadExecutor();
+
     protected final LttrsDatabase database;
     protected final Application application;
     protected final Mua mua;
@@ -173,12 +175,13 @@ public abstract class LttrsRepository {
             final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(RemoveFromMailboxWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(RemoveFromMailboxWorker.data(threadId, mailbox))
+                    .setInitialDelay(INITIAL_DELAY_DURATION, INITIAL_DELAY_TIME_UNIT)
                     .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
                     .build();
             final WorkManager workManager = WorkManager.getInstance(application);
             workManager.enqueueUniqueWork(
-                    MuaWorker.SYNC_LABELS, //TODO: use 'toggle $thread-id $mailbox-id instead and use replace
-                    ExistingWorkPolicy.APPEND,
+                    RemoveFromMailboxWorker.uniqueName(threadId, mailbox),
+                    ExistingWorkPolicy.REPLACE,
                     workRequest
             );
         });
@@ -198,8 +201,8 @@ public abstract class LttrsRepository {
                     .build();
             final WorkManager workManager = WorkManager.getInstance(application);
             workManager.enqueueUniqueWork(
-                    MuaWorker.SYNC_LABELS, //TODO: use 'toggle $thread-id $mailbox-id instead and use replace
-                    ExistingWorkPolicy.APPEND,
+                    CopyToMailboxWorker.uniqueName(threadId, mailbox),
+                    ExistingWorkPolicy.REPLACE,
                     workRequest
             );
         });
@@ -207,16 +210,15 @@ public abstract class LttrsRepository {
 
     public void archive(final String threadId) {
         IO_EXECUTOR.execute(() -> {
-            Log.d("lttrs", "archiving " + threadId);
             insertQueryItemOverwrite(threadId, Role.INBOX);
             deleteQueryItemOverwrite(threadId, Role.ARCHIVE);
             database.overwriteDao().insert(MailboxOverwriteEntity.of(threadId, Role.INBOX, false));
             database.overwriteDao().insert(MailboxOverwriteEntity.of(threadId, Role.ARCHIVE, true));
 
-            //TODO add initial delay to avoid unnecessary undo
             final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ArchiveWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(ArchiveWorker.data(threadId))
+                    .setInitialDelay(INITIAL_DELAY_DURATION, INITIAL_DELAY_TIME_UNIT)
                     .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
                     .build();
             final WorkManager workManager = WorkManager.getInstance(application);
@@ -241,6 +243,7 @@ public abstract class LttrsRepository {
             final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MoveToInboxWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(AbstractMailboxModificationWorker.data(threadId))
+                    .setInitialDelay(INITIAL_DELAY_DURATION, INITIAL_DELAY_TIME_UNIT)
                     .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
                     .build();
             final WorkManager workManager = WorkManager.getInstance(application);
@@ -264,6 +267,7 @@ public abstract class LttrsRepository {
             final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MoveToTrashWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(MoveToTrashWorker.data(threadId))
+                    .setInitialDelay(INITIAL_DELAY_DURATION, TimeUnit.SECONDS)
                     .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
                     .build();
             final WorkManager workManager = WorkManager.getInstance(application);
@@ -314,11 +318,11 @@ public abstract class LttrsRepository {
                 MailboxOverwriteEntity.of(threadId, Role.IMPORTANT, false)
         );
 
-        //TODO add initial delay to avoid unnecessary undo
         final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(RemoveFromMailboxWorker.class)
                 .setConstraints(CONNECTED_CONSTRAINT)
                 .setInputData(RemoveFromMailboxWorker.data(threadId, mailbox))
                 .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
+                .setInitialDelay(INITIAL_DELAY_DURATION, INITIAL_DELAY_TIME_UNIT)
                 .build();
         final WorkManager workManager = WorkManager.getInstance(application);
         workManager.enqueueUniqueWork(
@@ -355,6 +359,7 @@ public abstract class LttrsRepository {
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(ModifyKeywordWorker.data(threadId, keyword, targetState))
                     .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
+                    .setInitialDelay(targetState ? 0 : INITIAL_DELAY_DURATION, INITIAL_DELAY_TIME_UNIT)
                     .build();
             final WorkManager workManager = WorkManager.getInstance(application);
             workManager.enqueueUniqueWork(

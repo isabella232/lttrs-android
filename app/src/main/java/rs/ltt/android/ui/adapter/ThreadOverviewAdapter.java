@@ -91,7 +91,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
                 return;
             }
             threadOverviewHolder.binding.setThread(item);
-            threadOverviewHolder.binding.setImportant(item.isInMailbox(getImportantMailbox()));
+            threadOverviewHolder.binding.setIsImportant(item.isInMailbox(getImportantMailbox()));
             threadOverviewHolder.binding.starToggle.setOnClickListener(v -> {
                 if (onFlaggedToggled != null) {
                     final boolean target = !item.showAsFlagged();

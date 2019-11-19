@@ -39,6 +39,6 @@ public class EmailWithMailboxes implements IdentifiableEmailWithMailboxIds {
 
     @Override
     public Map<String, Boolean> getMailboxIds() {
-        return Maps.asMap(mailboxIds, keyword -> true);
+        return Maps.asMap(mailboxIds, id -> true);
     }
 }

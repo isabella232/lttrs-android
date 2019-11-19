@@ -40,7 +40,7 @@ public abstract class AbstractMailboxModificationWorker extends MuaWorker {
 
     protected final String threadId;
 
-    public AbstractMailboxModificationWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    AbstractMailboxModificationWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         final Data data = getInputData();
         this.threadId = data.getString(THREAD_ID_KEY);

@@ -129,7 +129,7 @@ public class QueryRepository extends LttrsRepository {
     }
 
 
-    public void requestNextPage(final EmailQuery emailQuery, String afterEmailId) {
+    private void requestNextPage(final EmailQuery emailQuery, String afterEmailId) {
         final String queryString = emailQuery.toQueryString();
         synchronized (this) {
             if (!runningPagingRequests.add(queryString)) {
