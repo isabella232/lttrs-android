@@ -18,11 +18,13 @@ package rs.ltt.android.entity;
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Index;
 
 import static androidx.room.ForeignKey.CASCADE;
 
 @Entity(tableName = "query_item_overwrite",
         primaryKeys = {"queryId", "threadId"},
+        indices = {@Index(value = {"threadId"})},
         foreignKeys = {
                 @ForeignKey(entity = ThreadEntity.class,
                         parentColumns = {"threadId"},
@@ -40,11 +42,22 @@ public class QueryItemOverwriteEntity {
     @NonNull
     public String threadId;
 
+    @NonNull
+    public Type type;
+
     public boolean executed = false;
 
 
-    public QueryItemOverwriteEntity(@NonNull Long queryId, @NonNull String threadId) {
+    public QueryItemOverwriteEntity(@NonNull Long queryId, @NonNull String threadId, @NonNull Type type) {
         this.queryId = queryId;
         this.threadId = threadId;
+        this.type = type;
+    }
+
+    //TODO add one for IMPORTANT because that can be toggled individual as well
+    public enum Type {
+        KEYWORD,
+        MAILBOX,
+        OTHER
     }
 }

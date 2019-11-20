@@ -21,24 +21,30 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
+import androidx.work.WorkInfo;
+
+import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.List;
 
 import rs.ltt.android.repository.MainRepository;
+import rs.ltt.android.repository.QueryRepository;
 import rs.ltt.jmap.mua.util.Label;
 import rs.ltt.jmap.mua.util.LabelUtil;
 
 public class MainViewModel extends AndroidViewModel {
 
     private final LiveData<List<Label>> navigatableLabels;
-    private MainRepository mainRepository;
+    private final MainRepository mainRepository;
+    private final QueryRepository queryRepository;
 
 
     public MainViewModel(@NonNull Application application) {
         super(application);
         this.mainRepository = new MainRepository(application);
+        this.queryRepository = new QueryRepository(application);
         this.navigatableLabels = Transformations.map(
-                this.mainRepository.getMailboxes(),
+                this.queryRepository.getMailboxes(),
                 LabelUtil::fillUpAndSort
         );
     }
@@ -50,6 +56,14 @@ public class MainViewModel extends AndroidViewModel {
 
     public void insertSearchSuggestion(String term) {
         this.mainRepository.insertSearchSuggestion(term);
+    }
+
+    public ListenableFuture<LiveData<WorkInfo>> moveToTrash(final String threadId) {
+        return this.queryRepository.moveToTrash(threadId);
+    }
+
+    public void cancelMoveToTrash(final WorkInfo workInfo, final String threadId) {
+        this.queryRepository.cancelMoveToTrash(workInfo, threadId);
     }
 
 }

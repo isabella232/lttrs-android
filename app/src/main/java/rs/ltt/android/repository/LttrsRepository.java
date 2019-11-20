@@ -20,15 +20,21 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.util.Preconditions;
+import androidx.lifecycle.LiveData;
 import androidx.work.Constraints;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
+
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -59,7 +65,7 @@ import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 import rs.ltt.jmap.mua.Mua;
 
-public abstract class LttrsRepository {
+public class LttrsRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LttrsRepository.class);
 
@@ -89,6 +95,10 @@ public abstract class LttrsRepository {
                 .build();
     }
 
+    public LiveData<List<MailboxOverviewItem>> getMailboxes() {
+        return database.mailboxDao().getMailboxes();
+    }
+
     private void insert(final KeywordOverwriteEntity keywordOverwriteEntity) {
         Log.d("lttrs", "db insert keyword overwrite " + keywordOverwriteEntity.value);
         database.overwriteDao().insert(keywordOverwriteEntity);
@@ -107,7 +117,9 @@ public abstract class LttrsRepository {
                         EmailFilterCondition.builder()
                                 .inMailbox(mailbox.getId())
                                 .build(),
-                        true));
+                        true),
+                QueryItemOverwriteEntity.Type.MAILBOX
+        );
     }
 
     private void insertQueryItemOverwrite(final String threadId, final String keyword) {
@@ -116,17 +128,16 @@ public abstract class LttrsRepository {
                         EmailFilterCondition.builder()
                                 .hasKeyword(keyword)
                                 .build(),
-                        true)
+                        true),
+                QueryItemOverwriteEntity.Type.KEYWORD
         );
     }
 
-    private void insertQueryItemOverwrite(final String threadId, final EmailQuery emailQuery) {
+    private void insertQueryItemOverwrite(final String threadId, final EmailQuery emailQuery, final QueryItemOverwriteEntity.Type type) {
         final String queryString = emailQuery.toQueryString();
         final QueryEntity queryEntity = database.queryDao().get(queryString);
         if (queryEntity != null) {
-            database.overwriteDao().insert(new QueryItemOverwriteEntity(queryEntity.id, threadId));
-        } else {
-            Log.d("lttrs", "do not enter overwrite");
+            database.overwriteDao().insert(new QueryItemOverwriteEntity(queryEntity.id, threadId, type));
         }
     }
 
@@ -143,7 +154,8 @@ public abstract class LttrsRepository {
                         EmailFilterCondition.builder().
                                 inMailbox(mailbox.getId())
                                 .build(),
-                        true)
+                        true),
+                QueryItemOverwriteEntity.Type.MAILBOX
         );
     }
 
@@ -153,15 +165,16 @@ public abstract class LttrsRepository {
                         EmailFilterCondition.builder()
                                 .hasKeyword(keyword)
                                 .build(),
-                        true)
+                        true),
+                QueryItemOverwriteEntity.Type.KEYWORD
         );
     }
 
-    private void deleteQueryItemOverwrite(final String threadId, final EmailQuery emailQuery) {
+    private void deleteQueryItemOverwrite(final String threadId, final EmailQuery emailQuery, QueryItemOverwriteEntity.Type type) {
         final String queryString = emailQuery.toQueryString();
         QueryEntity queryEntity = database.queryDao().get(queryString);
         if (queryEntity != null) {
-            database.overwriteDao().delete(new QueryItemOverwriteEntity(queryEntity.id, threadId));
+            database.overwriteDao().delete(new QueryItemOverwriteEntity(queryEntity.id, threadId, type));
         }
     }
 
@@ -255,7 +268,8 @@ public abstract class LttrsRepository {
         });
     }
 
-    public void moveToTrash(final String threadId) {
+    public ListenableFuture<LiveData<WorkInfo>> moveToTrash(final String threadId) {
+        final SettableFuture<LiveData<WorkInfo>> future = SettableFuture.create();
         IO_EXECUTOR.execute(() -> {
             for (MailboxWithRoleAndName mailbox : database.mailboxDao().getMailboxesForThread(threadId)) {
                 if (mailbox.role != Role.TRASH) {
@@ -276,7 +290,15 @@ public abstract class LttrsRepository {
                     ExistingWorkPolicy.REPLACE,
                     workRequest
             );
+            future.set(workManager.getWorkInfoByIdLiveData(workRequest.getId()));
         });
+        return future;
+    }
+
+    public void cancelMoveToTrash(final WorkInfo workInfo, final String threadId) {
+        Preconditions.checkNotNull(workInfo,"Unable to cancel moveToTrash operation.");
+        WorkManager.getInstance(application).cancelWorkById(workInfo.getId());
+        IO_EXECUTOR.execute(() -> database.overwriteDao().revertMailboxOverwrites(threadId));
     }
 
     public void markImportant(final String threadId) {

@@ -33,15 +33,9 @@ public class MainRepository {
     private final Executor ioExecutor = Executors.newSingleThreadExecutor();
 
     private final AppDatabase appDatabase;
-    private final LttrsDatabase lttrsDatabase;
 
     public MainRepository(Application application) {
         this.appDatabase = AppDatabase.getInstance(application);
-        this.lttrsDatabase = LttrsDatabase.getInstance(application, Credentials.username);
-    }
-
-    public LiveData<List<MailboxOverviewItem>> getMailboxes() {
-        return this.lttrsDatabase.mailboxDao().getMailboxes();
     }
 
     public void insertSearchSuggestion(String term) {

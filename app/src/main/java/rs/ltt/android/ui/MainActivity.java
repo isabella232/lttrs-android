@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -40,10 +41,20 @@ import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
+
+import com.google.android.material.snackbar.Snackbar;
+import com.google.common.util.concurrent.ListenableFuture;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -55,11 +66,15 @@ import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.ui.adapter.LabelListAdapter;
 import rs.ltt.android.ui.fragment.SearchQueryFragment;
 import rs.ltt.android.ui.model.MainViewModel;
+import rs.ltt.android.util.MainThreadExecutor;
+import rs.ltt.android.util.WorkInfoUtil;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mua.util.KeywordLabel;
 import rs.ltt.jmap.mua.util.Label;
 
-public class MainActivity extends AppCompatActivity implements OnLabelOpened, SearchQueryFragment.OnTermSearched, NavController.OnDestinationChangedListener, MenuItem.OnActionExpandListener {
+public class MainActivity extends AppCompatActivity implements OnLabelOpened, OnMoveToTrash, SearchQueryFragment.OnTermSearched, NavController.OnDestinationChangedListener, MenuItem.OnActionExpandListener {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MainActivity.class);
 
     private static final int NUM_TOOLBAR_ICON = 1;
     private static final List<Integer> MAIN_DESTINATIONS = Arrays.asList(
@@ -230,6 +245,33 @@ public class MainActivity extends AppCompatActivity implements OnLabelOpened, Se
             navController.navigate(MainNavigationDirections.actionSearch(query));
         }
 
+    }
+
+    @Override
+    public void onMoveToTrash(final String threadId) {
+        final Snackbar snackbar = Snackbar.make(binding.getRoot(), R.string.deleted, Snackbar.LENGTH_LONG);
+        final ListenableFuture<LiveData<WorkInfo>> future = mainViewModel.moveToTrash(threadId);
+        snackbar.setAction(R.string.undo, v -> {
+            try {
+                final LiveData<WorkInfo> workInfoLiveData = future.get();
+                final WorkInfo workInfo = workInfoLiveData.getValue();
+                mainViewModel.cancelMoveToTrash(workInfo, threadId);
+            } catch (Exception e) {
+                LOGGER.warn("Unable to cancel moveToTrash operation", e);
+            }
+        });
+        snackbar.show();
+        future.addListener(() -> {
+            try {
+                future.get().observe(this, workInfo -> {
+                    if (workInfo != null && workInfo.getState() != WorkInfo.State.ENQUEUED && snackbar.isShown()) {
+                        snackbar.dismiss();
+                    }
+                });
+            } catch (Exception e) {
+                LOGGER.warn("Unable to observe moveToTrash operation", e);
+            }
+        }, MainThreadExecutor.getInstance());
     }
 
     @Override

@@ -22,6 +22,7 @@ import androidx.room.TypeConverter;
 import rs.ltt.android.entity.EmailAddressType;
 import rs.ltt.android.entity.EmailBodyPartType;
 import rs.ltt.android.entity.EntityType;
+import rs.ltt.android.entity.QueryItemOverwriteEntity;
 import rs.ltt.jmap.common.entity.Role;
 
 public class Converters {
@@ -62,7 +63,6 @@ public class Converters {
     }
 
 
-
     @TypeConverter
     public static EmailBodyPartType toEmailBodyPartType(String type) {
         return EmailBodyPartType.valueOf(type);
@@ -70,6 +70,16 @@ public class Converters {
 
     @TypeConverter
     public static String toString(EmailBodyPartType type) {
+        return type.toString();
+    }
+
+    @TypeConverter
+    public static QueryItemOverwriteEntity.Type toType(String type) {
+        return QueryItemOverwriteEntity.Type.valueOf(type);
+    }
+
+    @TypeConverter
+    public static String toString(QueryItemOverwriteEntity.Type type) {
         return type.toString();
     }
 

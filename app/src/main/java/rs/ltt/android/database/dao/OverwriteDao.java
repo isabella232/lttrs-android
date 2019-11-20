@@ -52,8 +52,8 @@ public abstract class OverwriteDao {
     @Delete
     public abstract void delete(QueryItemOverwriteEntity queryItemOverwriteEntity);
 
-    @Query("update query_item_overwrite set executed=1 where executed=0 and threadId=:threadId")
-    protected abstract int markAsExecuted(String threadId);
+    @Query("delete from query_item_overwrite where threadId=:threadId and type=:type")
+    abstract int deleteQueryOverwritesByThread(String threadId, QueryItemOverwriteEntity.Type type);
 
     @Query("delete from mailbox_overwrite where threadId=:threadId")
     protected abstract int deleteMailboxOverwritesByThread(String threadId);
@@ -64,18 +64,18 @@ public abstract class OverwriteDao {
     @Transaction
     public void revertKeywordOverwrites(String threadId) {
         int keywordOverwrites = deleteKeywordOverwritesByThread(threadId);
-        int queryOverwrites = markAsExecuted(threadId); //mark as executed instead
+        int queryOverwrites = deleteQueryOverwritesByThread(threadId, QueryItemOverwriteEntity.Type.KEYWORD);
         if (keywordOverwrites > 0 || queryOverwrites > 0) {
-            LOGGER.info("Deleted {} keyword overwrites and marked {} query overwrites as executed for thread {}", keywordOverwrites, queryOverwrites, threadId);
+            LOGGER.info("Deleted {} keyword overwrites and {} query overwrites for thread {}", keywordOverwrites, queryOverwrites, threadId);
         }
     }
 
     @Transaction
     public void revertMailboxOverwrites(String threadId) {
         int mailboxOverwrites = deleteMailboxOverwritesByThread(threadId);
-        int queryOverwrites = markAsExecuted(threadId);
+        int queryOverwrites = deleteQueryOverwritesByThread(threadId, QueryItemOverwriteEntity.Type.MAILBOX);
         if (mailboxOverwrites > 0 || queryOverwrites > 0) {
-            LOGGER.info("Deleted {} mailbox overwrites and marked {} query overwrites as executed for thread {}", mailboxOverwrites, queryOverwrites, threadId);
+            LOGGER.info("Deleted {} mailbox overwrites and {} query overwrites for thread {}", mailboxOverwrites, queryOverwrites, threadId);
         }
     }
 

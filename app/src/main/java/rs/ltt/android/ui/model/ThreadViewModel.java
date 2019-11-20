@@ -141,6 +141,10 @@ public class ThreadViewModel extends AndroidViewModel {
         return this.label;
     }
 
+    public String getThreadId() {
+        return this.threadId;
+    }
+
     public void archive() {
         this.threadRepository.archive(this.threadId);
     }
@@ -152,10 +156,6 @@ public class ThreadViewModel extends AndroidViewModel {
             throw new IllegalStateException("No mailbox found with the label " + this.label);
         }
         this.threadRepository.removeFromMailbox(this.threadId, mailbox);
-    }
-
-    public void moveToTrash() {
-        this.threadRepository.moveToTrash(this.threadId);
     }
 
     public void moveToInbox() {
