@@ -54,11 +54,11 @@ public class KeywordQueryViewModel extends AbstractQueryViewModel {
         return emailQueryLiveData;
     }
 
-    public void removeKeyword(ThreadOverviewItem item) {
-        queryRepository.removeKeyword(item.threadId, this.keyword);
+    public void removeKeyword(final String threadId) {
+        queryRepository.removeKeyword(threadId, this.keyword);
     }
 
-    public void addKeyword(ThreadOverviewItem item) {
-        queryRepository.addKeyword(item.threadId, this.keyword);
+    public void addKeyword(final String threadId) {
+        queryRepository.addKeyword(threadId, this.keyword);
     }
 }

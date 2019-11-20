@@ -71,16 +71,28 @@ public class KeywordQueryFragment extends AbstractQueryFragment {
     }
 
     @Override
-    protected void onQueryItemSwiped(ThreadOverviewItem item) {
-        keywordQueryViewModel.removeKeyword(item);
+    protected void onQueryItemSwiped(final ThreadOverviewItem item) {
+        removeKeyword(item.threadId);
+    }
+
+    @Override
+    public void onFlaggedToggled(final String threadId, final boolean target) {
+        if (Keyword.FLAGGED.equals(keywordQueryViewModel.getKeyword()) && !target) {
+            removeKeyword(threadId);
+            return;
+        }
+        keywordQueryViewModel.toggleFlagged(threadId, target);
+    }
+
+    private void removeKeyword(final String threadId) {
+        keywordQueryViewModel.removeKeyword(threadId);
 
         final Snackbar snackbar = Snackbar.make(
                 this.binding.getRoot(),getString(R.string.removed_from_x, keywordLabel.getName()),
                 Snackbar.LENGTH_LONG
         );
 
-        snackbar.setAction(R.string.undo, v -> keywordQueryViewModel.addKeyword(item));
+        snackbar.setAction(R.string.undo, v -> keywordQueryViewModel.addKeyword(threadId));
         snackbar.show();
-
     }
 }
