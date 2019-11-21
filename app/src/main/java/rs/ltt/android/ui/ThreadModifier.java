@@ -15,7 +15,15 @@
 
 package rs.ltt.android.ui;
 
-public interface OnMoveToTrash {
+import rs.ltt.android.entity.MailboxWithRoleAndName;
 
-    void onMoveToTrash(String threadId);
+public interface ThreadModifier {
+
+    void archive(String threadId);
+
+    void moveToInbox(String threadId);
+
+    void moveToTrash(String threadId);
+
+    void removeFromMailbox(String threadId, MailboxWithRoleAndName mailbox);
 }

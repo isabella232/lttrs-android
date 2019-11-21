@@ -18,7 +18,6 @@ package rs.ltt.android.ui.fragment;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,18 +29,13 @@ import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.paging.PagedList;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
-import androidx.work.WorkInfo;
 
-import com.google.android.material.snackbar.Snackbar;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 
 import java.util.List;
@@ -50,12 +44,11 @@ import rs.ltt.android.R;
 import rs.ltt.android.databinding.FragmentThreadBinding;
 import rs.ltt.android.entity.ExpandedPosition;
 import rs.ltt.android.entity.FullEmail;
-import rs.ltt.android.ui.OnMoveToTrash;
+import rs.ltt.android.ui.ThreadModifier;
 import rs.ltt.android.ui.adapter.OnFlaggedToggled;
 import rs.ltt.android.ui.adapter.ThreadAdapter;
 import rs.ltt.android.ui.model.ThreadViewModel;
 import rs.ltt.android.ui.model.ThreadViewModelFactory;
-import rs.ltt.android.util.MainThreadExecutor;
 
 public class ThreadFragment extends Fragment implements OnFlaggedToggled {
 
@@ -132,10 +125,10 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
     }
 
     @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+    public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
         inflater.inflate(R.menu.fragment_thread, menu);
         menu.findItem(R.id.action_archive).setVisible(menuConfiguration.archive);
-        MenuItem removeLabelItem = menu.findItem(R.id.action_remove_label);
+        final MenuItem removeLabelItem = menu.findItem(R.id.action_remove_label);
         removeLabelItem.setVisible(menuConfiguration.removeLabel);
         removeLabelItem.setTitle(getString(R.string.remove_label_x, threadViewModel.getLabel()));
         menu.findItem(R.id.action_move_to_inbox).setVisible(menuConfiguration.moveToInbox);
@@ -159,24 +152,29 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
                 navController.popBackStack();
                 return true;
             case R.id.action_archive:
-                threadViewModel.archive();
+                getThreadModifier().archive(threadViewModel.getThreadId());
                 navController.popBackStack();
                 return true;
             case R.id.action_remove_label:
-                threadViewModel.removeLabel();
+                getThreadModifier().removeFromMailbox(
+                        threadViewModel.getThreadId(),
+                        threadViewModel.getMailbox()
+                );
                 navController.popBackStack();
                 return true;
             case R.id.action_move_to_inbox:
-                threadViewModel.moveToInbox();
+                getThreadModifier().moveToInbox(threadViewModel.getThreadId());
+                navController.popBackStack();
                 return true;
             case R.id.action_move_to_trash:
-                moveToTrash();
+                getThreadModifier().moveToTrash(threadViewModel.getThreadId());
                 navController.popBackStack();
                 return true;
             case R.id.action_mark_important:
                 threadViewModel.markImportant();
                 return true;
             case R.id.action_mark_not_important:
+                //TODO if label == important (coming from important view); pop back stack
                 threadViewModel.markNotImportant();
                 return true;
             default:
@@ -189,12 +187,11 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
         threadViewModel.toggleFlagged(threadId, target);
     }
 
-    private void moveToTrash() {
+    private ThreadModifier getThreadModifier() {
         final Activity activity = requireActivity();
-        if (activity instanceof OnMoveToTrash) {
-            ((OnMoveToTrash) activity).onMoveToTrash(threadViewModel.getThreadId());
-        } else {
-            throw new IllegalStateException("Activity does not implement OnMoveToTrash");
+        if (activity instanceof ThreadModifier) {
+            return (ThreadModifier) activity;
         }
+        throw new IllegalStateException("Activity does not implement ThreadModifier");
     }
 }

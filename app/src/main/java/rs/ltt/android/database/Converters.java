@@ -15,10 +15,10 @@
 
 package rs.ltt.android.database;
 
+import androidx.room.TypeConverter;
+
 import java.util.Date;
 
-import androidx.room.Delete;
-import androidx.room.TypeConverter;
 import rs.ltt.android.entity.EmailAddressType;
 import rs.ltt.android.entity.EmailBodyPartType;
 import rs.ltt.android.entity.EntityType;
@@ -39,7 +39,6 @@ public class Converters {
     }
 
 
-
     @TypeConverter
     public static String toString(EntityType entityType) {
         return entityType.toString();
@@ -49,7 +48,6 @@ public class Converters {
     public static EntityType toEntityType(String entityType) {
         return EntityType.valueOf(entityType);
     }
-
 
 
     @TypeConverter
@@ -73,6 +71,7 @@ public class Converters {
         return type.toString();
     }
 
+
     @TypeConverter
     public static QueryItemOverwriteEntity.Type toType(String type) {
         return QueryItemOverwriteEntity.Type.valueOf(type);
@@ -82,6 +81,7 @@ public class Converters {
     public static String toString(QueryItemOverwriteEntity.Type type) {
         return type.toString();
     }
+
 
     @TypeConverter
     public static Date toDate(long timestamp) {

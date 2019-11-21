@@ -149,17 +149,13 @@ public class ThreadViewModel extends AndroidViewModel {
         this.threadRepository.archive(this.threadId);
     }
 
-    public void removeLabel() {
+    public MailboxWithRoleAndName getMailbox() {
         final List<MailboxWithRoleAndName> mailboxes = this.mailboxes.getValue();
         final MailboxWithRoleAndName mailbox = mailboxes == null ? null : MailboxWithRoleAndName.findByLabel(mailboxes, this.label);
         if (mailbox == null) {
             throw new IllegalStateException("No mailbox found with the label " + this.label);
         }
-        this.threadRepository.removeFromMailbox(this.threadId, mailbox);
-    }
-
-    public void moveToInbox() {
-        this.threadRepository.moveToInbox(this.threadId);
+        return mailbox;
     }
 
     public void markImportant() {
@@ -178,7 +174,7 @@ public class ThreadViewModel extends AndroidViewModel {
         public final boolean markImportant;
         public final boolean markNotImportant;
 
-        public MenuConfiguration(boolean archive, boolean removeLabel, boolean moveToInbox, boolean moveToTrash, boolean markImportant, boolean markNotImportant) {
+        MenuConfiguration(boolean archive, boolean removeLabel, boolean moveToInbox, boolean moveToTrash, boolean markImportant, boolean markNotImportant) {
             this.archive = archive;
             this.removeLabel = removeLabel;
             this.moveToInbox = moveToInbox;

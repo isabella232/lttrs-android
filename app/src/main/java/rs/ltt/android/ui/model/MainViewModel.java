@@ -28,7 +28,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.util.List;
 
 import rs.ltt.android.repository.MainRepository;
-import rs.ltt.android.repository.QueryRepository;
+import rs.ltt.android.repository.ThreadRepository;
+import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.mua.util.Label;
 import rs.ltt.jmap.mua.util.LabelUtil;
 
@@ -36,15 +37,15 @@ public class MainViewModel extends AndroidViewModel {
 
     private final LiveData<List<Label>> navigatableLabels;
     private final MainRepository mainRepository;
-    private final QueryRepository queryRepository;
+    private final ThreadRepository threadRepository;
 
 
     public MainViewModel(@NonNull Application application) {
         super(application);
         this.mainRepository = new MainRepository(application);
-        this.queryRepository = new QueryRepository(application);
+        this.threadRepository = new ThreadRepository(application);
         this.navigatableLabels = Transformations.map(
-                this.queryRepository.getMailboxes(),
+                this.threadRepository.getMailboxes(),
                 LabelUtil::fillUpAndSort
         );
     }
@@ -59,11 +60,27 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public ListenableFuture<LiveData<WorkInfo>> moveToTrash(final String threadId) {
-        return this.queryRepository.moveToTrash(threadId);
+        return this.threadRepository.moveToTrash(threadId);
     }
 
     public void cancelMoveToTrash(final WorkInfo workInfo, final String threadId) {
-        this.queryRepository.cancelMoveToTrash(workInfo, threadId);
+        this.threadRepository.cancelMoveToTrash(workInfo, threadId);
+    }
+
+    public void archive(final String threadId) {
+        this.threadRepository.archive(threadId);
+    }
+
+    public void moveToInbox(final String threadId) {
+        this.threadRepository.moveToInbox(threadId);
+    }
+
+    public void removeFromMailbox(final String threadId, final IdentifiableMailboxWithRole mailbox) {
+        this.threadRepository.removeFromMailbox(threadId, mailbox);
+    }
+
+    public void copyToMailbox(final String threadId, final IdentifiableMailboxWithRole mailbox) {
+        this.threadRepository.copyToMailbox(threadId, mailbox);
     }
 
 }

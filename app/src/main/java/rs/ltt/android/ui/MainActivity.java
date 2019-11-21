@@ -42,13 +42,11 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 import androidx.work.WorkInfo;
-import androidx.work.WorkManager;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -63,16 +61,16 @@ import rs.ltt.android.MainNavigationDirections;
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.ActivityMainBinding;
 import rs.ltt.android.entity.MailboxOverviewItem;
+import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.ui.adapter.LabelListAdapter;
 import rs.ltt.android.ui.fragment.SearchQueryFragment;
 import rs.ltt.android.ui.model.MainViewModel;
 import rs.ltt.android.util.MainThreadExecutor;
-import rs.ltt.android.util.WorkInfoUtil;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mua.util.KeywordLabel;
 import rs.ltt.jmap.mua.util.Label;
 
-public class MainActivity extends AppCompatActivity implements OnLabelOpened, OnMoveToTrash, SearchQueryFragment.OnTermSearched, NavController.OnDestinationChangedListener, MenuItem.OnActionExpandListener {
+public class MainActivity extends AppCompatActivity implements OnLabelOpened, ThreadModifier, SearchQueryFragment.OnTermSearched, NavController.OnDestinationChangedListener, MenuItem.OnActionExpandListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainActivity.class);
 
@@ -248,7 +246,23 @@ public class MainActivity extends AppCompatActivity implements OnLabelOpened, On
     }
 
     @Override
-    public void onMoveToTrash(final String threadId) {
+    public void archive(final String threadId) {
+        final Snackbar snackbar = Snackbar.make(binding.getRoot(), R.string.archived, Snackbar.LENGTH_LONG);
+        snackbar.setAction(R.string.undo, v -> mainViewModel.moveToInbox(threadId));
+        snackbar.show();
+        mainViewModel.archive(threadId);
+    }
+
+    @Override
+    public void moveToInbox(final String threadId) {
+        final Snackbar snackbar = Snackbar.make(binding.getRoot(), R.string.moved_to_inbox, Snackbar.LENGTH_LONG);
+        snackbar.setAction(R.string.undo, v -> mainViewModel.archive(threadId));
+        snackbar.show();
+        mainViewModel.moveToInbox(threadId);
+    }
+
+    @Override
+    public void moveToTrash(final String threadId) {
         final Snackbar snackbar = Snackbar.make(binding.getRoot(), R.string.deleted, Snackbar.LENGTH_LONG);
         final ListenableFuture<LiveData<WorkInfo>> future = mainViewModel.moveToTrash(threadId);
         snackbar.setAction(R.string.undo, v -> {
@@ -272,6 +286,18 @@ public class MainActivity extends AppCompatActivity implements OnLabelOpened, On
                 LOGGER.warn("Unable to observe moveToTrash operation", e);
             }
         }, MainThreadExecutor.getInstance());
+    }
+
+    @Override
+    public void removeFromMailbox(String threadId, MailboxWithRoleAndName mailbox) {
+        final Snackbar snackbar = Snackbar.make(
+                binding.getRoot(),
+                getString(R.string.removed_from_x, mailbox.name),
+                Snackbar.LENGTH_LONG
+        );
+        snackbar.setAction(R.string.undo, v -> mainViewModel.copyToMailbox(threadId, mailbox));
+        snackbar.show();
+        mainViewModel.removeFromMailbox(threadId, mailbox);
     }
 
     @Override
