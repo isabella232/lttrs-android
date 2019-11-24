@@ -27,7 +27,7 @@ import rs.ltt.android.Credentials;
 import rs.ltt.android.cache.DatabaseCache;
 import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.jmap.client.api.MethodErrorResponseException;
-import rs.ltt.jmap.client.session.SessionFileCache;
+import rs.ltt.jmap.client.session.FileSessionCache;
 import rs.ltt.jmap.common.method.MethodErrorResponse;
 import rs.ltt.jmap.common.method.error.StateMismatchMethodErrorResponse;
 import rs.ltt.jmap.mua.Mua;
@@ -47,7 +47,7 @@ public abstract class MuaWorker extends Worker {
                 .username(Credentials.username)
                 .accountId(Credentials.accountId)
                 .cache(new DatabaseCache(this.database))
-                .sessionCache(new SessionFileCache(getApplicationContext().getCacheDir()))
+                .sessionCache(new FileSessionCache(getApplicationContext().getCacheDir()))
                 .build();
     }
 

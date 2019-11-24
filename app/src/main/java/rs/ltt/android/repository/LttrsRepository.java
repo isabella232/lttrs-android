@@ -57,7 +57,7 @@ import rs.ltt.android.worker.MoveToInboxWorker;
 import rs.ltt.android.worker.MoveToTrashWorker;
 import rs.ltt.android.worker.MuaWorker;
 import rs.ltt.android.worker.RemoveFromMailboxWorker;
-import rs.ltt.jmap.client.session.SessionFileCache;
+import rs.ltt.jmap.client.session.FileSessionCache;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.common.entity.Keyword;
 import rs.ltt.jmap.common.entity.Role;
@@ -90,7 +90,7 @@ public class LttrsRepository {
                 .username(Credentials.username)
                 .accountId(Credentials.accountId)
                 .cache(new DatabaseCache(this.database))
-                .sessionCache(new SessionFileCache(application.getCacheDir()))
+                .sessionCache(new FileSessionCache(application.getCacheDir()))
                 .queryPageSize(20L)
                 .build();
     }
