@@ -49,6 +49,12 @@ public abstract class MailboxDao extends AbstractEntityDao {
     @androidx.room.Update
     protected abstract void update(List<MailboxEntity> mailboxEntities);
 
+    @Query("select id from mailbox where role in (:roles) order by role")
+    public abstract LiveData<String[]> getMailboxesLiveData(Role... roles);
+
+    @Query("select id from mailbox where role in (:roles) order by role")
+    public abstract String[] getMailboxes(Role... roles);
+
     @Query("select * from mailbox where role is not null")
     public abstract List<MailboxEntity> getSpecialMailboxes();
 
@@ -57,6 +63,9 @@ public abstract class MailboxDao extends AbstractEntityDao {
 
     @Query("select id,parentId,name,sortOrder,unreadThreads,totalThreads,role from mailbox where role=:role limit 1")
     public abstract LiveData<MailboxOverviewItem> getMailboxOverviewItemLiveData(Role role);
+
+    @Query("select id,parentid,name,sortOrder,unreadThreads,totalThreads,role from mailbox where id=:id")
+    public abstract LiveData<MailboxOverviewItem> getMailboxOverviewItemLiveData(String id);
 
     @Query("select id,role,name from mailbox where role=:role limit 1")
     public abstract ListenableFuture<MailboxWithRoleAndName> getMailboxFuture(Role role);
@@ -69,9 +78,6 @@ public abstract class MailboxDao extends AbstractEntityDao {
 
     @Query("select id,parentId,name,sortOrder,unreadThreads,totalThreads,role from mailbox where role=:role limit 1")
     public abstract MailboxOverviewItem getMailboxOverviewItem(Role role);
-
-    @Query("select id,parentid,name,sortOrder,unreadThreads,totalThreads,role from mailbox where id=:id")
-    public abstract LiveData<MailboxOverviewItem> getMailboxOverviewItem(String id);
 
     @Query("select distinct mailbox.id,role,name from email join email_mailbox on email_mailbox.emailId=email.id join mailbox on email_mailbox.mailboxId=mailbox.id where threadId=:threadId")
     public abstract LiveData<List<MailboxWithRoleAndName>> getMailboxesForThreadLiveData(String threadId);

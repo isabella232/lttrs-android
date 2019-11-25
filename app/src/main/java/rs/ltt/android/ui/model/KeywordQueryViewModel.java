@@ -20,9 +20,8 @@ import android.app.Application;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Transformations;
 
-import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 
@@ -35,13 +34,10 @@ public class KeywordQueryViewModel extends AbstractQueryViewModel {
     KeywordQueryViewModel(final Application application, @NonNull final String keyword) {
         super(application);
         this.keyword = keyword;
-        //TODO exclude Trash and Junk
-        this.emailQueryLiveData = new MutableLiveData<>(
-                EmailQuery.of(
-                        EmailFilterCondition.builder().hasKeyword(keyword).build(),
-                        true
-                )
-        );
+        this.emailQueryLiveData = Transformations.map(queryRepository.getTrashAndJunk(), trashAndJunk -> EmailQuery.of(
+                EmailFilterCondition.builder().hasKeyword(keyword).inMailboxOtherThan(trashAndJunk).build(),
+                true
+        ));
         init();
     }
 

@@ -34,21 +34,23 @@ import rs.ltt.jmap.mua.util.MailboxUtil;
 
 public class SearchQueryViewModel extends AbstractQueryViewModel {
 
-    private final LiveData<String> searchTerm;
+    private final String searchTerm;
     private final LiveData<EmailQuery> searchQueryLiveData;
     private final ListenableFuture<MailboxWithRoleAndName> inbox;
 
     SearchQueryViewModel(final Application application, final String searchTerm) {
         super(application);
-        this.searchTerm = new MutableLiveData<>(searchTerm);
+        this.searchTerm = searchTerm;
         this.inbox = queryRepository.getInbox();
-        //TODO do we want to exclude Trash and Junk via inMailboxOtherThan
-        this.searchQueryLiveData = Transformations.map(this.searchTerm, text -> EmailQuery.of(EmailFilterCondition.builder().text(text).build(), true));
+        this.searchQueryLiveData = Transformations.map(queryRepository.getTrashAndJunk(), trashAndJunk -> EmailQuery.of(
+                EmailFilterCondition.builder().text(searchTerm).inMailboxOtherThan(trashAndJunk).build(),
+                true
+        ));
         init();
     }
 
     public LiveData<String> getSearchTerm() {
-        return this.searchTerm;
+        return new MutableLiveData<>(searchTerm);
     }
 
     @Override

@@ -21,12 +21,10 @@ import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
-import rs.ltt.android.Credentials;
-import rs.ltt.android.database.LttrsDatabase;
+
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
-import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 
@@ -39,14 +37,7 @@ public class MailboxQueryViewModel extends AbstractQueryViewModel {
 
     MailboxQueryViewModel(final Application application, final String mailboxId) {
         super(application);
-
-        //TODO move those calls into repository
-        LttrsDatabase lttrsDatabase = LttrsDatabase.getInstance(application, Credentials.username);
-        if (mailboxId == null) {
-            this.mailbox = lttrsDatabase.mailboxDao().getMailboxOverviewItemLiveData(Role.INBOX);
-        } else {
-            this.mailbox = lttrsDatabase.mailboxDao().getMailboxOverviewItem(mailboxId);
-        }
+        this.mailbox = this.queryRepository.getMailboxOverviewItem(mailboxId);
         this.emailQueryLiveData = Transformations.map(mailbox, input -> {
             if (input == null) {
                 return EmailQuery.unfiltered(true);

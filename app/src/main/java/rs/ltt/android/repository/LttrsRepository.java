@@ -64,6 +64,7 @@ import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 import rs.ltt.jmap.mua.Mua;
+import rs.ltt.jmap.mua.util.KeywordUtil;
 
 public class LttrsRepository {
 
@@ -126,6 +127,9 @@ public class LttrsRepository {
         insertQueryItemOverwrite(threadId,
                 EmailQuery.of(
                         EmailFilterCondition.builder()
+                                .inMailboxOtherThan(
+                                        database.mailboxDao().getMailboxes(Role.TRASH, Role.JUNK)
+                                )
                                 .hasKeyword(keyword)
                                 .build(),
                         true),
@@ -133,7 +137,9 @@ public class LttrsRepository {
         );
     }
 
-    private void insertQueryItemOverwrite(final String threadId, final EmailQuery emailQuery, final QueryItemOverwriteEntity.Type type) {
+    private void insertQueryItemOverwrite(final String threadId,
+                                          final EmailQuery emailQuery,
+                                          final QueryItemOverwriteEntity.Type type) {
         final String queryString = emailQuery.toQueryString();
         final QueryEntity queryEntity = database.queryDao().get(queryString);
         if (queryEntity != null) {
@@ -276,6 +282,9 @@ public class LttrsRepository {
                     insertQueryItemOverwrite(threadId, mailbox);
                 }
             }
+            for(String keyword : KeywordUtil.KEYWORD_ROLE.keySet()) {
+                insertQueryItemOverwrite(threadId, keyword);
+            }
             database.overwriteDao().insert(MailboxOverwriteEntity.of(threadId, Role.INBOX, false));
             database.overwriteDao().insert(MailboxOverwriteEntity.of(threadId, Role.TRASH, true));
             final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MoveToTrashWorker.class)
@@ -296,9 +305,12 @@ public class LttrsRepository {
     }
 
     public void cancelMoveToTrash(final WorkInfo workInfo, final String threadId) {
-        Preconditions.checkNotNull(workInfo,"Unable to cancel moveToTrash operation.");
+        Preconditions.checkNotNull(workInfo, "Unable to cancel moveToTrash operation.");
         WorkManager.getInstance(application).cancelWorkById(workInfo.getId());
-        IO_EXECUTOR.execute(() -> database.overwriteDao().revertMailboxOverwrites(threadId));
+        IO_EXECUTOR.execute(() -> {
+            database.overwriteDao().revertMailboxOverwrites(threadId);
+            database.overwriteDao().deleteQueryOverwritesByThread(threadId, QueryItemOverwriteEntity.Type.KEYWORD);
+        });
     }
 
     public void markImportant(final String threadId) {

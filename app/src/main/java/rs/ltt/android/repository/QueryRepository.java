@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.jmap.common.entity.Role;
@@ -61,7 +62,7 @@ public class QueryRepository extends LttrsRepository {
                 .setBoundaryCallback(new PagedList.BoundaryCallback<ThreadOverviewItem>() {
                     @Override
                     public void onZeroItemsLoaded() {
-                        Log.d("lttrs","onZeroItemsLoaded");
+                        Log.d("lttrs", "onZeroItemsLoaded");
                         requestNextPage(query, null); //conceptually in terms of loading indicators this is more of a page request
                         super.onZeroItemsLoaded();
                     }
@@ -163,5 +164,17 @@ public class QueryRepository extends LttrsRepository {
                 Log.d("lttrs", "error paging ", e);
             }
         }, MoreExecutors.directExecutor());
+    }
+
+    public LiveData<MailboxOverviewItem> getMailboxOverviewItem(final String mailboxId) {
+        if (mailboxId == null) {
+            return database.mailboxDao().getMailboxOverviewItemLiveData(Role.INBOX);
+        } else {
+            return database.mailboxDao().getMailboxOverviewItemLiveData(mailboxId);
+        }
+    }
+
+    public LiveData<String[]> getTrashAndJunk() {
+        return database.mailboxDao().getMailboxesLiveData(Role.TRASH, Role.JUNK);
     }
 }

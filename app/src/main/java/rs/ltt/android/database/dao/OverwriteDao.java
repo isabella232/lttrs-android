@@ -53,7 +53,7 @@ public abstract class OverwriteDao {
     public abstract void delete(QueryItemOverwriteEntity queryItemOverwriteEntity);
 
     @Query("delete from query_item_overwrite where threadId=:threadId and type=:type")
-    abstract int deleteQueryOverwritesByThread(String threadId, QueryItemOverwriteEntity.Type type);
+    public abstract int deleteQueryOverwritesByThread(String threadId, QueryItemOverwriteEntity.Type type);
 
     @Query("delete from mailbox_overwrite where threadId=:threadId")
     protected abstract int deleteMailboxOverwritesByThread(String threadId);

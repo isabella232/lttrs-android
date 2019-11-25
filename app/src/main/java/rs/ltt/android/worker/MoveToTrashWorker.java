@@ -17,17 +17,19 @@ package rs.ltt.android.worker;
 
 import android.content.Context;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
-import java.util.List;
-
 import androidx.annotation.NonNull;
 import androidx.work.WorkerParameters;
+
+import com.google.common.util.concurrent.ListenableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
 import rs.ltt.android.entity.EmailWithMailboxes;
+import rs.ltt.android.entity.QueryItemOverwriteEntity;
 
 public class MoveToTrashWorker extends AbstractMailboxModificationWorker {
 
@@ -40,6 +42,33 @@ public class MoveToTrashWorker extends AbstractMailboxModificationWorker {
     @Override
     protected ListenableFuture<Boolean> modify(List<EmailWithMailboxes> emails) {
         LOGGER.info("Modifying {} emails in thread {}", emails.size(), threadId);
-        return mua.moveToTrash(emails);
+        ListenableFuture<Boolean> future = mua.moveToTrash(emails);
+        try {
+            if (!future.get()) {
+                LOGGER.info(
+                        "No changes were made to thread {}. Deleting keyword query overwrites",
+                        threadId
+                );
+                database.overwriteDao().deleteQueryOverwritesByThread(
+                        threadId,
+                        QueryItemOverwriteEntity.Type.KEYWORD
+                );
+            }
+        } catch (ExecutionException | InterruptedException e) {
+            if (e instanceof ExecutionException && !shouldRetry((ExecutionException) e)) {
+                LOGGER.warn(
+                        String.format(
+                                "Unable to modify emails in thread %s. Deleting keyword query overwrites",
+                                threadId
+                        ),
+                        e
+                );
+                database.overwriteDao().deleteQueryOverwritesByThread(
+                        threadId,
+                        QueryItemOverwriteEntity.Type.KEYWORD
+                );
+            }
+        }
+        return future;
     }
 }
