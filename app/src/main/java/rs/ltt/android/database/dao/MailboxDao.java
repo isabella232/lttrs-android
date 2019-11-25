@@ -27,6 +27,7 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Transaction;
+
 import rs.ltt.android.entity.EntityStateEntity;
 import rs.ltt.android.entity.EntityType;
 import rs.ltt.android.entity.MailboxEntity;
@@ -77,6 +78,9 @@ public abstract class MailboxDao extends AbstractEntityDao {
 
     @Query("select distinct mailbox.id,role,name from email join email_mailbox on email_mailbox.emailId=email.id join mailbox on email_mailbox.mailboxId=mailbox.id where threadId=:threadId")
     public abstract List<MailboxWithRoleAndName> getMailboxesForThread(String threadId);
+
+    @Query("select count((select 1 where not exists(select * from email_mailbox join mailbox on email_mailbox.mailboxId=mailbox.id where mailbox.role=:role and email_mailbox.emailId=email.id))) > 0 from email where threadId=:threadId")
+    public abstract LiveData<Boolean> isAnyNotIn(String threadId, Role role);
 
     @Query("update mailbox set totalEmails=:value where id=:id")
     public abstract void updateTotalEmails(String id, Long value);
