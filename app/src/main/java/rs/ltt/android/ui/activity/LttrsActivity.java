@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package rs.ltt.android.ui;
+package rs.ltt.android.ui.activity;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -23,10 +23,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -62,17 +60,20 @@ import rs.ltt.android.R;
 import rs.ltt.android.databinding.ActivityMainBinding;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
+import rs.ltt.android.ui.OnLabelOpened;
+import rs.ltt.android.ui.Theme;
+import rs.ltt.android.ui.ThreadModifier;
 import rs.ltt.android.ui.adapter.LabelListAdapter;
 import rs.ltt.android.ui.fragment.SearchQueryFragment;
-import rs.ltt.android.ui.model.MainViewModel;
+import rs.ltt.android.ui.model.LttrsViewModel;
 import rs.ltt.android.util.MainThreadExecutor;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mua.util.KeywordLabel;
 import rs.ltt.jmap.mua.util.Label;
 
-public class MainActivity extends AppCompatActivity implements OnLabelOpened, ThreadModifier, SearchQueryFragment.OnTermSearched, NavController.OnDestinationChangedListener, MenuItem.OnActionExpandListener {
+public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, ThreadModifier, SearchQueryFragment.OnTermSearched, NavController.OnDestinationChangedListener, MenuItem.OnActionExpandListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MainActivity.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LttrsActivity.class);
 
     private static final int NUM_TOOLBAR_ICON = 1;
     private static final List<Integer> MAIN_DESTINATIONS = Arrays.asList(
@@ -82,11 +83,9 @@ public class MainActivity extends AppCompatActivity implements OnLabelOpened, Th
     );
     final LabelListAdapter labelListAdapter = new LabelListAdapter();
     private ActivityMainBinding binding;
-    private MainViewModel mainViewModel;
+    private LttrsViewModel lttrsViewModel;
     private MenuItem mSearchItem;
     private SearchView mSearchView;
-    //TODO: move to viewmodel
-    private String currentSearchTerm = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements OnLabelOpened, Th
                 getViewModelStore(),
                 getDefaultViewModelProviderFactory()
         );
-        mainViewModel = viewModelProvider.get(MainViewModel.class);
+        lttrsViewModel = viewModelProvider.get(LttrsViewModel.class);
         setSupportActionBar(binding.toolbar);
 
         final NavController navController = Navigation.findNavController(
@@ -129,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements OnLabelOpened, Th
             binding.appBarLayout.setExpanded(true, false);
         });
         binding.mailboxList.setAdapter(labelListAdapter);
-        mainViewModel.getNavigatableLabels().observe(this, labelListAdapter::submitList);
+        lttrsViewModel.getNavigatableLabels().observe(this, labelListAdapter::submitList);
     }
 
     @Override
@@ -150,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements OnLabelOpened, Th
             if (currentDestination == R.id.search) {
                 setSearchToolbarColors();
                 mSearchItem.expandActionView();
-                mSearchView.setQuery(currentSearchTerm, false);
+                mSearchView.setQuery(lttrsViewModel.getCurrentSearchTerm(), false);
                 mSearchView.clearFocus();
             }
             mSearchItem.setOnActionExpandListener(this);
@@ -235,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements OnLabelOpened, Th
             }
             binding.mailboxList.requestFocus();
 
-            mainViewModel.insertSearchSuggestion(query);
+            lttrsViewModel.insertSearchSuggestion(query);
             final NavController navController = Navigation.findNavController(
                     this,
                     R.id.nav_host_fragment
@@ -248,28 +247,28 @@ public class MainActivity extends AppCompatActivity implements OnLabelOpened, Th
     @Override
     public void archive(final String threadId) {
         final Snackbar snackbar = Snackbar.make(binding.getRoot(), R.string.archived, Snackbar.LENGTH_LONG);
-        snackbar.setAction(R.string.undo, v -> mainViewModel.moveToInbox(threadId));
+        snackbar.setAction(R.string.undo, v -> lttrsViewModel.moveToInbox(threadId));
         snackbar.show();
-        mainViewModel.archive(threadId);
+        lttrsViewModel.archive(threadId);
     }
 
     @Override
     public void moveToInbox(final String threadId) {
         final Snackbar snackbar = Snackbar.make(binding.getRoot(), R.string.moved_to_inbox, Snackbar.LENGTH_LONG);
-        snackbar.setAction(R.string.undo, v -> mainViewModel.archive(threadId));
+        snackbar.setAction(R.string.undo, v -> lttrsViewModel.archive(threadId));
         snackbar.show();
-        mainViewModel.moveToInbox(threadId);
+        lttrsViewModel.moveToInbox(threadId);
     }
 
     @Override
     public void moveToTrash(final String threadId) {
         final Snackbar snackbar = Snackbar.make(binding.getRoot(), R.string.deleted, Snackbar.LENGTH_LONG);
-        final ListenableFuture<LiveData<WorkInfo>> future = mainViewModel.moveToTrash(threadId);
+        final ListenableFuture<LiveData<WorkInfo>> future = lttrsViewModel.moveToTrash(threadId);
         snackbar.setAction(R.string.undo, v -> {
             try {
                 final LiveData<WorkInfo> workInfoLiveData = future.get();
                 final WorkInfo workInfo = workInfoLiveData.getValue();
-                mainViewModel.cancelMoveToTrash(workInfo, threadId);
+                lttrsViewModel.cancelMoveToTrash(workInfo, threadId);
             } catch (Exception e) {
                 LOGGER.warn("Unable to cancel moveToTrash operation", e);
             }
@@ -295,9 +294,9 @@ public class MainActivity extends AppCompatActivity implements OnLabelOpened, Th
                 getString(R.string.removed_from_x, mailbox.name),
                 Snackbar.LENGTH_LONG
         );
-        snackbar.setAction(R.string.undo, v -> mainViewModel.copyToMailbox(threadId, mailbox));
+        snackbar.setAction(R.string.undo, v -> lttrsViewModel.copyToMailbox(threadId, mailbox));
         snackbar.show();
-        mainViewModel.removeFromMailbox(threadId, mailbox);
+        lttrsViewModel.removeFromMailbox(threadId, mailbox);
     }
 
     @Override
@@ -415,8 +414,8 @@ public class MainActivity extends AppCompatActivity implements OnLabelOpened, Th
     }
 
     private void resetToolbarColors() {
-        binding.toolbar.setBackgroundColor(Theme.getColor(MainActivity.this, R.attr.colorPrimary));
-        binding.drawerLayout.setStatusBarBackgroundColor(Theme.getColor(MainActivity.this, R.attr.colorPrimaryDark));
+        binding.toolbar.setBackgroundColor(Theme.getColor(LttrsActivity.this, R.attr.colorPrimary));
+        binding.drawerLayout.setStatusBarBackgroundColor(Theme.getColor(LttrsActivity.this, R.attr.colorPrimaryDark));
     }
 
     private void setSearchToolbarColors() {
@@ -425,9 +424,8 @@ public class MainActivity extends AppCompatActivity implements OnLabelOpened, Th
     }
 
     @Override
-    public void onTermSearched(String term) {
-        this.currentSearchTerm = term;
-        Log.d("lttrs", "on term searched " + term);
+    public void onTermSearched(final String term) {
+        lttrsViewModel.setCurrentSearchTerm(term);
         labelListAdapter.setSelectedLabel(null);
     }
 }

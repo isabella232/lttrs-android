@@ -33,14 +33,14 @@ import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.mua.util.Label;
 import rs.ltt.jmap.mua.util.LabelUtil;
 
-public class MainViewModel extends AndroidViewModel {
+public class LttrsViewModel extends AndroidViewModel {
 
     private final LiveData<List<Label>> navigatableLabels;
     private final MainRepository mainRepository;
     private final ThreadRepository threadRepository;
+    private String currentSearchTerm;
 
-
-    public MainViewModel(@NonNull Application application) {
+    public LttrsViewModel(@NonNull Application application) {
         super(application);
         this.mainRepository = new MainRepository(application);
         this.threadRepository = new ThreadRepository(application);
@@ -48,6 +48,14 @@ public class MainViewModel extends AndroidViewModel {
                 this.threadRepository.getMailboxes(),
                 LabelUtil::fillUpAndSort
         );
+    }
+
+    public String getCurrentSearchTerm() {
+        return currentSearchTerm;
+    }
+
+    public void setCurrentSearchTerm(String currentSearchTerm) {
+        this.currentSearchTerm = currentSearchTerm;
     }
 
     public LiveData<List<Label>> getNavigatableLabels() {
