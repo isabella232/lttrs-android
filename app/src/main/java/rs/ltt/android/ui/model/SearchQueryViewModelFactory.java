@@ -21,19 +21,25 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
+import rs.ltt.android.entity.AccountWithCredentials;
+
 public class SearchQueryViewModelFactory implements ViewModelProvider.Factory {
 
     private final Application application;
+    private final ListenableFuture<AccountWithCredentials> account;
     private final String query;
 
-    public SearchQueryViewModelFactory(Application application, String query) {
+    public SearchQueryViewModelFactory(Application application, ListenableFuture<AccountWithCredentials> account, String query) {
         this.application = application;
+        this.account = account;
         this.query = query;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return modelClass.cast(new SearchQueryViewModel(application, query));
+        return modelClass.cast(new SearchQueryViewModel(application, account, query));
     }
 }

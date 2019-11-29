@@ -24,6 +24,7 @@ import androidx.lifecycle.Transformations;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.entity.MailboxOverwriteEntity;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.ThreadOverviewItem;
@@ -38,8 +39,8 @@ public class SearchQueryViewModel extends AbstractQueryViewModel {
     private final LiveData<EmailQuery> searchQueryLiveData;
     private final ListenableFuture<MailboxWithRoleAndName> inbox;
 
-    SearchQueryViewModel(final Application application, final String searchTerm) {
-        super(application);
+    SearchQueryViewModel(final Application application, final ListenableFuture<AccountWithCredentials> account, final String searchTerm) {
+        super(application, account);
         this.searchTerm = searchTerm;
         this.inbox = queryRepository.getInbox();
         this.searchQueryLiveData = Transformations.map(queryRepository.getTrashAndJunk(), trashAndJunk -> EmailQuery.of(

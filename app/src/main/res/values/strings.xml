@@ -31,4 +31,13 @@
     <string name="archived">Archived</string>
     <string name="undo">Undo</string>
     <string name="deleted">Deleted</string>
+    <string name="sign_in">Sign in</string>
+    <string name="email_address">Email address</string>
+    <string name="sign_in_instruction">with your Email account.</string>
+    <string name="next">Next</string>
+    <string name="enter_an_email_address">Enter an email address</string>
+    <string name="enter_a_valid_email_address">Enter a valid email address</string>
+    <string name="welcome">Welcome</string>
+    <string name="enter_your_password">Enter your password</string>
+    <string name="enter_a_password">Enter a password</string>
 </resources>

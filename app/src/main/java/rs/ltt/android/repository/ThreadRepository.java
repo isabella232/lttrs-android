@@ -17,16 +17,23 @@ package rs.ltt.android.repository;
 
 import android.app.Application;
 
+import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Transformations;
 import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
 
+import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+
 import java.util.List;
 
+import rs.ltt.android.database.LttrsDatabase;
+import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.entity.ExpandedPosition;
 import rs.ltt.android.entity.FullEmail;
 import rs.ltt.android.entity.KeywordOverwriteEntity;
@@ -36,41 +43,41 @@ import rs.ltt.android.entity.ThreadHeader;
 
 public class ThreadRepository extends LttrsRepository {
 
-    public ThreadRepository(Application application) {
-        super(application);
+    public ThreadRepository(Application application, ListenableFuture<AccountWithCredentials> account) {
+        super(application, account);
     }
 
     public LiveData<PagedList<FullEmail>> getEmails(String threadId) {
-        return new LivePagedListBuilder<>(database.threadAndEmailDao().getEmails(threadId), 30).build();
+        return Transformations.switchMap(databaseLiveData, database -> new LivePagedListBuilder<>(database.threadAndEmailDao().getEmails(threadId), 30).build());
     }
 
     public LiveData<ThreadHeader> getThreadHeader(String threadId) {
-        return database.threadAndEmailDao().getThreadHeader(threadId);
+        return Transformations.switchMap(databaseLiveData, database -> database.threadAndEmailDao().getThreadHeader(threadId));
     }
 
     public LiveData<List<MailboxWithRoleAndName>> getMailboxes(String threadId) {
-        return database.mailboxDao().getMailboxesForThreadLiveData(threadId);
+        return Transformations.switchMap(databaseLiveData, database ->database.mailboxDao().getMailboxesForThreadLiveData(threadId));
     }
 
 
     public LiveData<List<MailboxOverwriteEntity>> getMailboxOverwrites(String threadId) {
-        return database.overwriteDao().getMailboxOverwrites(threadId);
+        return Transformations.switchMap(databaseLiveData, database ->database.overwriteDao().getMailboxOverwrites(threadId));
     }
 
     public ListenableFuture<List<ExpandedPosition>> getExpandedPositions(String threadId) {
-        ListenableFuture<KeywordOverwriteEntity> overwriteFuture = database.overwriteDao().getKeywordOverwrite(threadId);
+        ListenableFuture<KeywordOverwriteEntity> overwriteFuture = Futures.transformAsync(this.database, database -> database.overwriteDao().getKeywordOverwrite(threadId), MoreExecutors.directExecutor());
         return Futures.transformAsync(overwriteFuture, input -> {
             if (input != null) {
                 if (input.value) {
-                    return database.threadAndEmailDao().getMaxPosition(threadId);
+                    return requireDatabase().threadAndEmailDao().getMaxPosition(threadId);
                 } else {
-                    return database.threadAndEmailDao().getAllPositions(threadId);
+                    return requireDatabase().threadAndEmailDao().getAllPositions(threadId);
                 }
             } else {
-                ListenableFuture<List<ExpandedPosition>> unseen = database.threadAndEmailDao().getUnseenPositions(threadId);
+                ListenableFuture<List<ExpandedPosition>> unseen = requireDatabase().threadAndEmailDao().getUnseenPositions(threadId);
                 return Futures.transformAsync(unseen, input1 -> {
                     if (input1 == null || input1.size() == 0) {
-                        return database.threadAndEmailDao().getMaxPosition(threadId);
+                        return requireDatabase().threadAndEmailDao().getMaxPosition(threadId);
                     } else {
                         return Futures.immediateFuture(input1);
                     }

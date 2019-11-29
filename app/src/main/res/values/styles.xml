@@ -43,4 +43,9 @@
         <item name="searchViewStyle">@style/SearchViewTheme</item>
     </style>
 
+    <style name="AppNameTheme" parent="TextAppearance.AppCompat.Title">
+        <item name="android:fontFamily">serif</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+    </style>
+
 </resources>

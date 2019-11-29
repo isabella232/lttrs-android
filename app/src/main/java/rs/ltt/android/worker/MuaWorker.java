@@ -18,14 +18,19 @@ package rs.ltt.android.worker;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.ExecutionException;
 
-import rs.ltt.android.Credentials;
 import rs.ltt.android.cache.DatabaseCache;
+import rs.ltt.android.database.AppDatabase;
 import rs.ltt.android.database.LttrsDatabase;
+import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.jmap.client.api.MethodErrorResponseException;
 import rs.ltt.jmap.client.session.FileSessionCache;
 import rs.ltt.jmap.common.method.MethodErrorResponse;
@@ -34,21 +39,22 @@ import rs.ltt.jmap.mua.Mua;
 
 public abstract class MuaWorker extends Worker {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MuaWorker.class);
+
     public static final String TAG_EMAIL_MODIFICATION = "email_modification";
 
-    protected final LttrsDatabase database;
-    protected final Mua mua;
+    protected static final String ACCOUNT_KEY = "account";
+
+    private final Long account;
 
     MuaWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        this.database = LttrsDatabase.getInstance(getApplicationContext(), Credentials.username);
-        this.mua = Mua.builder()
-                .password(Credentials.password)
-                .username(Credentials.username)
-                .accountId(Credentials.accountId)
-                .cache(new DatabaseCache(this.database))
-                .sessionCache(new FileSessionCache(getApplicationContext().getCacheDir()))
-                .build();
+        final Data data = getInputData();
+        if (data.hasKeyWithValueOfType(ACCOUNT_KEY, Long.class)) {
+            this.account = data.getLong(ACCOUNT_KEY, 0L);
+        } else {
+            throw new IllegalStateException("Missing required account");
+        }
     }
 
     static boolean shouldRetry(ExecutionException e) {
@@ -58,5 +64,20 @@ public abstract class MuaWorker extends Worker {
             return methodError instanceof StateMismatchMethodErrorResponse;
         }
         return false;
+    }
+
+    public LttrsDatabase getDatabase() {
+        return LttrsDatabase.getInstance(getApplicationContext(), this.account);
+    }
+
+    public Mua getMua() {
+        final AccountWithCredentials account = AppDatabase.getInstance(getApplicationContext()).accountDao().getAccount(this.account);
+        return Mua.builder()
+                .username(account.username)
+                .password(account.password)
+                .accountId(account.accountId)
+                .cache(new DatabaseCache(getDatabase()))
+                .sessionCache(new FileSessionCache(getApplicationContext().getCacheDir()))
+                .build();
     }
 }

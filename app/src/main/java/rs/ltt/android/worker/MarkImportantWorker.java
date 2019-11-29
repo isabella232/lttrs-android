@@ -41,7 +41,7 @@ public class MarkImportantWorker extends AbstractMailboxModificationWorker {
     @Override
     protected ListenableFuture<Boolean> modify(List<EmailWithMailboxes> emails) {
         LOGGER.info("Modifying {} emails in thread {}", emails.size(), threadId);
-        return mua.copyToImportant(emails);
+        return getMua().copyToImportant(emails);
     }
 
     public static String uniqueName(String threadId) {

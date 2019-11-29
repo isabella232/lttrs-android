@@ -43,7 +43,11 @@ public class SearchQueryFragment extends AbstractQueryFragment {
         final String term = SearchQueryFragmentArgs.fromBundle(bundle == null ? new Bundle() : bundle).getText();
         final ViewModelProvider viewModelProvider = new ViewModelProvider(
                 getViewModelStore(),
-                new SearchQueryViewModelFactory(requireActivity().getApplication(), term)
+                new SearchQueryViewModelFactory(
+                        requireActivity().getApplication(),
+                        getLttrsViewModel().getAccount(),
+                        term
+                )
         );
         this.searchQueryViewModel = viewModelProvider.get(SearchQueryViewModel.class);
         return super.onCreateView(inflater, container, savedInstanceState);

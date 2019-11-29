@@ -16,7 +16,6 @@
 package rs.ltt.android.ui.fragment;
 
 import android.app.Activity;
-import android.app.Application;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -27,7 +26,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -50,7 +48,7 @@ import rs.ltt.android.ui.adapter.ThreadAdapter;
 import rs.ltt.android.ui.model.ThreadViewModel;
 import rs.ltt.android.ui.model.ThreadViewModelFactory;
 
-public class ThreadFragment extends Fragment implements OnFlaggedToggled {
+public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedToggled {
 
     private FragmentThreadBinding binding;
     private ThreadViewModel threadViewModel;
@@ -68,7 +66,6 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         final FragmentActivity activity = getActivity();
-        final Application application = activity == null ? null : activity.getApplication();
         final Bundle bundle = getArguments();
         final ThreadFragmentArgs arguments = ThreadFragmentArgs.fromBundle(bundle == null ? new Bundle() : bundle);
         final String threadId = arguments.getThread();
@@ -76,7 +73,13 @@ public class ThreadFragment extends Fragment implements OnFlaggedToggled {
         final boolean triggerRead = arguments.getTriggerRead();
         final ViewModelProvider viewModelProvider = new ViewModelProvider(
                 getViewModelStore(),
-                new ThreadViewModelFactory(application, threadId, label, triggerRead)
+                new ThreadViewModelFactory(
+                        requireActivity().getApplication(),
+                        getLttrsViewModel().getAccount(),
+                        threadId,
+                        label,
+                        triggerRead
+                )
         );
         threadViewModel = viewModelProvider.get(ThreadViewModel.class);
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_thread, container, false);

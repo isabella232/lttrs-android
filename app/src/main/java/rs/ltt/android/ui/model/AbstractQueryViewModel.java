@@ -26,6 +26,7 @@ import androidx.work.WorkManager;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.repository.QueryRepository;
@@ -42,12 +43,12 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
     private LiveData<Boolean> runningPagingRequest;
     private ListenableFuture<MailboxWithRoleAndName> important;
 
-    AbstractQueryViewModel(@NonNull Application application) {
+    AbstractQueryViewModel(@NonNull Application application, ListenableFuture<AccountWithCredentials> account) {
         super(application);
 
         final WorkManager workManager = WorkManager.getInstance(application);
 
-        this.queryRepository = new QueryRepository(application);
+        this.queryRepository = new QueryRepository(application, account);
         this.important = this.queryRepository.getImportant();
         this.emailModificationWorkInfo = Transformations.map(workManager.getWorkInfosByTagLiveData(MuaWorker.TAG_EMAIL_MODIFICATION), WorkInfoUtil::allDone);
     }

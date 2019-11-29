@@ -13,16 +13,20 @@
  * limitations under the License.
  */
 
-package rs.ltt.android;
+package rs.ltt.android.ui.fragment;
 
-public final class Credentials {
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
-    public static final String username = "";
-    public static final String password = "";
-    public static final String accountId = "";
+import rs.ltt.android.ui.model.LttrsViewModel;
 
-    private Credentials() {
+public abstract class AbstractLttrsFragment extends Fragment {
 
+    protected LttrsViewModel getLttrsViewModel() {
+        final ViewModelProvider viewModelProvider = new ViewModelProvider(
+                requireActivity(),
+                getDefaultViewModelProviderFactory()
+        );
+        return viewModelProvider.get(LttrsViewModel.class);
     }
-
 }

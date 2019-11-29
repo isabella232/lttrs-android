@@ -47,7 +47,11 @@ public class KeywordQueryFragment extends AbstractQueryFragment {
         this.keywordLabel = KeywordQueryFragmentArgs.fromBundle(bundle == null ? new Bundle() : bundle).getKeyword();
         final ViewModelProvider viewModelProvider = new ViewModelProvider(
                 getViewModelStore(),
-                new KeywordQueryViewModelFactory(requireActivity().getApplication(), keywordLabel.getKeyword())
+                new KeywordQueryViewModelFactory(
+                        requireActivity().getApplication(),
+                        getLttrsViewModel().getAccount(),
+                        keywordLabel.getKeyword()
+                )
         );
         this.keywordQueryViewModel = viewModelProvider.get(KeywordQueryViewModel.class);
         onLabelOpened(this.keywordLabel);

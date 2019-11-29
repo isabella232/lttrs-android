@@ -28,8 +28,10 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.entity.EmailWithMailboxes;
 import rs.ltt.android.entity.QueryItemOverwriteEntity;
+import rs.ltt.jmap.mua.Mua;
 
 public class MoveToTrashWorker extends AbstractMailboxModificationWorker {
 
@@ -41,6 +43,8 @@ public class MoveToTrashWorker extends AbstractMailboxModificationWorker {
 
     @Override
     protected ListenableFuture<Boolean> modify(List<EmailWithMailboxes> emails) {
+        final LttrsDatabase database = getDatabase();
+        final Mua mua = getMua();
         LOGGER.info("Modifying {} emails in thread {}", emails.size(), threadId);
         ListenableFuture<Boolean> future = mua.moveToTrash(emails);
         try {

@@ -24,6 +24,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
+
 import rs.ltt.android.database.dao.MailboxDao;
 import rs.ltt.android.database.dao.OverwriteDao;
 import rs.ltt.android.database.dao.QueryDao;
@@ -64,7 +65,7 @@ import rs.ltt.android.entity.ThreadItemEntity;
 @TypeConverters(Converters.class)
 public abstract class LttrsDatabase extends RoomDatabase {
 
-    private static Map<String, LttrsDatabase> INSTANCES = new HashMap<>();
+    private static Map<Long, LttrsDatabase> INSTANCES = new HashMap<>();
 
     public abstract ThreadAndEmailDao threadAndEmailDao();
 
@@ -76,7 +77,7 @@ public abstract class LttrsDatabase extends RoomDatabase {
 
     public abstract OverwriteDao overwriteDao();
 
-    public static LttrsDatabase getInstance(final Context context, final String account) {
+    public static LttrsDatabase getInstance(final Context context, final Long account) {
         final LttrsDatabase instance = INSTANCES.get(account);
         if (instance != null) {
             return instance;
@@ -84,7 +85,8 @@ public abstract class LttrsDatabase extends RoomDatabase {
         synchronized (LttrsDatabase.class) {
             LttrsDatabase inner = INSTANCES.get(account);
             if (inner == null) {
-                inner = Room.databaseBuilder(context.getApplicationContext(), LttrsDatabase.class, "lttrs-" + account).build();
+                final String filename = String.format("lttrs-%x", account);
+                inner = Room.databaseBuilder(context.getApplicationContext(), LttrsDatabase.class, filename).build();
                 INSTANCES.put(account, inner);
             }
             return inner;

@@ -25,9 +25,8 @@ import com.google.common.base.CharMatcher;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import rs.ltt.android.Credentials;
+
 import rs.ltt.android.database.AppDatabase;
-import rs.ltt.android.database.LttrsDatabase;
 
 public class EmailSearchSuggestionsProvider extends ContentProvider {
 

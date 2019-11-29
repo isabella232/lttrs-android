@@ -13,30 +13,23 @@
  * limitations under the License.
  */
 
-package rs.ltt.android.worker;
+package rs.ltt.android.ui.activity;
 
-import android.content.Context;
-import android.util.Log;
+import android.os.Bundle;
 
-import androidx.annotation.NonNull;
-import androidx.work.WorkerParameters;
-import rs.ltt.jmap.mua.Mua;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 
-public class RefreshWorker extends MuaWorker {
+import rs.ltt.android.R;
+import rs.ltt.android.databinding.ActivitySetupBinding;
 
-    public RefreshWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
-        super(context, workerParams);
-    }
+public class SetupActivity extends AppCompatActivity {
 
-    @NonNull
+    private ActivitySetupBinding binding;
+
     @Override
-    public Result doWork() {
-        try {
-            getMua().refresh().get();
-            return Result.success();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Result.failure();
-        }
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_setup);
     }
 }

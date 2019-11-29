@@ -28,7 +28,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.entity.EmailWithKeywords;
+import rs.ltt.jmap.mua.Mua;
 
 public class ModifyKeywordWorker extends MuaWorker {
 
@@ -54,8 +56,9 @@ public class ModifyKeywordWorker extends MuaWorker {
         return "toggle-keyword-" + keyword + "-" + threadId;
     }
 
-    public static Data data(final String threadId, final String keyword, final boolean targetState) {
+    public static Data data(final Long account, final String threadId, final String keyword, final boolean targetState) {
         return new Data.Builder()
+                .putLong(ACCOUNT_KEY, account)
                 .putString(THREAD_ID_KEY, threadId)
                 .putString(KEYWORD_KEY, keyword)
                 .putBoolean(TARGET_STATE_KEY, targetState)
@@ -65,6 +68,8 @@ public class ModifyKeywordWorker extends MuaWorker {
     @NonNull
     @Override
     public Result doWork() {
+        final LttrsDatabase database = getDatabase();
+        final Mua mua = getMua();
         List<EmailWithKeywords> emails = threadId == null ? Collections.emptyList() : database.threadAndEmailDao().getEmailsWithKeywords(threadId);
         if (target) {
             LOGGER.info("Setting keyword {} for {} emails in thread {}", keyword, emails.size(), threadId);

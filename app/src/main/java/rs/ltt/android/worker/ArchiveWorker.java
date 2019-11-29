@@ -41,6 +41,6 @@ public class ArchiveWorker extends AbstractMailboxModificationWorker {
     @Override
     protected ListenableFuture<Boolean> modify(List<EmailWithMailboxes> emails) {
         LOGGER.info("Modifying {} emails in thread {}", emails.size(), threadId);
-        return mua.archive(emails);
+        return getMua().archive(emails);
     }
 }

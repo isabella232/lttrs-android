@@ -45,8 +45,9 @@ public class CopyToMailboxWorker extends AbstractMailboxModificationWorker {
         this.mailboxId = data.getString(MAILBOX_ID_KEY);
     }
 
-    public static Data data(String threadId, IdentifiableMailboxWithRole mailbox) {
+    public static Data data(Long account, String threadId, IdentifiableMailboxWithRole mailbox) {
         return new Data.Builder()
+                .putLong(ACCOUNT_KEY, account)
                 .putString(THREAD_ID_KEY, threadId)
                 .putString(MAILBOX_ID_KEY, mailbox.getId())
                 .build();
@@ -55,11 +56,11 @@ public class CopyToMailboxWorker extends AbstractMailboxModificationWorker {
     @Override
     protected ListenableFuture<Boolean> modify(List<EmailWithMailboxes> emails) {
         final IdentifiableMailboxWithRole mailbox = Preconditions.checkNotNull(
-                database.mailboxDao().getMailbox(this.mailboxId),
+                getDatabase().mailboxDao().getMailbox(this.mailboxId),
                 String.format("Unable to find cached mailbox with id %s", this.mailboxId)
         );
         LOGGER.info("Modifying {} emails in thread {}", emails.size(), threadId);
-        return mua.copyToMailbox(emails, mailbox);
+        return getMua().copyToMailbox(emails, mailbox);
     }
 
     public static String uniqueName(String threadId, IdentifiableMailboxWithRole mailbox) {

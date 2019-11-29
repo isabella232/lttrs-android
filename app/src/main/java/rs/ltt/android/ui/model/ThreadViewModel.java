@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.entity.ExpandedPosition;
 import rs.ltt.android.entity.FullEmail;
 import rs.ltt.android.entity.MailboxOverwriteEntity;
@@ -56,11 +57,11 @@ public class ThreadViewModel extends AndroidViewModel {
     private LiveData<MenuConfiguration> menuConfiguration;
 
 
-    ThreadViewModel(@NonNull Application application, String threadId, String label, boolean triggerRead) {
+    ThreadViewModel(@NonNull Application application, ListenableFuture<AccountWithCredentials> account, String threadId, String label, boolean triggerRead) {
         super(application);
         this.threadId = threadId;
         this.label = label;
-        this.threadRepository = new ThreadRepository(application);
+        this.threadRepository = new ThreadRepository(application, account);
         final LiveData<ThreadHeader> header = this.threadRepository.getThreadHeader(threadId);
         this.emails = this.threadRepository.getEmails(threadId);
         this.mailboxes = this.threadRepository.getMailboxes(threadId);

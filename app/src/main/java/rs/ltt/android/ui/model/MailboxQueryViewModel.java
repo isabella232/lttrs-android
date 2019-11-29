@@ -22,6 +22,9 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
+import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
@@ -35,8 +38,8 @@ public class MailboxQueryViewModel extends AbstractQueryViewModel {
 
     private final LiveData<EmailQuery> emailQueryLiveData;
 
-    MailboxQueryViewModel(final Application application, final String mailboxId) {
-        super(application);
+    MailboxQueryViewModel(final Application application, ListenableFuture<AccountWithCredentials> account, final String mailboxId) {
+        super(application, account);
         this.mailbox = this.queryRepository.getMailboxOverviewItem(mailboxId);
         this.emailQueryLiveData = Transformations.map(mailbox, input -> {
             if (input == null) {

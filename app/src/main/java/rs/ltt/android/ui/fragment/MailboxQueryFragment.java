@@ -17,7 +17,6 @@ package rs.ltt.android.ui.fragment;
 
 
 import android.os.Bundle;
-import android.view.View;
 
 import androidx.core.util.Preconditions;
 import androidx.navigation.NavController;
@@ -25,10 +24,9 @@ import androidx.navigation.Navigation;
 
 import com.google.android.material.snackbar.Snackbar;
 
-import rs.ltt.android.MainNavigationDirections;
+import rs.ltt.android.LttrsNavigationDirections;
 import rs.ltt.android.R;
 import rs.ltt.android.entity.MailboxOverviewItem;
-import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.ThreadOverviewItem;
 
 public class MailboxQueryFragment extends AbstractMailboxQueryFragment {
@@ -46,7 +44,7 @@ public class MailboxQueryFragment extends AbstractMailboxQueryFragment {
                 R.id.nav_host_fragment
         );
         final String label = mailbox != null && mailbox.role == null ? mailbox.name : null;
-        navController.navigate(MainNavigationDirections.actionToThread(
+        navController.navigate(LttrsNavigationDirections.actionToThread(
                 threadId,
                 label,
                 !everyHasSeen

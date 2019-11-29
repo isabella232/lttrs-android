@@ -21,18 +21,28 @@ import android.content.Context;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.TypeConverters;
+
+import rs.ltt.android.database.dao.AccountDao;
 import rs.ltt.android.database.dao.SearchSuggestionDao;
+import rs.ltt.android.entity.AccountEntity;
+import rs.ltt.android.entity.CredentialsEntity;
 import rs.ltt.android.entity.SearchSuggestionEntity;
 
 @Database(entities = {
+        CredentialsEntity.class,
+        AccountEntity.class,
         SearchSuggestionEntity.class
 }, version = 1)
+@TypeConverters(Converters.class)
 public abstract class AppDatabase extends RoomDatabase {
 
 
     private static volatile AppDatabase INSTANCE = null;
 
     public abstract SearchSuggestionDao searchSuggestionDao();
+
+    public abstract AccountDao accountDao();
 
     public static AppDatabase getInstance(final Context context) {
         if (INSTANCE != null) {

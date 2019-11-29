@@ -40,6 +40,6 @@ public class MoveToInboxWorker extends AbstractMailboxModificationWorker {
     @Override
     protected ListenableFuture<Boolean> modify(List<EmailWithMailboxes> emails) {
         LOGGER.info("Modifying {} emails in thread {}", emails.size(), threadId);
-        return mua.moveToInbox(emails);
+        return getMua().moveToInbox(emails);
     }
 }

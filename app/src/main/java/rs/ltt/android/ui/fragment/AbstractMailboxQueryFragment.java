@@ -41,7 +41,11 @@ public abstract class AbstractMailboxQueryFragment extends AbstractQueryFragment
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final ViewModelProvider viewModelProvider = new ViewModelProvider(
                 getViewModelStore(),
-                new MailboxQueryViewModelFactory(requireActivity().getApplication(), getMailboxId())
+                new MailboxQueryViewModelFactory(
+                        requireActivity().getApplication(),
+                        getLttrsViewModel().getAccount(),
+                        getMailboxId()
+                )
         );
         this.mailboxQueryViewModel = viewModelProvider.get(MailboxQueryViewModel.class);
         return super.onCreateView(inflater, container, savedInstanceState);

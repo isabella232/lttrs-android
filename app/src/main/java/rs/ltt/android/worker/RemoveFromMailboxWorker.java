@@ -44,8 +44,9 @@ public class RemoveFromMailboxWorker extends AbstractMailboxModificationWorker {
         this.mailboxId = data.getString(MAILBOX_ID_KEY);
     }
 
-    public static Data data(String threadId, IdentifiableMailboxWithRole mailbox) {
+    public static Data data(Long account, String threadId, IdentifiableMailboxWithRole mailbox) {
         return new Data.Builder()
+                .putLong(ACCOUNT_KEY, account)
                 .putString(THREAD_ID_KEY, threadId)
                 .putString(MAILBOX_ID_KEY, mailbox.getId())
                 .build();
@@ -54,7 +55,7 @@ public class RemoveFromMailboxWorker extends AbstractMailboxModificationWorker {
     @Override
     protected ListenableFuture<Boolean> modify(List<EmailWithMailboxes> emails) {
         LOGGER.info("Modifying {} emails in thread {}", emails.size(), threadId);
-        return mua.removeFromMailbox(emails, this.mailboxId);
+        return getMua().removeFromMailbox(emails, this.mailboxId);
     }
 
     public static String uniqueName(String threadId, IdentifiableMailboxWithRole mailbox) {

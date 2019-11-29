@@ -38,6 +38,10 @@ import androidx.annotation.DrawableRes;
 import androidx.core.content.ContextCompat;
 import androidx.core.widget.ImageViewCompat;
 import androidx.databinding.BindingAdapter;
+import androidx.lifecycle.LiveData;
+
+import com.google.android.material.textfield.TextInputLayout;
+
 import rs.ltt.android.R;
 import rs.ltt.android.entity.SubjectWithImportance;
 import rs.ltt.android.entity.ThreadHeader;
@@ -246,5 +250,10 @@ public class BindingAdapters {
             }
         }
         imageView.setImageResource(imageResource);
+    }
+
+    @BindingAdapter("errorText")
+    public static void setErrorText(final TextInputLayout textInputLayout, final LiveData<String> error) {
+        textInputLayout.setError(error.getValue());
     }
 }

@@ -28,7 +28,7 @@
         tools:ignore="GoogleAppIndexingWarning">
 
         <activity android:name=".ui.activity.LttrsActivity"
-            android:launchMode="singleTop">
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -43,8 +43,12 @@
                 android:resource="@xml/searchable" />
         </activity>
 
+        <activity android:name=".ui.activity.SetupActivity"
+            android:launchMode="singleTask"/>
+
         <provider android:name=".provider.EmailSearchSuggestionsProvider"
-            android:authorities="rs.ltt.android.provider.EmailSearchSuggestionsProvider" />
+            android:authorities="rs.ltt.android.provider.EmailSearchSuggestionsProvider"
+            android:exported="false" />
     </application>
 
 </manifest>

@@ -19,6 +19,7 @@ import androidx.room.TypeConverter;
 
 import java.util.Date;
 
+import okhttp3.HttpUrl;
 import rs.ltt.android.entity.EmailAddressType;
 import rs.ltt.android.entity.EmailBodyPartType;
 import rs.ltt.android.entity.EntityType;
@@ -91,5 +92,15 @@ public class Converters {
     @TypeConverter
     public static long toTimestamp(Date date) {
         return date.getTime();
+    }
+
+    @TypeConverter
+    public static HttpUrl toHttpUrl(final String url) {
+        return url == null ? null : HttpUrl.get(url);
+    }
+
+    @TypeConverter
+    public static String toString(final HttpUrl httpUrl) {
+        return httpUrl == null ? null : httpUrl.toString();
     }
 }

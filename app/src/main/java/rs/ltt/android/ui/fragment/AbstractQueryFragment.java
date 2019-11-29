@@ -33,7 +33,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 
-import rs.ltt.android.MainNavigationDirections;
+import rs.ltt.android.LttrsNavigationDirections;
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.FragmentThreadListBinding;
 import rs.ltt.android.entity.ThreadOverviewItem;
@@ -45,7 +45,7 @@ import rs.ltt.android.ui.model.AbstractQueryViewModel;
 import rs.ltt.jmap.mua.util.Label;
 
 
-public abstract class AbstractQueryFragment extends Fragment implements OnFlaggedToggled, ThreadOverviewAdapter.OnThreadClicked, QueryItemTouchHelper.OnQueryItemSwipe {
+public abstract class AbstractQueryFragment extends AbstractLttrsFragment implements OnFlaggedToggled, ThreadOverviewAdapter.OnThreadClicked, QueryItemTouchHelper.OnQueryItemSwipe {
 
     private final ThreadOverviewAdapter threadOverviewAdapter = new ThreadOverviewAdapter();
     protected FragmentThreadListBinding binding;
@@ -131,7 +131,7 @@ public abstract class AbstractQueryFragment extends Fragment implements OnFlagge
     @Override
     public void onThreadClicked(String threadId, boolean everyHasSeen) {
         final NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
-        navController.navigate(MainNavigationDirections.actionToThread(
+        navController.navigate(LttrsNavigationDirections.actionToThread(
                 threadId,
                 null,
                 !everyHasSeen

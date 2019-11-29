@@ -55,9 +55,9 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.List;
 
-import rs.ltt.android.MainNavigationDirections;
+import rs.ltt.android.LttrsNavigationDirections;
 import rs.ltt.android.R;
-import rs.ltt.android.databinding.ActivityMainBinding;
+import rs.ltt.android.databinding.ActivityLttrsBinding;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.ui.OnLabelOpened;
@@ -82,7 +82,7 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
             R.id.keyword
     );
     final LabelListAdapter labelListAdapter = new LabelListAdapter();
-    private ActivityMainBinding binding;
+    private ActivityLttrsBinding binding;
     private LttrsViewModel lttrsViewModel;
     private MenuItem mSearchItem;
     private SearchView mSearchView;
@@ -90,13 +90,14 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_lttrs);
 
         final ViewModelProvider viewModelProvider = new ViewModelProvider(
-                getViewModelStore(),
+                this,
                 getDefaultViewModelProviderFactory()
         );
         lttrsViewModel = viewModelProvider.get(LttrsViewModel.class);
+        lttrsViewModel.getHasAccounts().observe(this, this::onHasAccountsChanged);
         setSupportActionBar(binding.toolbar);
 
         final NavController navController = Navigation.findNavController(
@@ -111,13 +112,13 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
             }
             final boolean navigateToInbox = label.getRole() == Role.INBOX;
             if (navigateToInbox) {
-                navController.navigate(MainNavigationDirections.actionToInbox());
+                navController.navigate(LttrsNavigationDirections.actionToInbox());
             } else if (label instanceof MailboxOverviewItem) {
                 final MailboxOverviewItem mailbox = (MailboxOverviewItem) label;
-                navController.navigate(MainNavigationDirections.actionToMailbox(mailbox.id));
+                navController.navigate(LttrsNavigationDirections.actionToMailbox(mailbox.id));
             } else if (label instanceof KeywordLabel) {
                 final KeywordLabel keyword = (KeywordLabel) label;
-                navController.navigate(MainNavigationDirections.actionToKeyword(keyword));
+                navController.navigate(LttrsNavigationDirections.actionToKeyword(keyword));
             } else {
                 throw new IllegalStateException(String.format("%s is an unsupported label", label.getClass()));
             }
@@ -129,6 +130,13 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
         });
         binding.mailboxList.setAdapter(labelListAdapter);
         lttrsViewModel.getNavigatableLabels().observe(this, labelListAdapter::submitList);
+    }
+
+    private void onHasAccountsChanged(Boolean hasAccounts) {
+        if (!hasAccounts) {
+            startActivity(new Intent(LttrsActivity.this, SetupActivity.class));
+            finish();
+        }
     }
 
     @Override
@@ -239,7 +247,7 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
                     this,
                     R.id.nav_host_fragment
             );
-            navController.navigate(MainNavigationDirections.actionSearch(query));
+            navController.navigate(LttrsNavigationDirections.actionSearch(query));
         }
 
     }

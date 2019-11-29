@@ -21,19 +21,25 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
+import rs.ltt.android.entity.AccountWithCredentials;
+
 public class KeywordQueryViewModelFactory implements ViewModelProvider.Factory {
 
     private final Application application;
+    private final ListenableFuture<AccountWithCredentials> account;
     private final String keyword;
 
-    public KeywordQueryViewModelFactory(@NonNull Application application, @NonNull String keyword) {
+    public KeywordQueryViewModelFactory(@NonNull Application application, ListenableFuture<AccountWithCredentials> account, @NonNull String keyword) {
         this.application = application;
+        this.account = account;
         this.keyword = keyword;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return modelClass.cast(new KeywordQueryViewModel(application, keyword));
+        return modelClass.cast(new KeywordQueryViewModel(application, account, keyword));
     }
 }

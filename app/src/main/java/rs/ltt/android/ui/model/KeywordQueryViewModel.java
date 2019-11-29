@@ -22,6 +22,9 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
+import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 
@@ -31,8 +34,8 @@ public class KeywordQueryViewModel extends AbstractQueryViewModel {
 
     private final String keyword;
 
-    KeywordQueryViewModel(final Application application, @NonNull final String keyword) {
-        super(application);
+    KeywordQueryViewModel(final Application application, ListenableFuture<AccountWithCredentials> account, @NonNull final String keyword) {
+        super(application, account);
         this.keyword = keyword;
         this.emailQueryLiveData = Transformations.map(queryRepository.getTrashAndJunk(), trashAndJunk -> EmailQuery.of(
                 EmailFilterCondition.builder().hasKeyword(keyword).inMailboxOtherThan(trashAndJunk).build(),

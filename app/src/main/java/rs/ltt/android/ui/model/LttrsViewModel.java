@@ -25,8 +25,12 @@ import androidx.work.WorkInfo;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 
+import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.repository.MainRepository;
 import rs.ltt.android.repository.ThreadRepository;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
@@ -35,19 +39,30 @@ import rs.ltt.jmap.mua.util.LabelUtil;
 
 public class LttrsViewModel extends AndroidViewModel {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(LttrsViewModel.class);
+
     private final LiveData<List<Label>> navigatableLabels;
     private final MainRepository mainRepository;
+    private final ListenableFuture<AccountWithCredentials> account;
     private final ThreadRepository threadRepository;
+    private final LiveData<Boolean> hasAccounts;
     private String currentSearchTerm;
 
     public LttrsViewModel(@NonNull Application application) {
         super(application);
+        LOGGER.debug("creating instance of LttrsViewModel");
         this.mainRepository = new MainRepository(application);
-        this.threadRepository = new ThreadRepository(application);
+        this.account = this.mainRepository.getAccount(null);
+        this.threadRepository = new ThreadRepository(application, this.account);
         this.navigatableLabels = Transformations.map(
                 this.threadRepository.getMailboxes(),
                 LabelUtil::fillUpAndSort
         );
+        this.hasAccounts = this.mainRepository.hasAccounts();
+    }
+
+    public ListenableFuture<AccountWithCredentials> getAccount() {
+        return this.account;
     }
 
     public String getCurrentSearchTerm() {
@@ -89,6 +104,10 @@ public class LttrsViewModel extends AndroidViewModel {
 
     public void copyToMailbox(final String threadId, final IdentifiableMailboxWithRole mailbox) {
         this.threadRepository.copyToMailbox(threadId, mailbox);
+    }
+
+    public LiveData<Boolean> getHasAccounts() {
+        return this.hasAccounts;
     }
 
 }
