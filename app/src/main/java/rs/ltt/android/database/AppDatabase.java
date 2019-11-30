@@ -52,7 +52,7 @@ public abstract class AppDatabase extends RoomDatabase {
             if (INSTANCE != null) {
                 return INSTANCE;
             }
-            INSTANCE = Room.databaseBuilder(context,AppDatabase.class,"app").build();
+            INSTANCE = Room.databaseBuilder(context, AppDatabase.class, "app").allowMainThreadQueries().build();
             return INSTANCE;
         }
     }

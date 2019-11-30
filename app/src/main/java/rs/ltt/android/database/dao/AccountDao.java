@@ -50,7 +50,10 @@ public abstract class AccountDao {
     abstract void insert(AccountEntity entity);
 
     @Query("select exists (select 1 from account)")
-    public abstract LiveData<Boolean> hasAccounts();
+    public abstract LiveData<Boolean> hasAccountsLiveData();
+
+    @Query("select exists (select 1 from account)")
+    public abstract boolean hasAccounts();
 
     @Transaction
     public void insert(String username,

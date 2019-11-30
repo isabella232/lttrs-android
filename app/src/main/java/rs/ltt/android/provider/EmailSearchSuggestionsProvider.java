@@ -32,7 +32,6 @@ public class EmailSearchSuggestionsProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        Log.d("lttrs","EmailSearchSuggestions Provider onCreate");
         return false;
     }
 

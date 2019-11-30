@@ -32,6 +32,7 @@ import okhttp3.HttpUrl;
 import rs.ltt.android.database.AppDatabase;
 import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.entity.SearchSuggestionEntity;
+import rs.ltt.android.util.SetupCache;
 import rs.ltt.jmap.common.entity.Account;
 
 public class MainRepository {
@@ -62,13 +63,14 @@ public class MainRepository {
                     primaryAccountId,
                     accounts
             );
+            SetupCache.invalidate();
             settableFuture.set(null);
         });
         return settableFuture;
     }
 
     public LiveData<Boolean> hasAccounts() {
-        return Transformations.distinctUntilChanged(appDatabase.accountDao().hasAccounts());
+        return Transformations.distinctUntilChanged(appDatabase.accountDao().hasAccountsLiveData());
     }
 
     public ListenableFuture<AccountWithCredentials> getAccount(@Nullable final Long id) {
