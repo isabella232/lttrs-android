@@ -15,21 +15,51 @@
 
 package rs.ltt.android.ui.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import rs.ltt.android.R;
-import rs.ltt.android.databinding.ActivitySetupBinding;
+import rs.ltt.android.SetupNavigationDirections;
+import rs.ltt.android.ui.model.SetupViewModel;
 
 public class SetupActivity extends AppCompatActivity {
-
-    private ActivitySetupBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_setup);
+        setContentView(R.layout.activity_setup);
+        final NavController navController = Navigation.findNavController(
+                this,
+                R.id.nav_host_fragment
+        );
+        final ViewModelProvider viewModelProvider = new ViewModelProvider(
+                this,
+                getDefaultViewModelProviderFactory()
+        );
+        viewModelProvider.get(SetupViewModel.class).getRedirection().observe(this, targetEvent -> {
+            if (targetEvent.isConsumable()) {
+                final SetupViewModel.Target target = targetEvent.consume();
+                switch (target) {
+                    case LTTRS:
+                        startActivity(new Intent(SetupActivity.this, LttrsActivity.class));
+                        finish();
+                        break;
+                    case ENTER_PASSWORD:
+                        navController.navigate(SetupNavigationDirections.enterPassword());
+                        break;
+                    case ENTER_URL:
+                        navController.navigate(SetupNavigationDirections.enterConnectionUrl());
+                        break;
+                    default:
+                        throw new IllegalStateException(String.format("Unable to navigate to target %s", target));
+
+                }
+            }
+        });
     }
 }

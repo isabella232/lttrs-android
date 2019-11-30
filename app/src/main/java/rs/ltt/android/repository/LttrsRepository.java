@@ -115,6 +115,7 @@ public class LttrsRepository {
                         .username(account.username)
                         .password(account.password)
                         .accountId(account.accountId)
+                        .sessionResource(account.connectionUrl)
                         .cache(new DatabaseCache(database))
                         .sessionCache(new FileSessionCache(application.getCacheDir()))
                         .queryPageSize(20L)

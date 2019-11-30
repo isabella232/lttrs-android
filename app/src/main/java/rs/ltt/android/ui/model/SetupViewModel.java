@@ -33,6 +33,7 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -42,8 +43,10 @@ import java.util.regex.Pattern;
 import okhttp3.HttpUrl;
 import rs.ltt.android.R;
 import rs.ltt.android.repository.MainRepository;
+import rs.ltt.android.util.Event;
 import rs.ltt.jmap.client.JmapClient;
 import rs.ltt.jmap.client.api.EndpointNotFoundException;
+import rs.ltt.jmap.client.api.InvalidSessionResourceException;
 import rs.ltt.jmap.client.api.UnauthorizedException;
 import rs.ltt.jmap.client.session.Session;
 import rs.ltt.jmap.common.entity.Account;
@@ -67,8 +70,8 @@ public class SetupViewModel extends AndroidViewModel {
     private final MutableLiveData<String> connectionUrl = new MutableLiveData<>();
     private final MutableLiveData<String> connectionUrlError = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
+    private final MutableLiveData<Event<Target>> redirection = new MutableLiveData<>();
 
-    private final AtomicBoolean runningSessionFetch = new AtomicBoolean(false);
     private final MainRepository mainRepository;
 
     public SetupViewModel(@NonNull Application application) {
@@ -104,12 +107,43 @@ public class SetupViewModel extends AndroidViewModel {
         return connectionUrlError;
     }
 
-    public ListenableFuture<Target> enterEmailAddress() {
+    public LiveData<Event<Target>> getRedirection() {
+        return this.redirection;
+    }
+
+    public void enterEmailAddress() {
+        this.password.setValue(null);
+        this.connectionUrl.setValue(null);
         final String emailAddress = Strings.nullToEmpty(this.emailAddress.getValue()).trim();
         if (EMAIL_PATTERN.matcher(emailAddress).matches()) {
-            emailAddressError.postValue(null);
+            this.loading.postValue(true);
+            this.emailAddressError.postValue(null);
             this.emailAddress.postValue(emailAddress);
-            return connectToServer();
+            final ListenableFuture<Session> sessionFuture = getSession();
+            sessionFuture.addListener(() -> {
+                try {
+                    final Session session = sessionFuture.get();
+                    processAccounts(session);
+                } catch (ExecutionException e) {
+                    loading.postValue(false);
+                    final Throwable cause = e.getCause();
+                    if (cause instanceof UnauthorizedException) {
+                        passwordError.postValue(null);
+                        redirection.postValue(new Event<>(Target.ENTER_PASSWORD));
+                    } else if (cause instanceof EndpointNotFoundException
+                            || cause instanceof UnknownHostException
+                            || cause instanceof InvalidSessionResourceException) {
+                        //TODO on UnknownHostException first check if we have internet
+                        connectionUrlError.postValue(null);
+                        redirection.postValue(new Event<>(Target.ENTER_URL));
+                    } else {
+                        LOGGER.error("Unexpected problem fetching session object", cause);
+                    }
+                } catch (InterruptedException e) {
+                    loading.postValue(false);
+                    LOGGER.warn("fetching session object from server has been interrupted", e);
+                }
+            }, MoreExecutors.directExecutor());
         } else {
             if (emailAddress.isEmpty()) {
                 emailAddressError.postValue(
@@ -120,76 +154,119 @@ public class SetupViewModel extends AndroidViewModel {
                         getApplication().getString(R.string.enter_a_valid_email_address)
                 );
             }
-            return Futures.immediateFuture(Target.NOP);
         }
     }
 
-    public ListenableFuture<Target> enterPassword() {
+    public void enterPassword() {
         final String password = Strings.nullToEmpty(this.password.getValue());
         if (password.isEmpty()) {
             this.passwordError.postValue(
                     getApplication().getString(R.string.enter_a_password)
             );
-            return Futures.immediateFuture(Target.NOP);
         } else {
+            this.loading.postValue(true);
             this.passwordError.postValue(null);
-            return connectToServer();
+            final ListenableFuture<Session> sessionFuture = getSession();
+            sessionFuture.addListener(() -> {
+                try {
+                    final Session session = sessionFuture.get();
+                    processAccounts(session);
+                } catch (ExecutionException e) {
+                    loading.postValue(false);
+                    final Throwable cause = e.getCause();
+                    if (cause instanceof UnauthorizedException) {
+                        passwordError.postValue(getApplication().getString(R.string.wrong_password));
+                    } else if (cause instanceof EndpointNotFoundException) {
+                        if (Strings.emptyToNull(connectionUrl.getValue()) != null) {
+                            connectionUrlError.postValue(
+                                    getApplication().getString(R.string.endpoint_not_found)
+                            );
+                        } else {
+                            connectionUrlError.postValue(null);
+                        }
+                        redirection.postValue(new Event<>(Target.ENTER_URL));
+                    } else {
+                        LOGGER.error("Unexpected problem fetching session object", cause);
+                    }
+                } catch (InterruptedException e) {
+                    loading.postValue(false);
+                    LOGGER.warn("fetching session object from server has been interrupted", e);
+                }
+            }, MoreExecutors.directExecutor());
         }
     }
 
-    private ListenableFuture<Target> connectToServer() {
-        if (runningSessionFetch.compareAndSet(true, false)) {
-            LOGGER.warn("Session fetch already in progress");
-            loading.postValue(true);
-            return Futures.immediateFuture(Target.NOP);
+    public void enterConnectionUrl() {
+        try {
+            final HttpUrl httpUrl = HttpUrl.get(Strings.nullToEmpty(connectionUrl.getValue()));
+            LOGGER.debug("User entered connection url {}", httpUrl.toString());
+            if (httpUrl.scheme().equals("http")) {
+                this.connectionUrlError.postValue(getApplication().getString(R.string.enter_a_secure_url));
+                return;
+            }
+            this.loading.postValue(true);
+            this.connectionUrl.postValue(httpUrl.toString());
+            this.connectionUrlError.postValue(null);
+            final ListenableFuture<Session> sessionFuture = getSession();
+            sessionFuture.addListener(() -> {
+                try {
+                    final Session session = sessionFuture.get();
+                    processAccounts(session);
+                } catch (ExecutionException e) {
+                    loading.postValue(false);
+                    final Throwable cause = e.getCause();
+                    if (cause instanceof UnauthorizedException) {
+                        passwordError.postValue(null);
+                        redirection.postValue(new Event<>(Target.ENTER_PASSWORD));
+                    } else if (cause instanceof EndpointNotFoundException) {
+                        connectionUrlError.postValue(getApplication().getString(R.string.endpoint_not_found));
+                    } else if (cause instanceof InvalidSessionResourceException) {
+                        connectionUrlError.postValue(getApplication().getString(R.string.invalid_session_resource));
+                    } else if (cause instanceof UnknownHostException) {
+                        connectionUrlError.postValue(getApplication().getString(R.string.unknown_host, httpUrl.host()));
+                    } else {
+                        LOGGER.error("Unexpected problem fetching session object", cause);
+                    }
+                } catch (InterruptedException e) {
+                    loading.postValue(false);
+                    LOGGER.warn("fetching session object from server has been interrupted", e);
+                }
+            }, MoreExecutors.directExecutor());
+        } catch (IllegalArgumentException e) {
+            this.connectionUrlError.postValue(getApplication().getString(R.string.enter_a_valid_url));
         }
-        loading.postValue(true);
-        final SettableFuture<Target> settableFuture = SettableFuture.create();
+    }
+
+    private ListenableFuture<Session> getSession() {
         final JmapClient jmapClient = new JmapClient(
                 Strings.nullToEmpty(emailAddress.getValue()),
                 Strings.nullToEmpty(password.getValue()),
                 getHttpConnectionUrl()
         );
-        final ListenableFuture<Session> sessionFuture = jmapClient.getSession();
-        sessionFuture.addListener(() -> {
-            try {
-                final Session session = sessionFuture.get();
-                final Map<String, Account> accounts = session.getAccounts(MailAccountCapability.class);
-                LOGGER.info("found {} accounts with mail capability", accounts.size());
-                if (accounts.size() == 1) {
-                    ListenableFuture<Void> insertFuture = mainRepository.insertAccounts(
-                            Strings.nullToEmpty(emailAddress.getValue()),
-                            Strings.nullToEmpty(password.getValue()),
-                            getHttpConnectionUrl(),
-                            session.getPrimaryAccount(MailAccountCapability.class),
-                            accounts
-                    );
-                    settableFuture.setFuture(Futures.transform(insertFuture, new Function<Void, Target>() {
-                        @NullableDecl
-                        @Override
-                        public Target apply(@NullableDecl Void input) {
-                            return Target.DONE;
-                        }
-                    }, MoreExecutors.directExecutor()));
-                }
-            } catch (ExecutionException e) {
-                final Throwable cause = e.getCause();
-                if (cause instanceof UnauthorizedException) {
-                    settableFuture.set(Target.ENTER_PASSWORD);
-                } else if (cause instanceof EndpointNotFoundException) {
-                    settableFuture.set(Target.ENTER_URL);
-                } else {
-                    LOGGER.error("Unexpected problem fetching session object", cause);
-                    settableFuture.setException(cause);
-                }
-            } catch (InterruptedException e) {
-                LOGGER.warn("fetching session object from server has been interrupted", e);
-                settableFuture.set(Target.NOP);
-            }
-            runningSessionFetch.set(false);
+        return jmapClient.getSession();
+    }
+
+    private void processAccounts(final Session session) {
+        final Map<String, Account> accounts = session.getAccounts(MailAccountCapability.class);
+        LOGGER.info("found {} accounts with mail capability", accounts.size());
+        if (accounts.size() == 1) {
+            ListenableFuture<Void> insertFuture = mainRepository.insertAccounts(
+                    Strings.nullToEmpty(emailAddress.getValue()),
+                    Strings.nullToEmpty(password.getValue()),
+                    getHttpConnectionUrl(),
+                    session.getPrimaryAccount(MailAccountCapability.class),
+                    accounts
+            );
+            insertFuture.addListener(() -> {
+                loading.postValue(false);
+                redirection.postValue(new Event<>(Target.LTTRS));
+                //TODO error handling; post snackbar or something
+            }, MoreExecutors.directExecutor());
+        } else {
             loading.postValue(false);
-        }, MoreExecutors.directExecutor());
-        return settableFuture;
+            redirection.postValue(new Event<>(Target.SELECT_ACCOUNTS));
+            //store accounts in view model
+        }
     }
 
     private HttpUrl getHttpConnectionUrl() {
@@ -206,7 +283,6 @@ public class SetupViewModel extends AndroidViewModel {
         ENTER_PASSWORD,
         ENTER_URL,
         SELECT_ACCOUNTS,
-        DONE,
-        NOP
+        LTTRS
     }
 }

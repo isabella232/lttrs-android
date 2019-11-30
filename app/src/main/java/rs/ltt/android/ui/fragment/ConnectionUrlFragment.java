@@ -15,7 +15,6 @@
 
 package rs.ltt.android.ui.fragment;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,27 +22,21 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-
-import com.google.common.util.concurrent.ListenableFuture;
-
-import java.util.concurrent.ExecutionException;
 
 import rs.ltt.android.R;
-import rs.ltt.android.databinding.FragmentPasswordBinding;
-import rs.ltt.android.ui.activity.LttrsActivity;
-import rs.ltt.android.ui.model.SetupViewModel;
-import rs.ltt.android.util.MainThreadExecutor;
+import rs.ltt.android.databinding.FragmentConnectionUrlBinding;
 
-public class PasswordFragment extends AbstractSetupFragment {
-
-    FragmentPasswordBinding binding;
+public class ConnectionUrlFragment extends AbstractSetupFragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        this.binding = DataBindingUtil.inflate(inflater, R.layout.fragment_password, container, false);
+        final FragmentConnectionUrlBinding binding = DataBindingUtil.inflate(
+                inflater,
+                R.layout.fragment_connection_url,
+                container,
+                false
+        );
         binding.setSetupViewModel(setupViewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
         return binding.getRoot();

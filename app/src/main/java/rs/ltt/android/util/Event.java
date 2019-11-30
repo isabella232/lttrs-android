@@ -13,15 +13,28 @@
  * limitations under the License.
  */
 
-package rs.ltt.android.entity;
+package rs.ltt.android.util;
 
-import okhttp3.HttpUrl;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-public class AccountWithCredentials {
+public class Event<T> {
 
-    public Long id;
-    public String accountId;
-    public String username;
-    public String password;
-    public HttpUrl connectionUrl;
+    private final T event;
+    private final AtomicBoolean isConsumable = new AtomicBoolean(true);
+
+    public Event(T event) {
+        this.event = event;
+    }
+
+    public T consume() {
+        if (isConsumable.compareAndSet(true, false)) {
+            return event;
+        }
+        throw new IllegalStateException("Event has already been consumed");
+    }
+
+    public boolean isConsumable() {
+        return isConsumable.get();
+    }
+
 }

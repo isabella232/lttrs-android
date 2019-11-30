@@ -102,7 +102,7 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
         threadViewModel.getFlagged().observe(getViewLifecycleOwner(), threadAdapter::setFlagged);
         threadViewModel.getMenuConfiguration().observe(getViewLifecycleOwner(), menuConfiguration -> {
             this.menuConfiguration = menuConfiguration;
-            getActivity().invalidateOptionsMenu();
+            requireActivity().invalidateOptionsMenu();
         });
         threadAdapter.setOnFlaggedToggledListener(this);
         return binding.getRoot();

@@ -44,37 +44,7 @@ public class SignInFragment extends AbstractSetupFragment {
         this.binding = DataBindingUtil.inflate(inflater, R.layout.fragment_sign_in, container, false);
         binding.setSetupViewModel(setupViewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
-        binding.next.setOnClickListener(this::onNextButtonClicked);
         return binding.getRoot();
-    }
-
-    private void onNextButtonClicked(View view) {
-        final ListenableFuture<SetupViewModel.Target> future = setupViewModel.enterEmailAddress();
-        future.addListener(() -> {
-            try {
-                final SetupViewModel.Target target = future.get();
-                if (target == SetupViewModel.Target.NOP) {
-                    return;
-                }
-                final NavController navController = Navigation.findNavController(
-                        requireActivity(),
-                        R.id.nav_host_fragment
-                );
-                switch (target) {
-                    case ENTER_PASSWORD:
-                        navController.navigate(R.id.signIn_to_password);
-                        break;
-                    case ENTER_URL:
-                        break;
-                    default:
-                        throw new IllegalStateException(
-                                String.format("Navigating to %s not implemented", target.toString())
-                        );
-                }
-            } catch (ExecutionException | InterruptedException e) {
-
-            }
-        }, MainThreadExecutor.getInstance());
     }
 
 }

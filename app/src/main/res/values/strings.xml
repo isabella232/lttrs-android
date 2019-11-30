@@ -40,4 +40,12 @@
     <string name="welcome">Welcome</string>
     <string name="enter_your_password">Enter your password</string>
     <string name="enter_a_password">Enter a password</string>
+    <string name="wrong_password">Wrong password. Try again.</string>
+    <string name="information_required">Information required</string>
+    <string name="enter_your_connection_url">Enter your connection URL</string>
+    <string name="enter_a_valid_url">Enter a valid connection URL</string>
+    <string name="enter_a_secure_url">Enter a secure URL</string>
+    <string name="endpoint_not_found">There is no Email service on this URL</string>
+    <string name="invalid_session_resource">There is no valid Email service on this URL</string>
+    <string name="unknown_host">Unable to resolve %s</string>
 </resources>

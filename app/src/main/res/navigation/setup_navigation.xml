@@ -19,22 +19,37 @@
     android:id="@+id/setup_navigation"
     app:startDestination="@+id/signIn">
 
+    <action
+        android:id="@+id/enterPassword"
+        app:destination="@+id/password"
+        app:popUpTo="@+id/connectionUrl"
+        app:enterAnim="@anim/slide_from_right"
+        app:exitAnim="@anim/slide_to_left"
+        app:popEnterAnim="@anim/slide_from_left"
+        app:popExitAnim="@anim/slide_to_right" />
+
+    <action
+        android:id="@+id/enterConnectionUrl"
+        app:popUpTo="@+id/signIn"
+        app:destination="@+id/connectionUrl"
+        app:enterAnim="@anim/slide_from_right"
+        app:exitAnim="@anim/slide_to_left"
+        app:popEnterAnim="@anim/slide_from_left"
+        app:popExitAnim="@anim/slide_to_right" />
+
     <fragment
         android:id="@+id/signIn"
         android:name="rs.ltt.android.ui.fragment.SignInFragment"
-        tools:layout="@layout/fragment_sign_in">
-        <action
-            android:id="@+id/signIn_to_password"
-            app:destination="@+id/password"
-            app:enterAnim="@anim/slide_from_right"
-            app:exitAnim="@anim/slide_to_left"
-            app:popEnterAnim="@anim/slide_from_left"
-            app:popExitAnim="@anim/slide_to_right" />
-    </fragment>
+        tools:layout="@layout/fragment_sign_in" />
 
     <fragment
         android:id="@+id/password"
         android:name="rs.ltt.android.ui.fragment.PasswordFragment"
         tools:layout="@layout/fragment_password" />
+
+    <fragment
+        android:id="@+id/connectionUrl"
+        android:name="rs.ltt.android.ui.fragment.ConnectionUrlFragment"
+        tools:layout="@layout/fragment_connection_url" />
 
 </navigation>
