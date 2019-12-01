@@ -16,29 +16,33 @@
 package rs.ltt.android.ui.model;
 
 import android.app.Application;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
-import com.google.common.util.concurrent.SettableFuture;
 
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
+
+import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.SSLPeerUnverifiedException;
 
 import okhttp3.HttpUrl;
 import rs.ltt.android.R;
@@ -77,6 +81,14 @@ public class SetupViewModel extends AndroidViewModel {
     public SetupViewModel(@NonNull Application application) {
         super(application);
         this.mainRepository = new MainRepository(application);
+    }
+
+    private static boolean endpointProblem(Throwable t) {
+        return t instanceof InvalidSessionResourceException
+                || t instanceof EndpointNotFoundException
+                || t instanceof ConnectException
+                || t instanceof SSLHandshakeException
+                || t instanceof SSLPeerUnverifiedException;
     }
 
     public LiveData<Boolean> isLoading() {
@@ -119,29 +131,32 @@ public class SetupViewModel extends AndroidViewModel {
             this.loading.postValue(true);
             this.emailAddressError.postValue(null);
             this.emailAddress.postValue(emailAddress);
-            final ListenableFuture<Session> sessionFuture = getSession();
-            sessionFuture.addListener(() -> {
-                try {
-                    final Session session = sessionFuture.get();
+            Futures.addCallback(getSession(), new FutureCallback<Session>() {
+                @Override
+                public void onSuccess(@NullableDecl Session session) {
+                    Preconditions.checkNotNull(session);
                     processAccounts(session);
-                } catch (ExecutionException e) {
+                }
+
+                @Override
+                public void onFailure(@NonNull Throwable cause) {
                     loading.postValue(false);
-                    final Throwable cause = e.getCause();
                     if (cause instanceof UnauthorizedException) {
                         passwordError.postValue(null);
                         redirection.postValue(new Event<>(Target.ENTER_PASSWORD));
-                    } else if (cause instanceof EndpointNotFoundException
-                            || cause instanceof UnknownHostException
-                            || cause instanceof InvalidSessionResourceException) {
-                        //TODO on UnknownHostException first check if we have internet
+                    } else if (cause instanceof UnknownHostException) {
+                        if (isNetworkAvailable()) {
+                            connectionUrlError.postValue(null);
+                            redirection.postValue(new Event<>(Target.ENTER_URL));
+                        } else {
+                            emailAddressError.postValue(getApplication().getString(R.string.no_network_connection));
+                        }
+                    } else if (endpointProblem(cause)) {
                         connectionUrlError.postValue(null);
                         redirection.postValue(new Event<>(Target.ENTER_URL));
                     } else {
                         LOGGER.error("Unexpected problem fetching session object", cause);
                     }
-                } catch (InterruptedException e) {
-                    loading.postValue(false);
-                    LOGGER.warn("fetching session object from server has been interrupted", e);
                 }
             }, MoreExecutors.directExecutor());
         } else {
@@ -166,21 +181,28 @@ public class SetupViewModel extends AndroidViewModel {
         } else {
             this.loading.postValue(true);
             this.passwordError.postValue(null);
-            final ListenableFuture<Session> sessionFuture = getSession();
-            sessionFuture.addListener(() -> {
-                try {
-                    final Session session = sessionFuture.get();
+            Futures.addCallback(getSession(), new FutureCallback<Session>() {
+                @Override
+                public void onSuccess(@NullableDecl Session session) {
+                    Preconditions.checkNotNull(session);
                     processAccounts(session);
-                } catch (ExecutionException e) {
+                }
+
+                @Override
+                public void onFailure(@NonNull Throwable cause) {
                     loading.postValue(false);
-                    final Throwable cause = e.getCause();
                     if (cause instanceof UnauthorizedException) {
                         passwordError.postValue(getApplication().getString(R.string.wrong_password));
-                    } else if (cause instanceof EndpointNotFoundException) {
+                    } else if (cause instanceof UnknownHostException) {
+                        if (isNetworkAvailable()) {
+                            connectionUrlError.postValue(null);
+                            redirection.postValue(new Event<>(Target.ENTER_URL));
+                        } else {
+                            passwordError.postValue(getApplication().getString(R.string.no_network_connection));
+                        }
+                    } else if (endpointProblem(cause)) {
                         if (Strings.emptyToNull(connectionUrl.getValue()) != null) {
-                            connectionUrlError.postValue(
-                                    getApplication().getString(R.string.endpoint_not_found)
-                            );
+                            connectionUrlError.postValue(causeToString(cause));
                         } else {
                             connectionUrlError.postValue(null);
                         }
@@ -188,9 +210,6 @@ public class SetupViewModel extends AndroidViewModel {
                     } else {
                         LOGGER.error("Unexpected problem fetching session object", cause);
                     }
-                } catch (InterruptedException e) {
-                    loading.postValue(false);
-                    LOGGER.warn("fetching session object from server has been interrupted", e);
                 }
             }, MoreExecutors.directExecutor());
         }
@@ -207,29 +226,30 @@ public class SetupViewModel extends AndroidViewModel {
             this.loading.postValue(true);
             this.connectionUrl.postValue(httpUrl.toString());
             this.connectionUrlError.postValue(null);
-            final ListenableFuture<Session> sessionFuture = getSession();
-            sessionFuture.addListener(() -> {
-                try {
-                    final Session session = sessionFuture.get();
+            Futures.addCallback(getSession(), new FutureCallback<Session>() {
+                @Override
+                public void onSuccess(@NullableDecl Session session) {
+                    Preconditions.checkNotNull(session);
                     processAccounts(session);
-                } catch (ExecutionException e) {
+                }
+
+                @Override
+                public void onFailure(@NonNull Throwable cause) {
                     loading.postValue(false);
-                    final Throwable cause = e.getCause();
                     if (cause instanceof UnauthorizedException) {
                         passwordError.postValue(null);
                         redirection.postValue(new Event<>(Target.ENTER_PASSWORD));
-                    } else if (cause instanceof EndpointNotFoundException) {
-                        connectionUrlError.postValue(getApplication().getString(R.string.endpoint_not_found));
-                    } else if (cause instanceof InvalidSessionResourceException) {
-                        connectionUrlError.postValue(getApplication().getString(R.string.invalid_session_resource));
+                    } else if (endpointProblem(cause)) {
+                        connectionUrlError.postValue(causeToString(cause));
                     } else if (cause instanceof UnknownHostException) {
-                        connectionUrlError.postValue(getApplication().getString(R.string.unknown_host, httpUrl.host()));
+                        if (isNetworkAvailable()) {
+                            connectionUrlError.postValue(getApplication().getString(R.string.unknown_host, httpUrl.host()));
+                        } else {
+                            connectionUrlError.postValue(getApplication().getString(R.string.no_network_connection));
+                        }
                     } else {
                         LOGGER.error("Unexpected problem fetching session object", cause);
                     }
-                } catch (InterruptedException e) {
-                    loading.postValue(false);
-                    LOGGER.warn("fetching session object from server has been interrupted", e);
                 }
             }, MoreExecutors.directExecutor());
         } catch (IllegalArgumentException e) {
@@ -269,6 +289,12 @@ public class SetupViewModel extends AndroidViewModel {
         }
     }
 
+    private boolean isNetworkAvailable() {
+        final ConnectivityManager cm = (ConnectivityManager) getApplication().getSystemService(Context.CONNECTIVITY_SERVICE);
+        final NetworkInfo info = cm.getActiveNetworkInfo();
+        return info != null && info.isConnected();
+    }
+
     private HttpUrl getHttpConnectionUrl() {
         final String connectionUrl = Strings.emptyToNull(this.connectionUrl.getValue());
         if (connectionUrl == null) {
@@ -276,6 +302,26 @@ public class SetupViewModel extends AndroidViewModel {
         } else {
             return HttpUrl.get(connectionUrl);
         }
+    }
+
+    private String causeToString(Throwable t) {
+        final Context c = getApplication();
+        if (t instanceof InvalidSessionResourceException) {
+            return c.getString(R.string.invalid_session_resource);
+        }
+        if (t instanceof EndpointNotFoundException) {
+            return c.getString(R.string.endpoint_not_found);
+        }
+        if (t instanceof ConnectException) {
+            return c.getString(R.string.unable_to_connect);
+        }
+        if (t instanceof SSLHandshakeException) {
+            return c.getString(R.string.unable_to_establish_secure_connection);
+        }
+        if (t instanceof SSLPeerUnverifiedException) {
+            return c.getString(R.string.unable_to_verify_service_identity);
+        }
+        throw new IllegalArgumentException();
     }
 
 

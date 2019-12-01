@@ -19,12 +19,14 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import rs.ltt.android.R;
 import rs.ltt.android.SetupNavigationDirections;
+import rs.ltt.android.databinding.ActivitySetupBinding;
 import rs.ltt.android.ui.model.SetupViewModel;
 
 public class SetupActivity extends AppCompatActivity {
@@ -32,7 +34,7 @@ public class SetupActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_setup);
+        final ActivitySetupBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_setup);
         final NavController navController = Navigation.findNavController(
                 this,
                 R.id.nav_host_fragment
@@ -41,7 +43,8 @@ public class SetupActivity extends AppCompatActivity {
                 this,
                 getDefaultViewModelProviderFactory()
         );
-        viewModelProvider.get(SetupViewModel.class).getRedirection().observe(this, targetEvent -> {
+        final SetupViewModel setupViewModel = viewModelProvider.get(SetupViewModel.class);
+        setupViewModel.getRedirection().observe(this, targetEvent -> {
             if (targetEvent.isConsumable()) {
                 final SetupViewModel.Target target = targetEvent.consume();
                 switch (target) {

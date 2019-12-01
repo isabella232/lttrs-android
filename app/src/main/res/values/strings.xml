@@ -45,7 +45,11 @@
     <string name="enter_your_connection_url">Enter your connection URL</string>
     <string name="enter_a_valid_url">Enter a valid connection URL</string>
     <string name="enter_a_secure_url">Enter a secure URL</string>
-    <string name="endpoint_not_found">There is no Email service on this URL</string>
-    <string name="invalid_session_resource">There is no valid Email service on this URL</string>
+    <string name="endpoint_not_found">There is no Email service at this address</string>
+    <string name="invalid_session_resource">There is no valid Email service at this address</string>
+    <string name="unable_to_connect">Unable to connect to Email service</string>
+    <string name="unable_to_establish_secure_connection">Unable to establish a secure connection</string>
+    <string name="unable_to_verify_service_identity">Unable to verify identity</string>
     <string name="unknown_host">Unable to resolve %s</string>
+    <string name="no_network_connection">No network connection</string>
 </resources>

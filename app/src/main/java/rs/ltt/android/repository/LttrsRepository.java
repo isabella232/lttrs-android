@@ -136,7 +136,6 @@ public class LttrsRepository {
 
     private AccountWithCredentials requireAccount() {
         try {
-            LOGGER.debug("account={}",account.get());
             return this.account.get();
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.warn("Unable to acquire account credentials");
