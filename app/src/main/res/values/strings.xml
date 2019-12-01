@@ -48,8 +48,14 @@
     <string name="endpoint_not_found">There is no Email service at this address</string>
     <string name="invalid_session_resource">There is no valid Email service at this address</string>
     <string name="unable_to_connect">Unable to connect to Email service</string>
+    <string name="timeout_reached">Timeout reached trying to connect to Email service</string>
     <string name="unable_to_establish_secure_connection">Unable to establish a secure connection</string>
     <string name="unable_to_verify_service_identity">Unable to verify identity</string>
     <string name="unknown_host">Unable to resolve %s</string>
     <string name="no_network_connection">No network connection</string>
+    <string name="unable_to_fetch_session">Unable to fetch session: %s</string>
+    <plurals name="unable_to_safe_accounts">
+        <item quantity="one">Unable to safe account</item>
+        <item quantity="many">Unable to safe accounts</item>
+    </plurals>
 </resources>

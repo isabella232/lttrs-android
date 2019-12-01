@@ -17,6 +17,7 @@ package rs.ltt.android.ui.model;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
@@ -37,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -75,6 +77,7 @@ public class SetupViewModel extends AndroidViewModel {
     private final MutableLiveData<String> connectionUrlError = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
     private final MutableLiveData<Event<Target>> redirection = new MutableLiveData<>();
+    private final MutableLiveData<Event<String>> warningMessage = new MutableLiveData<>();
 
     private final MainRepository mainRepository;
 
@@ -83,10 +86,11 @@ public class SetupViewModel extends AndroidViewModel {
         this.mainRepository = new MainRepository(application);
     }
 
-    private static boolean endpointProblem(Throwable t) {
+    private static boolean isEndpointProblem(Throwable t) {
         return t instanceof InvalidSessionResourceException
                 || t instanceof EndpointNotFoundException
                 || t instanceof ConnectException
+                || t instanceof SocketTimeoutException
                 || t instanceof SSLHandshakeException
                 || t instanceof SSLPeerUnverifiedException;
     }
@@ -123,6 +127,10 @@ public class SetupViewModel extends AndroidViewModel {
         return this.redirection;
     }
 
+    public LiveData<Event<String>> getWarningMessage() {
+        return this.warningMessage;
+    }
+
     public void enterEmailAddress() {
         this.password.setValue(null);
         this.connectionUrl.setValue(null);
@@ -151,11 +159,11 @@ public class SetupViewModel extends AndroidViewModel {
                         } else {
                             emailAddressError.postValue(getApplication().getString(R.string.no_network_connection));
                         }
-                    } else if (endpointProblem(cause)) {
+                    } else if (isEndpointProblem(cause)) {
                         connectionUrlError.postValue(null);
                         redirection.postValue(new Event<>(Target.ENTER_URL));
                     } else {
-                        LOGGER.error("Unexpected problem fetching session object", cause);
+                        reportUnableToFetchSession(cause);
                     }
                 }
             }, MoreExecutors.directExecutor());
@@ -200,7 +208,7 @@ public class SetupViewModel extends AndroidViewModel {
                         } else {
                             passwordError.postValue(getApplication().getString(R.string.no_network_connection));
                         }
-                    } else if (endpointProblem(cause)) {
+                    } else if (isEndpointProblem(cause)) {
                         if (Strings.emptyToNull(connectionUrl.getValue()) != null) {
                             connectionUrlError.postValue(causeToString(cause));
                         } else {
@@ -208,7 +216,7 @@ public class SetupViewModel extends AndroidViewModel {
                         }
                         redirection.postValue(new Event<>(Target.ENTER_URL));
                     } else {
-                        LOGGER.error("Unexpected problem fetching session object", cause);
+                        reportUnableToFetchSession(cause);
                     }
                 }
             }, MoreExecutors.directExecutor());
@@ -239,7 +247,7 @@ public class SetupViewModel extends AndroidViewModel {
                     if (cause instanceof UnauthorizedException) {
                         passwordError.postValue(null);
                         redirection.postValue(new Event<>(Target.ENTER_PASSWORD));
-                    } else if (endpointProblem(cause)) {
+                    } else if (isEndpointProblem(cause)) {
                         connectionUrlError.postValue(causeToString(cause));
                     } else if (cause instanceof UnknownHostException) {
                         if (isNetworkAvailable()) {
@@ -248,7 +256,7 @@ public class SetupViewModel extends AndroidViewModel {
                             connectionUrlError.postValue(getApplication().getString(R.string.no_network_connection));
                         }
                     } else {
-                        LOGGER.error("Unexpected problem fetching session object", cause);
+                        reportUnableToFetchSession(cause);
                     }
                 }
             }, MoreExecutors.directExecutor());
@@ -270,23 +278,49 @@ public class SetupViewModel extends AndroidViewModel {
         final Map<String, Account> accounts = session.getAccounts(MailAccountCapability.class);
         LOGGER.info("found {} accounts with mail capability", accounts.size());
         if (accounts.size() == 1) {
-            ListenableFuture<Void> insertFuture = mainRepository.insertAccounts(
+            final ListenableFuture<Void> insertFuture = mainRepository.insertAccounts(
                     Strings.nullToEmpty(emailAddress.getValue()),
                     Strings.nullToEmpty(password.getValue()),
                     getHttpConnectionUrl(),
                     session.getPrimaryAccount(MailAccountCapability.class),
                     accounts
             );
-            insertFuture.addListener(() -> {
-                loading.postValue(false);
-                redirection.postValue(new Event<>(Target.LTTRS));
-                //TODO error handling; post snackbar or something
+            Futures.addCallback(insertFuture, new FutureCallback<Void>() {
+                @Override
+                public void onSuccess(@NullableDecl Void result) {
+                    redirection.postValue(new Event<>(Target.LTTRS));
+                    loading.postValue(false);
+                }
+
+                @Override
+                public void onFailure(@NonNull Throwable cause) {
+                    loading.postValue(false);
+                    final Resources r = getApplication().getResources();
+                    warningMessage.postValue(
+                            new Event<>(r.getQuantityString(R.plurals.unable_to_safe_accounts, 1))
+                    );
+
+                }
             }, MoreExecutors.directExecutor());
         } else {
             loading.postValue(false);
             redirection.postValue(new Event<>(Target.SELECT_ACCOUNTS));
             //store accounts in view model
         }
+    }
+
+    private void reportUnableToFetchSession(final Throwable throwable) {
+        if (throwable instanceof InterruptedException) {
+            return;
+        }
+        LOGGER.error("Unexpected problem fetching session object", throwable);
+        final String message = throwable.getMessage();
+        this.warningMessage.postValue(new Event<>(
+                getApplication().getString(
+                        R.string.unable_to_fetch_session,
+                        (message == null ? throwable.getClass().getSimpleName() : message)
+                )
+        ));
     }
 
     private boolean isNetworkAvailable() {
@@ -314,6 +348,9 @@ public class SetupViewModel extends AndroidViewModel {
         }
         if (t instanceof ConnectException) {
             return c.getString(R.string.unable_to_connect);
+        }
+        if (t instanceof SocketTimeoutException) {
+            return c.getString(R.string.timeout_reached);
         }
         if (t instanceof SSLHandshakeException) {
             return c.getString(R.string.unable_to_establish_secure_connection);

@@ -50,21 +50,25 @@ public class MainRepository {
     }
 
     public ListenableFuture<Void> insertAccounts(final String username,
-                                           final String password,
-                                           final HttpUrl connectionUrl,
-                                           final String primaryAccountId,
-                                           final Map<String, Account> accounts) {
+                                                 final String password,
+                                                 final HttpUrl connectionUrl,
+                                                 final String primaryAccountId,
+                                                 final Map<String, Account> accounts) {
         final SettableFuture<Void> settableFuture = SettableFuture.create();
         IO_EXECUTOR.execute(() -> {
-            appDatabase.accountDao().insert(
-                    username,
-                    password,
-                    connectionUrl,
-                    primaryAccountId,
-                    accounts
-            );
-            SetupCache.invalidate();
-            settableFuture.set(null);
+            try {
+                appDatabase.accountDao().insert(
+                        username,
+                        password,
+                        connectionUrl,
+                        primaryAccountId,
+                        accounts
+                );
+                SetupCache.invalidate();
+                settableFuture.set(null);
+            } catch (Exception e) {
+                settableFuture.setException(e);
+            }
         });
         return settableFuture;
     }

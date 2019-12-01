@@ -24,6 +24,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import com.google.android.material.snackbar.Snackbar;
+
 import rs.ltt.android.R;
 import rs.ltt.android.SetupNavigationDirections;
 import rs.ltt.android.databinding.ActivitySetupBinding;
@@ -62,6 +64,11 @@ public class SetupActivity extends AppCompatActivity {
                         throw new IllegalStateException(String.format("Unable to navigate to target %s", target));
 
                 }
+            }
+        });
+        setupViewModel.getWarningMessage().observe(this, event -> {
+            if (event.isConsumable()) {
+                Snackbar.make(binding.getRoot(), event.consume(), Snackbar.LENGTH_LONG).show();
             }
         });
     }
