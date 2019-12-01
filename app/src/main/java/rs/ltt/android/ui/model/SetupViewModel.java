@@ -24,7 +24,10 @@ import android.net.NetworkInfo;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.Transformations;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -84,6 +87,9 @@ public class SetupViewModel extends AndroidViewModel {
     public SetupViewModel(@NonNull Application application) {
         super(application);
         this.mainRepository = new MainRepository(application);
+        Transformations.distinctUntilChanged(emailAddress).observeForever(s -> emailAddressError.postValue(null));
+        Transformations.distinctUntilChanged(connectionUrl).observeForever(s -> connectionUrlError.postValue(null));
+        Transformations.distinctUntilChanged(password).observeForever(s -> passwordError.postValue(null));
     }
 
     private static boolean isEndpointProblem(Throwable t) {
@@ -100,7 +106,7 @@ public class SetupViewModel extends AndroidViewModel {
     }
 
     public LiveData<String> getEmailAddressError() {
-        return emailAddressError;
+        return Transformations.distinctUntilChanged(emailAddressError);
     }
 
     public MutableLiveData<String> getEmailAddress() {
@@ -111,16 +117,16 @@ public class SetupViewModel extends AndroidViewModel {
         return password;
     }
 
-    public MutableLiveData<String> getPasswordError() {
-        return passwordError;
+    public LiveData<String> getPasswordError() {
+        return Transformations.distinctUntilChanged(this.passwordError);
     }
 
     public MutableLiveData<String> getConnectionUrl() {
         return connectionUrl;
     }
 
-    public MutableLiveData<String> getConnectionUrlError() {
-        return connectionUrlError;
+    public LiveData<String> getConnectionUrlError() {
+        return Transformations.distinctUntilChanged(connectionUrlError);
     }
 
     public LiveData<Event<Target>> getRedirection() {
