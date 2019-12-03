@@ -24,4 +24,12 @@ public class AccountWithCredentials {
     public String username;
     public String password;
     public HttpUrl connectionUrl;
+
+    public AccountWithCredentials(Long id, String accountId, String username, String password, HttpUrl connectionUrl) {
+        this.id = id;
+        this.accountId = accountId;
+        this.username = username;
+        this.password = password;
+        this.connectionUrl = connectionUrl;
+    }
 }

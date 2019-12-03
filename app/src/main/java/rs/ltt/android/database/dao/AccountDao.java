@@ -21,8 +21,10 @@ import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Transaction;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.util.List;
 import java.util.Map;
 
 import okhttp3.HttpUrl;
@@ -47,7 +49,7 @@ public abstract class AccountDao {
     abstract Long insert(CredentialsEntity entity);
 
     @Insert
-    abstract void insert(AccountEntity entity);
+    abstract Long insert(AccountEntity entity);
 
     @Query("select exists (select 1 from account)")
     public abstract LiveData<Boolean> hasAccountsLiveData();
@@ -56,24 +58,35 @@ public abstract class AccountDao {
     public abstract boolean hasAccounts();
 
     @Transaction
-    public void insert(String username,
-                       String password,
-                       HttpUrl connectionUrl,
-                       String primaryAccountId,
-                       Map<String, Account> accounts) {
+    public List<AccountWithCredentials> insert(String username,
+                                               String password,
+                                               HttpUrl connectionUrl,
+                                               String primaryAccountId,
+                                               Map<String, Account> accounts) {
+        final ImmutableList.Builder<AccountWithCredentials> builder = ImmutableList.builder();
         final long now = System.currentTimeMillis();
         final Long credentialId = insert(new CredentialsEntity(
                 username,
                 password,
                 connectionUrl
         ));
-        for(Map.Entry<String, Account> entry : accounts.entrySet()) {
-            insert(new AccountEntity(
+        for (Map.Entry<String, Account> entry : accounts.entrySet()) {
+            final String accountId = entry.getKey();
+            final String name = entry.getValue().getName();
+            Long id = insert(new AccountEntity(
                     credentialId,
-                    entry.getKey(),
-                    entry.getValue().getName(),
-                    entry.getKey().equals(primaryAccountId) ? now + 1 : now
+                    accountId,
+                    name,
+                    accountId.equals(primaryAccountId) ? now + 1 : now
+            ));
+            builder.add(new AccountWithCredentials(
+                    id,
+                    accountId,
+                    username,
+                    password,
+                    connectionUrl
             ));
         }
+        return builder.build();
     }
 }

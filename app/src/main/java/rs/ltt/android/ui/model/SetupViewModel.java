@@ -24,9 +24,7 @@ import android.net.NetworkInfo;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
 
 import com.google.common.base.Preconditions;
@@ -284,7 +282,7 @@ public class SetupViewModel extends AndroidViewModel {
         final Map<String, Account> accounts = session.getAccounts(MailAccountCapability.class);
         LOGGER.info("found {} accounts with mail capability", accounts.size());
         if (accounts.size() == 1) {
-            final ListenableFuture<Void> insertFuture = mainRepository.insertAccounts(
+            final ListenableFuture<Void> insertFuture = mainRepository.insertAccountsRefreshMailboxes(
                     Strings.nullToEmpty(emailAddress.getValue()),
                     Strings.nullToEmpty(password.getValue()),
                     getHttpConnectionUrl(),
@@ -295,7 +293,6 @@ public class SetupViewModel extends AndroidViewModel {
                 @Override
                 public void onSuccess(@NullableDecl Void result) {
                     redirection.postValue(new Event<>(Target.LTTRS));
-                    loading.postValue(false);
                 }
 
                 @Override

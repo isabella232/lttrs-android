@@ -15,6 +15,7 @@
 
 package rs.ltt.android.database;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import java.util.HashMap;
@@ -65,6 +66,7 @@ import rs.ltt.android.entity.ThreadItemEntity;
 @TypeConverters(Converters.class)
 public abstract class LttrsDatabase extends RoomDatabase {
 
+    @SuppressLint("UseSparseArrays")
     private static Map<Long, LttrsDatabase> INSTANCES = new HashMap<>();
 
     public abstract ThreadAndEmailDao threadAndEmailDao();
