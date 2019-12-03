@@ -76,7 +76,7 @@ public abstract class MuaWorker extends Worker {
                 .username(account.username)
                 .password(account.password)
                 .accountId(account.accountId)
-                .sessionResource(account.connectionUrl)
+                .sessionResource(account.sessionResource)
                 .cache(new DatabaseCache(getDatabase()))
                 .sessionCache(new FileSessionCache(getApplicationContext().getCacheDir()))
                 .build();

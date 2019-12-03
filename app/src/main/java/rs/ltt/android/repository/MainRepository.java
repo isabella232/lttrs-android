@@ -66,7 +66,7 @@ public class MainRepository {
 
     public ListenableFuture<Void> insertAccountsRefreshMailboxes(final String username,
                                                                  final String password,
-                                                                 final HttpUrl connectionUrl,
+                                                                 final HttpUrl sessionResource,
                                                                  final String primaryAccountId,
                                                                  final Map<String, Account> accounts) {
         final SettableFuture<Void> settableFuture = SettableFuture.create();
@@ -75,7 +75,7 @@ public class MainRepository {
                 List<AccountWithCredentials> credentials = appDatabase.accountDao().insert(
                         username,
                         password,
-                        connectionUrl,
+                        sessionResource,
                         primaryAccountId,
                         accounts
                 );
@@ -114,7 +114,7 @@ public class MainRepository {
                 .accountId(account.accountId)
                 .username(account.username)
                 .password(account.password)
-                .sessionResource(account.connectionUrl)
+                .sessionResource(account.sessionResource)
                 .cache(new DatabaseCache(LttrsDatabase.getInstance(this.application, account.id)))
                 .sessionCache(new FileSessionCache(application.getCacheDir()))
                 .build();

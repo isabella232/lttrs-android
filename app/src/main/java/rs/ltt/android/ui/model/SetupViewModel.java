@@ -74,8 +74,8 @@ public class SetupViewModel extends AndroidViewModel {
     private final MutableLiveData<String> emailAddressError = new MutableLiveData<>();
     private final MutableLiveData<String> password = new MutableLiveData<>();
     private final MutableLiveData<String> passwordError = new MutableLiveData<>();
-    private final MutableLiveData<String> connectionUrl = new MutableLiveData<>();
-    private final MutableLiveData<String> connectionUrlError = new MutableLiveData<>();
+    private final MutableLiveData<String> sessionResource = new MutableLiveData<>();
+    private final MutableLiveData<String> sessionResourceError = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
     private final MutableLiveData<Event<Target>> redirection = new MutableLiveData<>();
     private final MutableLiveData<Event<String>> warningMessage = new MutableLiveData<>();
@@ -86,7 +86,7 @@ public class SetupViewModel extends AndroidViewModel {
         super(application);
         this.mainRepository = new MainRepository(application);
         Transformations.distinctUntilChanged(emailAddress).observeForever(s -> emailAddressError.postValue(null));
-        Transformations.distinctUntilChanged(connectionUrl).observeForever(s -> connectionUrlError.postValue(null));
+        Transformations.distinctUntilChanged(sessionResource).observeForever(s -> sessionResourceError.postValue(null));
         Transformations.distinctUntilChanged(password).observeForever(s -> passwordError.postValue(null));
     }
 
@@ -119,12 +119,12 @@ public class SetupViewModel extends AndroidViewModel {
         return Transformations.distinctUntilChanged(this.passwordError);
     }
 
-    public MutableLiveData<String> getConnectionUrl() {
-        return connectionUrl;
+    public MutableLiveData<String> getSessionResource() {
+        return sessionResource;
     }
 
-    public LiveData<String> getConnectionUrlError() {
-        return Transformations.distinctUntilChanged(connectionUrlError);
+    public LiveData<String> getSessionResourceError() {
+        return Transformations.distinctUntilChanged(sessionResourceError);
     }
 
     public LiveData<Event<Target>> getRedirection() {
@@ -137,7 +137,7 @@ public class SetupViewModel extends AndroidViewModel {
 
     public void enterEmailAddress() {
         this.password.setValue(null);
-        this.connectionUrl.setValue(null);
+        this.sessionResource.setValue(null);
         final String emailAddress = Strings.nullToEmpty(this.emailAddress.getValue()).trim();
         if (EMAIL_PATTERN.matcher(emailAddress).matches()) {
             this.loading.postValue(true);
@@ -158,13 +158,13 @@ public class SetupViewModel extends AndroidViewModel {
                         redirection.postValue(new Event<>(Target.ENTER_PASSWORD));
                     } else if (cause instanceof UnknownHostException) {
                         if (isNetworkAvailable()) {
-                            connectionUrlError.postValue(null);
+                            sessionResourceError.postValue(null);
                             redirection.postValue(new Event<>(Target.ENTER_URL));
                         } else {
                             emailAddressError.postValue(getApplication().getString(R.string.no_network_connection));
                         }
                     } else if (isEndpointProblem(cause)) {
-                        connectionUrlError.postValue(null);
+                        sessionResourceError.postValue(null);
                         redirection.postValue(new Event<>(Target.ENTER_URL));
                     } else {
                         reportUnableToFetchSession(cause);
@@ -207,16 +207,16 @@ public class SetupViewModel extends AndroidViewModel {
                         passwordError.postValue(getApplication().getString(R.string.wrong_password));
                     } else if (cause instanceof UnknownHostException) {
                         if (isNetworkAvailable()) {
-                            connectionUrlError.postValue(null);
+                            sessionResourceError.postValue(null);
                             redirection.postValue(new Event<>(Target.ENTER_URL));
                         } else {
                             passwordError.postValue(getApplication().getString(R.string.no_network_connection));
                         }
                     } else if (isEndpointProblem(cause)) {
-                        if (Strings.emptyToNull(connectionUrl.getValue()) != null) {
-                            connectionUrlError.postValue(causeToString(cause));
+                        if (Strings.emptyToNull(sessionResource.getValue()) != null) {
+                            sessionResourceError.postValue(causeToString(cause));
                         } else {
-                            connectionUrlError.postValue(null);
+                            sessionResourceError.postValue(null);
                         }
                         redirection.postValue(new Event<>(Target.ENTER_URL));
                     } else {
@@ -227,17 +227,17 @@ public class SetupViewModel extends AndroidViewModel {
         }
     }
 
-    public void enterConnectionUrl() {
+    public void enterSessionResource() {
         try {
-            final HttpUrl httpUrl = HttpUrl.get(Strings.nullToEmpty(connectionUrl.getValue()));
+            final HttpUrl httpUrl = HttpUrl.get(Strings.nullToEmpty(sessionResource.getValue()));
             LOGGER.debug("User entered connection url {}", httpUrl.toString());
             if (httpUrl.scheme().equals("http")) {
-                this.connectionUrlError.postValue(getApplication().getString(R.string.enter_a_secure_url));
+                this.sessionResourceError.postValue(getApplication().getString(R.string.enter_a_secure_url));
                 return;
             }
             this.loading.postValue(true);
-            this.connectionUrl.postValue(httpUrl.toString());
-            this.connectionUrlError.postValue(null);
+            this.sessionResource.postValue(httpUrl.toString());
+            this.sessionResourceError.postValue(null);
             Futures.addCallback(getSession(), new FutureCallback<Session>() {
                 @Override
                 public void onSuccess(@NullableDecl Session session) {
@@ -252,12 +252,12 @@ public class SetupViewModel extends AndroidViewModel {
                         passwordError.postValue(null);
                         redirection.postValue(new Event<>(Target.ENTER_PASSWORD));
                     } else if (isEndpointProblem(cause)) {
-                        connectionUrlError.postValue(causeToString(cause));
+                        sessionResourceError.postValue(causeToString(cause));
                     } else if (cause instanceof UnknownHostException) {
                         if (isNetworkAvailable()) {
-                            connectionUrlError.postValue(getApplication().getString(R.string.unknown_host, httpUrl.host()));
+                            sessionResourceError.postValue(getApplication().getString(R.string.unknown_host, httpUrl.host()));
                         } else {
-                            connectionUrlError.postValue(getApplication().getString(R.string.no_network_connection));
+                            sessionResourceError.postValue(getApplication().getString(R.string.no_network_connection));
                         }
                     } else {
                         reportUnableToFetchSession(cause);
@@ -265,7 +265,7 @@ public class SetupViewModel extends AndroidViewModel {
                 }
             }, MoreExecutors.directExecutor());
         } catch (IllegalArgumentException e) {
-            this.connectionUrlError.postValue(getApplication().getString(R.string.enter_a_valid_url));
+            this.sessionResourceError.postValue(getApplication().getString(R.string.enter_a_valid_url));
         }
     }
 
@@ -273,7 +273,7 @@ public class SetupViewModel extends AndroidViewModel {
         final JmapClient jmapClient = new JmapClient(
                 Strings.nullToEmpty(emailAddress.getValue()),
                 Strings.nullToEmpty(password.getValue()),
-                getHttpConnectionUrl()
+                getHttpSessionResource()
         );
         return jmapClient.getSession();
     }
@@ -285,7 +285,7 @@ public class SetupViewModel extends AndroidViewModel {
             final ListenableFuture<Void> insertFuture = mainRepository.insertAccountsRefreshMailboxes(
                     Strings.nullToEmpty(emailAddress.getValue()),
                     Strings.nullToEmpty(password.getValue()),
-                    getHttpConnectionUrl(),
+                    getHttpSessionResource(),
                     session.getPrimaryAccount(MailAccountCapability.class),
                     accounts
             );
@@ -332,12 +332,12 @@ public class SetupViewModel extends AndroidViewModel {
         return info != null && info.isConnected();
     }
 
-    private HttpUrl getHttpConnectionUrl() {
-        final String connectionUrl = Strings.emptyToNull(this.connectionUrl.getValue());
-        if (connectionUrl == null) {
+    private HttpUrl getHttpSessionResource() {
+        final String sessionResource = Strings.emptyToNull(this.sessionResource.getValue());
+        if (sessionResource == null) {
             return null;
         } else {
-            return HttpUrl.get(connectionUrl);
+            return HttpUrl.get(sessionResource);
         }
     }
 

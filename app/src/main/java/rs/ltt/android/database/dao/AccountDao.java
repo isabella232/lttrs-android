@@ -36,13 +36,13 @@ import rs.ltt.jmap.common.entity.Account;
 @Dao
 public abstract class AccountDao {
 
-    @Query("select account.id as id, username,password,connectionUrl,accountId from credentials join account on credentialsId = credentials.id where account.id=:id limit 1")
+    @Query("select account.id as id, username,password,sessionResource,accountId from credentials join account on credentialsId = credentials.id where account.id=:id limit 1")
     public abstract ListenableFuture<AccountWithCredentials> getAccountFuture(Long id);
 
-    @Query("select account.id as id, username,password,connectionUrl,accountId from credentials join account on credentialsId = credentials.id where account.id=:id limit 1")
+    @Query("select account.id as id, username,password,sessionResource,accountId from credentials join account on credentialsId = credentials.id where account.id=:id limit 1")
     public abstract AccountWithCredentials getAccount(Long id);
 
-    @Query("select account.id as id, username,password,connectionUrl,accountId from credentials join account on credentialsId = credentials.id order by lastSelectedAt desc limit 1")
+    @Query("select account.id as id, username,password,sessionResource,accountId from credentials join account on credentialsId = credentials.id order by lastSelectedAt desc limit 1")
     public abstract ListenableFuture<AccountWithCredentials> getMostRecentlySelectedAccountFuture();
 
     @Insert
@@ -60,7 +60,7 @@ public abstract class AccountDao {
     @Transaction
     public List<AccountWithCredentials> insert(String username,
                                                String password,
-                                               HttpUrl connectionUrl,
+                                               HttpUrl sessionResource,
                                                String primaryAccountId,
                                                Map<String, Account> accounts) {
         final ImmutableList.Builder<AccountWithCredentials> builder = ImmutableList.builder();
@@ -68,7 +68,7 @@ public abstract class AccountDao {
         final Long credentialId = insert(new CredentialsEntity(
                 username,
                 password,
-                connectionUrl
+                sessionResource
         ));
         for (Map.Entry<String, Account> entry : accounts.entrySet()) {
             final String accountId = entry.getKey();
@@ -84,7 +84,7 @@ public abstract class AccountDao {
                     accountId,
                     username,
                     password,
-                    connectionUrl
+                    sessionResource
             ));
         }
         return builder.build();

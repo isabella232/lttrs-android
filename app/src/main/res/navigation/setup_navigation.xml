@@ -22,16 +22,16 @@
     <action
         android:id="@+id/enterPassword"
         app:destination="@+id/password"
-        app:popUpTo="@+id/connectionUrl"
+        app:popUpTo="@+id/sessionResource"
         app:enterAnim="@anim/slide_from_right"
         app:exitAnim="@anim/slide_to_left"
         app:popEnterAnim="@anim/slide_from_left"
         app:popExitAnim="@anim/slide_to_right" />
 
     <action
-        android:id="@+id/enterConnectionUrl"
+        android:id="@+id/enterSessionResource"
         app:popUpTo="@+id/signIn"
-        app:destination="@+id/connectionUrl"
+        app:destination="@+id/sessionResource"
         app:enterAnim="@anim/slide_from_right"
         app:exitAnim="@anim/slide_to_left"
         app:popEnterAnim="@anim/slide_from_left"
@@ -48,8 +48,8 @@
         tools:layout="@layout/fragment_password" />
 
     <fragment
-        android:id="@+id/connectionUrl"
-        android:name="rs.ltt.android.ui.fragment.ConnectionUrlFragment"
-        tools:layout="@layout/fragment_connection_url" />
+        android:id="@+id/sessionResource"
+        android:name="rs.ltt.android.ui.fragment.SessionResourceFragment"
+        tools:layout="@layout/fragment_session_resource" />
 
 </navigation>

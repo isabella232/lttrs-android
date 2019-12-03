@@ -58,7 +58,7 @@ public class SetupActivity extends AppCompatActivity {
                         navController.navigate(SetupNavigationDirections.enterPassword());
                         break;
                     case ENTER_URL:
-                        navController.navigate(SetupNavigationDirections.enterConnectionUrl());
+                        navController.navigate(SetupNavigationDirections.enterSessionResource());
                         break;
                     default:
                         throw new IllegalStateException(String.format("Unable to navigate to target %s", target));

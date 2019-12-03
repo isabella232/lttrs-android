@@ -94,7 +94,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentBottom="true"
-                    android:onClick="@{(v) -> setupViewModel.enterConnectionUrl()}"
+                    android:onClick="@{(v) -> setupViewModel.enterSessionResource()}"
                     android:enabled="@{!setupViewModel.isLoading()}"
                     android:text="@string/next" />
 
@@ -106,7 +106,7 @@
                     android:layout_gravity="center_horizontal"
                     android:enabled="@{!setupViewModel.isLoading()}"
                     android:hint="@string/enter_your_connection_url"
-                    app:errorText="@{setupViewModel.connectionUrlError}">
+                    app:errorText="@{setupViewModel.sessionResourceError}">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
@@ -114,7 +114,7 @@
                         android:imeOptions="flagNoExtractUi"
                         android:inputType="textUri"
                         android:maxLines="1"
-                        android:text="@={setupViewModel.connectionUrl}" />
+                        android:text="@={setupViewModel.sessionResource}" />
                 </com.google.android.material.textfield.TextInputLayout>
 
             </RelativeLayout>

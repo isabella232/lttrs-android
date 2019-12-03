@@ -24,16 +24,16 @@ import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 
 import rs.ltt.android.R;
-import rs.ltt.android.databinding.FragmentConnectionUrlBinding;
+import rs.ltt.android.databinding.FragmentSessionResourceBinding;
 
-public class ConnectionUrlFragment extends AbstractSetupFragment {
+public class SessionResourceFragment extends AbstractSetupFragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        final FragmentConnectionUrlBinding binding = DataBindingUtil.inflate(
+        final FragmentSessionResourceBinding binding = DataBindingUtil.inflate(
                 inflater,
-                R.layout.fragment_connection_url,
+                R.layout.fragment_session_resource,
                 container,
                 false
         );

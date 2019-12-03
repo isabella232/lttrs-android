@@ -23,13 +23,13 @@ public class AccountWithCredentials {
     public String accountId;
     public String username;
     public String password;
-    public HttpUrl connectionUrl;
+    public HttpUrl sessionResource;
 
-    public AccountWithCredentials(Long id, String accountId, String username, String password, HttpUrl connectionUrl) {
+    public AccountWithCredentials(Long id, String accountId, String username, String password, HttpUrl sessionResource) {
         this.id = id;
         this.accountId = accountId;
         this.username = username;
         this.password = password;
-        this.connectionUrl = connectionUrl;
+        this.sessionResource = sessionResource;
     }
 }

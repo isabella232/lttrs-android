@@ -28,11 +28,11 @@ public class CredentialsEntity {
 
     public String username;
     public String password;
-    public HttpUrl connectionUrl;
+    public HttpUrl sessionResource;
 
-    public CredentialsEntity(String username, String password, HttpUrl connectionUrl) {
+    public CredentialsEntity(String username, String password, HttpUrl sessionResource) {
         this.username = username;
         this.password = password;
-        this.connectionUrl = connectionUrl;
+        this.sessionResource = sessionResource;
     }
 }

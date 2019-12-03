@@ -55,7 +55,6 @@ import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.QueryEntity;
 import rs.ltt.android.entity.QueryItemOverwriteEntity;
 import rs.ltt.android.util.FutureLiveData;
-import rs.ltt.android.worker.AbstractMailboxModificationWorker;
 import rs.ltt.android.worker.ArchiveWorker;
 import rs.ltt.android.worker.CopyToMailboxWorker;
 import rs.ltt.android.worker.MarkImportantWorker;
@@ -115,7 +114,7 @@ public class LttrsRepository {
                         .username(account.username)
                         .password(account.password)
                         .accountId(account.accountId)
-                        .sessionResource(account.connectionUrl)
+                        .sessionResource(account.sessionResource)
                         .cache(new DatabaseCache(database))
                         .sessionCache(new FileSessionCache(application.getCacheDir()))
                         .queryPageSize(20L)
