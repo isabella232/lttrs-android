@@ -119,11 +119,17 @@ public class QueryRepository extends LttrsRepository {
             }
 
         }
-        Futures.transformAsync(mua, mua -> mua.query(emailQuery), MoreExecutors.directExecutor()).addListener(() -> {
+        final ListenableFuture<Status> statusFuture = Futures.transformAsync(mua, mua -> mua.query(emailQuery), MoreExecutors.directExecutor());
+        statusFuture.addListener(() -> {
             synchronized (runningQueries) {
                 runningQueries.remove(queryString);
             }
             runningQueriesLiveData.postValue(runningQueries);
+            try {
+                Status status = statusFuture.get();
+            } catch (Exception e) {
+                Log.d("lttrs", "unable to refresh", e);
+            }
         }, MoreExecutors.directExecutor());
     }
 

@@ -53,25 +53,30 @@ public abstract class StateDao {
         return new ObjectsState(mailboxState, threadState, emailState);
     }
 
-    @Query("select state from `query` where queryString=:queryString and valid=1")
-    abstract String getQueryState(String queryString);
+    @Query("select state,canCalculateChanges from `query` where queryString=:queryString and valid=1")
+    abstract QueryState getQueryState(String queryString);
 
-    @Query("select emailId from `query` join query_item on `query`.id = queryId  where queryString=:queryString order by position desc limit 1")
-    abstract String getUpTo(String queryString);
+    @Query("select emailId as id,position from `query` join query_item on `query`.id = queryId  where queryString=:queryString order by position desc limit 1")
+    abstract QueryStateWrapper.UpTo getUpTo(String queryString);
 
     @Query("update `query` set valid=0 where queryString=:queryString")
     public abstract void invalidateQueryState(String queryString);
 
     @Transaction
     public QueryStateWrapper getQueryStateWrapper(String queryString) {
-        final String queryState = getQueryState(queryString);
+        final QueryState queryState = getQueryState(queryString);
         final ObjectsState objectsState = getObjectsState();
-        final String upTo;
+        final QueryStateWrapper.UpTo upTo;
         if (queryState == null) {
-            upTo = null;
+            return new QueryStateWrapper(null, false, null, objectsState);
         } else {
             upTo = getUpTo(queryString);
+            return new QueryStateWrapper(queryState.state, queryState.canCalculateChanges, upTo, objectsState);
         }
-        return new QueryStateWrapper(queryState, upTo, objectsState);
+    }
+
+    public static class QueryState {
+        public String state;
+        public Boolean canCalculateChanges;
     }
 }

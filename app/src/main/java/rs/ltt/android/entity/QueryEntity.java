@@ -28,16 +28,18 @@ public class QueryEntity {
 
     public String queryString;
     public String state;
+    public Boolean canCalculateChanges;
     public Boolean valid;
 
-    public QueryEntity(String queryString, String state, Boolean valid) {
+    public QueryEntity(String queryString, String state, Boolean canCalculateChanges, Boolean valid) {
         this.queryString = queryString;
         this.state = state;
+        this.canCalculateChanges = canCalculateChanges;
         this.valid = valid;
     }
 
 
-    public static QueryEntity of(String queryString, String state) {
-        return new QueryEntity(queryString, state, true);
+    public static QueryEntity of(String queryString, String state, Boolean canCalculateChanges) {
+        return new QueryEntity(queryString, state, canCalculateChanges,true);
     }
 }

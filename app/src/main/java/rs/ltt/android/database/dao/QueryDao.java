@@ -84,7 +84,7 @@ public abstract class QueryDao extends AbstractEntityDao {
             return;
         }
 
-        long queryId = insert(QueryEntity.of(queryString, queryResult.queryState.getState()));
+        long queryId = insert(QueryEntity.of(queryString, queryResult.queryState.getState(), queryResult.canCalculateChanges));
         insert(QueryItemEntity.of(queryId, queryResult.items, 0));
     }
 
@@ -153,7 +153,7 @@ public abstract class QueryDao extends AbstractEntityDao {
         final QueryEntity queryEntity = getQueryEntity(queryString);
 
         int count = deleteAllExecuted(queryEntity.id);
-        Log.d("lttrs","deleted "+count+" query overwrites");
+        Log.d("lttrs", "deleted " + count + " query overwrites");
 
         for (String emailId : queryUpdate.getRemoved()) {
             Log.d("lttrs", "deleting emailId=" + emailId + " from queryId=" + queryEntity.id);
