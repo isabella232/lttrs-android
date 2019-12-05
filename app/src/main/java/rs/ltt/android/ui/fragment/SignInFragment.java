@@ -22,17 +22,9 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-
-import com.google.common.util.concurrent.ListenableFuture;
-
-import java.util.concurrent.ExecutionException;
 
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.FragmentSignInBinding;
-import rs.ltt.android.ui.model.SetupViewModel;
-import rs.ltt.android.util.MainThreadExecutor;
 
 public class SignInFragment extends AbstractSetupFragment {
 

@@ -57,16 +57,16 @@
                     <ImageView
                         android:layout_width="16sp"
                         android:layout_height="16sp"
-                        android:src="@drawable/ic_account_circle_black_24dp"
                         android:layout_marginTop="2sp"
-                        android:layout_marginEnd="2sp"/>
+                        android:layout_marginEnd="2sp"
+                        android:src="@drawable/ic_account_circle_black_24dp" />
 
                     <TextView
                         style="@style/TextAppearance.AppCompat.Body2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        tools:text="username@exmample.com"
-                        android:text="@{setupViewModel.emailAddress}" />
+                        android:text="@{setupViewModel.emailAddress}"
+                        tools:text="username@exmample.com" />
                 </LinearLayout>
 
                 <TextView
@@ -94,8 +94,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentBottom="true"
-                    android:onClick="@{(v) -> setupViewModel.enterSessionResource()}"
                     android:enabled="@{!setupViewModel.isLoading()}"
+                    android:onClick="@{(v) -> setupViewModel.enterSessionResource()}"
                     android:text="@string/next" />
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -114,7 +114,8 @@
                         android:imeOptions="flagNoExtractUi"
                         android:inputType="textUri"
                         android:maxLines="1"
-                        android:text="@={setupViewModel.sessionResource}" />
+                        android:text="@={setupViewModel.sessionResource}"
+                        app:editorAction="@{(a,b,c)->setupViewModel.enterSessionResource()}" />
                 </com.google.android.material.textfield.TextInputLayout>
 
             </RelativeLayout>

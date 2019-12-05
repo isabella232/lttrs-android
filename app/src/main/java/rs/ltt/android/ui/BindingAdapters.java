@@ -40,6 +40,7 @@ import androidx.core.widget.ImageViewCompat;
 import androidx.databinding.BindingAdapter;
 import androidx.lifecycle.LiveData;
 
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import rs.ltt.android.R;
@@ -255,5 +256,10 @@ public class BindingAdapters {
     @BindingAdapter("errorText")
     public static void setErrorText(final TextInputLayout textInputLayout, final LiveData<String> error) {
         textInputLayout.setError(error.getValue());
+    }
+
+    @BindingAdapter("editorAction")
+    public static void setEditorAction(final TextInputEditText editText, final TextView.OnEditorActionListener listener) {
+        editText.setOnEditorActionListener(listener);
     }
 }

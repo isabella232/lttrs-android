@@ -135,7 +135,7 @@ public class SetupViewModel extends AndroidViewModel {
         return this.warningMessage;
     }
 
-    public void enterEmailAddress() {
+    public boolean enterEmailAddress() {
         this.password.setValue(null);
         this.sessionResource.setValue(null);
         final String emailAddress = Strings.nullToEmpty(this.emailAddress.getValue()).trim();
@@ -182,9 +182,10 @@ public class SetupViewModel extends AndroidViewModel {
                 );
             }
         }
+        return true;
     }
 
-    public void enterPassword() {
+    public boolean enterPassword() {
         final String password = Strings.nullToEmpty(this.password.getValue());
         if (password.isEmpty()) {
             this.passwordError.postValue(
@@ -225,15 +226,16 @@ public class SetupViewModel extends AndroidViewModel {
                 }
             }, MoreExecutors.directExecutor());
         }
+        return true;
     }
 
-    public void enterSessionResource() {
+    public boolean enterSessionResource() {
         try {
             final HttpUrl httpUrl = HttpUrl.get(Strings.nullToEmpty(sessionResource.getValue()));
             LOGGER.debug("User entered connection url {}", httpUrl.toString());
             if (httpUrl.scheme().equals("http")) {
                 this.sessionResourceError.postValue(getApplication().getString(R.string.enter_a_secure_url));
-                return;
+                return true;
             }
             this.loading.postValue(true);
             this.sessionResource.postValue(httpUrl.toString());
@@ -267,6 +269,7 @@ public class SetupViewModel extends AndroidViewModel {
         } catch (IllegalArgumentException e) {
             this.sessionResourceError.postValue(getApplication().getString(R.string.enter_a_valid_url));
         }
+        return true;
     }
 
     private ListenableFuture<Session> getSession() {
