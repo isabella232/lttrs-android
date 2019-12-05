@@ -14,7 +14,8 @@ def execute_cmd(cmd)
 end
 
 images = {
-    "cover.png" => ["cover.png", 304]
+    "cover.png" => ["cover.png", 304],
+    "email.svg" => ["splash_icon_128dp.png", 128]
 }
 
 images.each do |source_filename, settings|
@@ -24,6 +25,10 @@ images.each do |source_filename, settings|
     resolutions.each do |resolution, factor|
         path = "../res/drawable-#{resolution}/#{output_filename}"
         width = factor * base_size
-        execute_cmd "convert #{source_filename} -resize #{width} #{path}"
+        if source_filename.end_with? ".svg" then
+            execute_cmd "inkscape -f #{source_filename} -z -C -w #{width} -h #{width} -e #{path}"
+        else
+            execute_cmd "convert #{source_filename} -resize #{width} #{path}"
+        end
     end
 end

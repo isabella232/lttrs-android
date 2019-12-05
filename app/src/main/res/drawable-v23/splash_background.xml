@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="utf-8"?>
+<!--
   ~ Copyright 2019 Daniel Gultsch
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,11 +15,7 @@
   -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:drawable="@color/colorPrimary" />
+    <item android:drawable="@color/colorPrimary"/>
 
-    <item>
-        <bitmap
-            android:gravity="center"
-            android:src="@drawable/splash_icon_128dp" />
-    </item>
+    <item android:gravity="center" android:drawable="@drawable/ic_email_white_128dp"/>
 </layer-list>
