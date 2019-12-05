@@ -14,8 +14,7 @@ def execute_cmd(cmd)
 end
 
 images = {
-    "cover.png" => ["cover.png", 304],
-    "email.svg" => ["splash_icon_128dp.png", 128]
+    "cover.png" => ["cover.png", 304]
 }
 
 images.each do |source_filename, settings|
