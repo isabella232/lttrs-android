@@ -59,6 +59,12 @@ public class KeywordQueryFragment extends AbstractQueryFragment {
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        binding.compose.show();
+    }
+
+    @Override
     protected AbstractQueryViewModel getQueryViewModel() {
         return keywordQueryViewModel;
     }

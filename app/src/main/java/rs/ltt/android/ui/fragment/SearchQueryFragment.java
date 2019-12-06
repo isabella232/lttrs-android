@@ -61,7 +61,6 @@ public class SearchQueryFragment extends AbstractQueryFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        binding.fab.setVisibility(View.GONE);
         searchQueryViewModel.getSearchTerm().observe(getViewLifecycleOwner(), searchTerm -> {
             if (searchTerm == null) {
                 return;

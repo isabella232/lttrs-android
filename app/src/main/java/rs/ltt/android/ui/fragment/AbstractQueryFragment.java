@@ -17,6 +17,7 @@ package rs.ltt.android.ui.fragment;
 
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +40,7 @@ import rs.ltt.android.databinding.FragmentThreadListBinding;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.ui.OnLabelOpened;
 import rs.ltt.android.ui.QueryItemTouchHelper;
+import rs.ltt.android.ui.activity.ComposeActivity;
 import rs.ltt.android.ui.adapter.OnFlaggedToggled;
 import rs.ltt.android.ui.adapter.ThreadOverviewAdapter;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
@@ -72,6 +74,9 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         binding.threadList.setAdapter(threadOverviewAdapter);
         binding.setViewModel(viewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
+        binding.compose.setOnClickListener((v) -> {
+            startActivity(new Intent(requireActivity(), ComposeActivity.class));
+        });
 
         binding.swipeToRefresh.setColorSchemeResources(R.color.colorAccent);
 

@@ -25,7 +25,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/LttrsTheme"
+        android:theme="@style/BaseTheme"
         tools:ignore="GoogleAppIndexingWarning">
 
         <activity
@@ -39,7 +39,8 @@
 
         <activity
             android:name=".ui.activity.LttrsActivity"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:theme="@style/LttrsTheme">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -51,7 +52,11 @@
 
         <activity
             android:name=".ui.activity.SetupActivity"
-            android:launchMode="singleTask" />
+            android:launchMode="singleTask"
+            android:theme="@style/SetupTheme" />
+
+        <activity android:name=".ui.activity.ComposeActivity"
+            android:label="@string/compose"/>
 
         <provider
             android:name=".provider.EmailSearchSuggestionsProvider"
