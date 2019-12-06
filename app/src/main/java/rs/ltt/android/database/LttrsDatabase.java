@@ -47,22 +47,27 @@ import rs.ltt.android.entity.QueryItemOverwriteEntity;
 import rs.ltt.android.entity.ThreadEntity;
 import rs.ltt.android.entity.ThreadItemEntity;
 
-@Database(entities = {MailboxEntity.class,
-        EntityStateEntity.class,
-        ThreadEntity.class,
-        ThreadItemEntity.class,
-        EmailEntity.class,
-        EmailEmailAddressEntity.class,
-        EmailKeywordEntity.class,
-        EmailMailboxEntity.class,
-        EmailBodyValueEntity.class,
-        EmailBodyPartEntity.class,
-        QueryEntity.class,
-        QueryItemEntity.class,
-        KeywordOverwriteEntity.class,
-        MailboxOverwriteEntity.class,
-        QueryItemOverwriteEntity.class
-}, version = 1)
+@Database(
+        entities = {
+                MailboxEntity.class,
+                EntityStateEntity.class,
+                ThreadEntity.class,
+                ThreadItemEntity.class,
+                EmailEntity.class,
+                EmailEmailAddressEntity.class,
+                EmailKeywordEntity.class,
+                EmailMailboxEntity.class,
+                EmailBodyValueEntity.class,
+                EmailBodyPartEntity.class,
+                QueryEntity.class,
+                QueryItemEntity.class,
+                KeywordOverwriteEntity.class,
+                MailboxOverwriteEntity.class,
+                QueryItemOverwriteEntity.class
+        },
+        version = 1,
+        exportSchema = false
+)
 @TypeConverters(Converters.class)
 public abstract class LttrsDatabase extends RoomDatabase {
 

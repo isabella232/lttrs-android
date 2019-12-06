@@ -29,11 +29,15 @@ import rs.ltt.android.entity.AccountEntity;
 import rs.ltt.android.entity.CredentialsEntity;
 import rs.ltt.android.entity.SearchSuggestionEntity;
 
-@Database(entities = {
-        CredentialsEntity.class,
-        AccountEntity.class,
-        SearchSuggestionEntity.class
-}, version = 1)
+@Database(
+        entities = {
+                CredentialsEntity.class,
+                AccountEntity.class,
+                SearchSuggestionEntity.class
+        },
+        version = 1,
+        exportSchema = false
+)
 @TypeConverters(Converters.class)
 public abstract class AppDatabase extends RoomDatabase {
 

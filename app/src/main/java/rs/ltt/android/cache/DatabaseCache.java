@@ -15,10 +15,10 @@
 
 package rs.ltt.android.cache;
 
-import android.util.Log;
-
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,6 +47,8 @@ import rs.ltt.jmap.mua.util.QueryResult;
 import rs.ltt.jmap.mua.util.QueryResultItem;
 
 public class DatabaseCache implements Cache {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseCache.class);
 
 
     private final LttrsDatabase database;
@@ -115,14 +117,14 @@ public class DatabaseCache implements Cache {
                                    final Thread[] threads,
                                    final TypedState<Email> emailState,
                                    final Email[] emails) {
-        database.threadAndEmailDao().add(threadState,threads, emailState, emails);
+        database.threadAndEmailDao().add(threadState, threads, emailState, emails);
     }
 
 
     @Override
     public void updateThreads(final Update<Thread> update) throws CacheWriteException {
+        LOGGER.debug("updating threads {}", update);
         database.threadAndEmailDao().update(update);
-        Log.d("lttrs", "updated some threads "+update.toString());
     }
 
 
@@ -160,7 +162,7 @@ public class DatabaseCache implements Cache {
     public void updateQueryResults(final String queryString,
                                    final QueryUpdate<Email, QueryResultItem> queryUpdate,
                                    final TypedState<Email> emailTypedState) throws CacheConflictException {
-        Log.d("lttrs", "updating query results "+queryUpdate);
+        LOGGER.debug("updating query results {}", queryUpdate);
         database.queryDao().updateQueryResults(queryString, queryUpdate, emailTypedState);
     }
 
@@ -171,8 +173,8 @@ public class DatabaseCache implements Cache {
 
     @Override
     public Missing getMissing(final String query) throws CacheReadException {
-        Missing missing = database.threadAndEmailDao().getMissing(query);
-        Log.d("lttrs", "cache reported " + missing.threadIds.size() + " missing threads");
+        final Missing missing = database.threadAndEmailDao().getMissing(query);
+        LOGGER.debug("cache reported {} missing threads", missing.threadIds.size());
         return missing;
     }
 }
