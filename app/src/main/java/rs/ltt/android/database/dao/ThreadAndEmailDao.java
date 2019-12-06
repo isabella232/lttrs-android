@@ -26,6 +26,7 @@ import androidx.paging.DataSource;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Transaction;
 
@@ -58,7 +59,7 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ThreadAndEmailDao.class);
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract void insert(ThreadEntity entity);
 
     @Insert
@@ -147,7 +148,7 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
     @Query("delete from email_mailbox where emailId=:emailId")
     abstract void deleteMailboxes(String emailId);
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract void insert(EmailEntity entity);
 
     @Insert
