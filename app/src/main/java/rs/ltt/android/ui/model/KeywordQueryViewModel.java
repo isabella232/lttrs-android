@@ -37,6 +37,7 @@ public class KeywordQueryViewModel extends AbstractQueryViewModel {
     KeywordQueryViewModel(final Application application, ListenableFuture<AccountWithCredentials> account, @NonNull final String keyword) {
         super(application, account);
         this.keyword = keyword;
+        //TODO; we probably want to change this to someInThreadHaveKeyword
         this.emailQueryLiveData = Transformations.map(queryRepository.getTrashAndJunk(), trashAndJunk -> EmailQuery.of(
                 EmailFilterCondition.builder().hasKeyword(keyword).inMailboxOtherThan(trashAndJunk).build(),
                 true

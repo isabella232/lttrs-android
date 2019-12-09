@@ -16,16 +16,21 @@
 package rs.ltt.android.ui.activity;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatEditText;
 import androidx.databinding.DataBindingUtil;
 
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.ActivityComposeBinding;
+import rs.ltt.android.ui.ChipDrawableSpan;
 
 public class ComposeActivity extends AppCompatActivity {
 
@@ -41,6 +46,38 @@ public class ComposeActivity extends AppCompatActivity {
         final ActionBar actionbar = requireActionBar();
         actionbar.setHomeButtonEnabled(true);
         actionbar.setDisplayHomeAsUpEnabled(true);
+
+        binding.to.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                ChipDrawableSpan.apply(ComposeActivity.this, editable, binding.to.hasFocus());
+            }
+        });
+        binding.to.setOnFocusChangeListener(
+                (v, hasFocus) -> ChipDrawableSpan.apply(this, binding.to.getEditableText(), hasFocus)
+        );
+
+        binding.toLabel.setOnClickListener(v -> requestFocusAndOpenKeyboard(binding.to));
+        binding.placeholder.setOnClickListener(v -> requestFocusAndOpenKeyboard(binding.body));
+    }
+
+    private void requestFocusAndOpenKeyboard(AppCompatEditText editText) {
+        editText.requestFocus();
+        final InputMethodManager inputMethodManager = getSystemService(InputMethodManager.class);
+        if (inputMethodManager != null) {
+            inputMethodManager.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
+        }
     }
 
     @Override
@@ -60,7 +97,8 @@ public class ComposeActivity extends AppCompatActivity {
 
     }
 
-    private @NonNull ActionBar requireActionBar() {
+    private @NonNull
+    ActionBar requireActionBar() {
         final ActionBar actionBar = getSupportActionBar();
         if (actionBar == null) {
             throw new IllegalStateException("No ActionBar found");

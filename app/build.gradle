@@ -37,16 +37,16 @@ android {
 dependencies {
 
     def appcompat_version = "1.1.0"
-    def lifecycle_version = "2.2.0-rc02"
+    def lifecycle_version = "2.2.0-rc03"
     def nav_version = "2.2.0-rc03"
     def paging_version = "2.1.0"
     def recycler_view_version = "1.1.0"
-    def recycler_view_selection_version = "1.1.0-alpha06"
+    def recycler_view_selection_version = "1.1.0-beta01"
     def room_version = "2.2.2"
     def work_version = "2.3.0-beta01"
 
     implementation "androidx.appcompat:appcompat:$appcompat_version"
-    implementation 'rs.ltt.jmap:jmap-mua:0.1.5'
+    implementation 'rs.ltt.jmap:jmap-mua:0.1.6'
 
     //room
     implementation "androidx.room:room-runtime:$room_version"
