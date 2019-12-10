@@ -59,7 +59,7 @@ public class DatabaseCache implements Cache {
 
     @Override
     public String getIdentityState() {
-        return null;
+        return database.identityDao().getState(EntityType.IDENTITY);
     }
 
     @Override
@@ -137,12 +137,13 @@ public class DatabaseCache implements Cache {
     @Override
     public void setIdentities(final TypedState<Identity> identityTypedState,
                               final Identity[] identities) {
-
+        database.identityDao().set(identities, identityTypedState.getState());
     }
 
     @Override
     public void updateIdentities(final Update<Identity> update) throws CacheWriteException {
-
+        LOGGER.debug("updating identities {}", update);
+        database.identityDao().update(update);
     }
 
     @Override

@@ -118,6 +118,7 @@ public class MainRepository {
                 .cache(new DatabaseCache(LttrsDatabase.getInstance(this.application, account.id)))
                 .sessionCache(new FileSessionCache(application.getCacheDir()))
                 .build();
+        mua.refreshIdentities();
         return mua.refreshMailboxes();
     }
 }

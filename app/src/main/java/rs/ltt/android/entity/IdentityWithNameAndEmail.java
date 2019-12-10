@@ -15,7 +15,16 @@
 
 package rs.ltt.android.entity;
 
-public enum EntityType {
+import rs.ltt.jmap.common.entity.Identifiable;
 
-    EMAIL, THREAD, MAILBOX, IDENTITY
+public class IdentityWithNameAndEmail implements Identifiable {
+
+    public String id;
+    public String name;
+    public String email;
+
+    @Override
+    public String getId() {
+        return id;
+    }
 }

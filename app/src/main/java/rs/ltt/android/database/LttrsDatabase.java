@@ -26,6 +26,7 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
+import rs.ltt.android.database.dao.IdentityDao;
 import rs.ltt.android.database.dao.MailboxDao;
 import rs.ltt.android.database.dao.OverwriteDao;
 import rs.ltt.android.database.dao.QueryDao;
@@ -38,6 +39,8 @@ import rs.ltt.android.entity.EmailEntity;
 import rs.ltt.android.entity.EmailKeywordEntity;
 import rs.ltt.android.entity.EmailMailboxEntity;
 import rs.ltt.android.entity.EntityStateEntity;
+import rs.ltt.android.entity.IdentityEmailAddressEntity;
+import rs.ltt.android.entity.IdentityEntity;
 import rs.ltt.android.entity.KeywordOverwriteEntity;
 import rs.ltt.android.entity.MailboxEntity;
 import rs.ltt.android.entity.MailboxOverwriteEntity;
@@ -59,6 +62,8 @@ import rs.ltt.android.entity.ThreadItemEntity;
                 EmailMailboxEntity.class,
                 EmailBodyValueEntity.class,
                 EmailBodyPartEntity.class,
+                IdentityEntity.class,
+                IdentityEmailAddressEntity.class,
                 QueryEntity.class,
                 QueryItemEntity.class,
                 KeywordOverwriteEntity.class,
@@ -77,6 +82,8 @@ public abstract class LttrsDatabase extends RoomDatabase {
     public abstract ThreadAndEmailDao threadAndEmailDao();
 
     public abstract MailboxDao mailboxDao();
+
+    public abstract IdentityDao identityDao();
 
     public abstract StateDao stateDao();
 

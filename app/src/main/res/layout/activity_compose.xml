@@ -70,6 +70,16 @@
                             android:text="@string/compose_from"
                             android:textColor="@color/black54" />
                     </LinearLayout>
+
+                    <androidx.appcompat.widget.AppCompatSpinner
+                        android:id="@+id/from"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_centerVertical="true"
+
+                        android:background="@drawable/spinner_background"
+                        android:layout_toEndOf="@id/from_label"
+                        android:layout_marginEnd="12dp"/>
                 </RelativeLayout>
 
                 <View
@@ -133,8 +143,8 @@
                         android:background="@color/white"
                         android:hint="@string/compose_subject"
                         android:imeOptions="flagNoExtractUi"
-                        android:maxLines="1"
                         android:inputType="textEmailSubject"
+                        android:maxLines="1"
                         android:paddingStart="16dp"
                         android:paddingTop="8dp"
                         android:paddingEnd="16dp"
