@@ -52,12 +52,13 @@
                     android:layout_height="wrap_content"
                     android:minHeight="56dp">
 
+                    <!-- the 'to' label has a min width of 72 but the spinner item has a 8dp padding-->
                     <LinearLayout
                         android:id="@+id/from_label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
-                        android:minWidth="72dp"
+                        android:minWidth="64dp"
                         android:minHeight="56dp"
                         android:paddingStart="16dp"
                         android:paddingEnd="2dp">

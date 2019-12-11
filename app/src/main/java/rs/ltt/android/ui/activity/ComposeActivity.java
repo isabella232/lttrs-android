@@ -40,6 +40,7 @@ import rs.ltt.android.entity.IdentityWithNameAndEmail;
 import rs.ltt.android.ui.ChipDrawableSpan;
 import rs.ltt.android.ui.model.ComposeViewModel;
 import rs.ltt.android.ui.model.LttrsViewModel;
+import rs.ltt.jmap.mua.util.EmailAddressUtil;
 
 public class ComposeActivity extends AppCompatActivity {
 
@@ -90,7 +91,7 @@ public class ComposeActivity extends AppCompatActivity {
         viewModel.getIdentities().observe(this, identityWithNameAndEmails -> {
             fromAdapter.clear();
             for (IdentityWithNameAndEmail identity : identityWithNameAndEmails) {
-                fromAdapter.add(identity.email);
+                fromAdapter.add(EmailAddressUtil.toString(identity.getEmailAddress()));
             }
             fromAdapter.notifyDataSetChanged();
         });

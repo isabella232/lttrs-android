@@ -15,9 +15,10 @@
 
 package rs.ltt.android.entity;
 
-import rs.ltt.jmap.common.entity.Identifiable;
+import rs.ltt.jmap.common.entity.EmailAddress;
+import rs.ltt.jmap.common.entity.IdentifiableIdentity;
 
-public class IdentityWithNameAndEmail implements Identifiable {
+public class IdentityWithNameAndEmail implements IdentifiableIdentity {
 
     public String id;
     public String name;
@@ -26,5 +27,9 @@ public class IdentityWithNameAndEmail implements Identifiable {
     @Override
     public String getId() {
         return id;
+    }
+
+    public EmailAddress getEmailAddress() {
+        return EmailAddress.builder().email(email).name(name).build();
     }
 }
