@@ -3,11 +3,11 @@ apply plugin: "androidx.navigation.safeargs"
 
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     defaultConfig {
         applicationId "rs.ltt.android"
         minSdkVersion 23
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 1
         versionName "0.0.1-alpha"
 
