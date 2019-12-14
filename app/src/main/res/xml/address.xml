@@ -18,6 +18,5 @@
     style="@style/Widget.MaterialComponents.Chip.Entry"
     app:closeIconEnabled="false"
     android:textAppearance="?textAppearanceBody1"
-    app:chipBackgroundColor="@color/white"
     app:chipStrokeColor="@color/black26"
     app:chipStrokeWidth="1dp"/>

@@ -36,6 +36,7 @@ import rs.ltt.android.R;
 import rs.ltt.jmap.common.entity.EmailAddress;
 import rs.ltt.jmap.mua.util.EmailAddressToken;
 import rs.ltt.jmap.mua.util.EmailAddressTokenizer;
+import rs.ltt.jmap.mua.util.EmailAddressUtil;
 
 
 public class ChipDrawableSpan extends ImageSpan {
@@ -106,6 +107,11 @@ public class ChipDrawableSpan extends ImageSpan {
         }
         for (EmailAddressToken token : tokens) {
             final ChipDrawable chip = ChipDrawable.createFromResource(context, R.xml.address);
+            if (EmailAddressUtil.isValid(token.getEmailAddress())) {
+                chip.setChipBackgroundColorResource(R.color.white);
+            } else {
+                chip.setChipBackgroundColorResource(R.color.red300);
+            }
             final EmailAddress emailAddress = token.getEmailAddress();
             if (TextUtils.isEmpty(emailAddress.getName())) {
                 chip.setText(emailAddress.getEmail());
