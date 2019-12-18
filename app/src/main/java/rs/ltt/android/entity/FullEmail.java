@@ -50,13 +50,17 @@ public class FullEmail {
     @Relation(parentColumn = "id", entityColumn = "emailId")
     public List<EmailBodyValueEntity> bodyValueEntities;
 
+    public boolean isDraft() {
+        return keywords.contains(Keyword.DRAFT);
+    }
+
 
     public String getPreview() {
         return preview;
     }
 
     public From getFrom() {
-        if (keywords.contains(Keyword.DRAFT)) {
+        if (isDraft()) {
             return new DraftFrom();
         }
         for (EmailAddress emailAddress : emailAddresses) {
