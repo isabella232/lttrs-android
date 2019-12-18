@@ -62,6 +62,9 @@ public abstract class IdentityDao extends AbstractEntityDao {
     @Query("select id,name,email from identity")
     public abstract LiveData<List<IdentityWithNameAndEmail>> getIdentitiesLiveData();
 
+    @Query("select id,name,email from identity where id=:id limit 1")
+    public abstract IdentityWithNameAndEmail get(String id);
+
     @Transaction
     public void set(Identity[] identities, String state) {
         if (state != null && state.equals(getState(EntityType.IDENTITY))) {

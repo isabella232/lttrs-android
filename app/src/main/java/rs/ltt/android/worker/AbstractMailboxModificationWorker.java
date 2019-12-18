@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.entity.EmailWithMailboxes;
 
-public abstract class AbstractMailboxModificationWorker extends MuaWorker {
+public abstract class AbstractMailboxModificationWorker extends AbstractMuaWorker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMailboxModificationWorker.class);
 

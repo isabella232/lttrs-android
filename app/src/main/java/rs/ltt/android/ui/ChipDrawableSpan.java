@@ -91,11 +91,6 @@ public class ChipDrawableSpan extends ImageSpan {
         canvas.restore();
     }
 
-    public EmailAddress getEmailAddressToken() {
-        return emailAddressToken.getEmailAddress();
-    }
-
-
     public static void apply(final Context context, final Editable editable, final boolean requireExplicitDelimiter) {
         final Set<EmailAddressToken> tokens = new HashSet<>(EmailAddressTokenizer.tokenize(editable, requireExplicitDelimiter));
         final ChipDrawableSpan[] spans = editable.getSpans(0, editable.length() - 1, ChipDrawableSpan.class);

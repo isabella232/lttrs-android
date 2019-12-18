@@ -19,6 +19,8 @@ import android.app.Application;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -26,6 +28,9 @@ import java.util.List;
 
 import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.entity.IdentityWithNameAndEmail;
+import rs.ltt.android.worker.SaveDraftWorker;
+import rs.ltt.android.worker.SendEmailWorker;
+import rs.ltt.jmap.common.entity.IdentifiableIdentity;
 
 public class ComposeRepository extends LttrsRepository {
 
@@ -35,5 +40,23 @@ public class ComposeRepository extends LttrsRepository {
 
     public LiveData<List<IdentityWithNameAndEmail>> getIdentities() {
         return Transformations.switchMap(this.databaseLiveData, database -> database.identityDao().getIdentitiesLiveData());
+    }
+
+    public void sendEmail(IdentifiableIdentity identity, String to, String subject, String body) {
+        final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(SendEmailWorker.class)
+                .setConstraints(CONNECTED_CONSTRAINT)
+                .setInputData(SendEmailWorker.data(requireAccount().id, identity.getId(), to, subject, body))
+                .build();
+        final WorkManager workManager = WorkManager.getInstance(application);
+        workManager.enqueue(workRequest);
+    }
+
+    public void saveDraft(IdentifiableIdentity identity, String to, String subject, String body) {
+        final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(SaveDraftWorker.class)
+                .setConstraints(CONNECTED_CONSTRAINT)
+                .setInputData(SendEmailWorker.data(requireAccount().id, identity.getId(), to, subject, body))
+                .build();
+        final WorkManager workManager = WorkManager.getInstance(application);
+        workManager.enqueue(workRequest);
     }
 }

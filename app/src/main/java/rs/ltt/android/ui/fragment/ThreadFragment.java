@@ -65,7 +65,6 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        final FragmentActivity activity = getActivity();
         final Bundle bundle = getArguments();
         final ThreadFragmentArgs arguments = ThreadFragmentArgs.fromBundle(bundle == null ? new Bundle() : bundle);
         final String threadId = arguments.getThread();

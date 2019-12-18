@@ -101,7 +101,7 @@ public class LabelListAdapter extends RecyclerView.Adapter<LabelListAdapter.Abst
             TypedValue outValue = new TypedValue();
             context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
             holder.binding.item.setBackgroundResource(outValue.resourceId);
-            ImageViewCompat.setImageTintList(holder.binding.icon, ColorStateList.valueOf(ContextCompat.getColor(context, R.color.black54)));
+            ImageViewCompat.setImageTintList(holder.binding.icon, ColorStateList.valueOf(ContextCompat.getColor(context, R.color.colorSecondaryOnSurface)));
         }
     }
 

@@ -13,28 +13,8 @@
  * limitations under the License.
  */
 
-package rs.ltt.android.worker;
+package rs.ltt.android.ui;
 
-import android.content.Context;
-
-import androidx.annotation.NonNull;
-import androidx.work.WorkerParameters;
-
-public class RefreshWorker extends AbstractMuaWorker {
-
-    public RefreshWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
-        super(context, workerParams);
-    }
-
-    @NonNull
-    @Override
-    public Result doWork() {
-        try {
-            getMua().refresh().get();
-            return Result.success();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Result.failure();
-        }
-    }
+public enum ComposeAction {
+    EDIT_DRAFT, REPLY, REPLY_ALL
 }

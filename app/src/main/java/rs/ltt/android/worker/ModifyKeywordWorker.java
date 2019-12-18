@@ -32,7 +32,7 @@ import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.entity.EmailWithKeywords;
 import rs.ltt.jmap.mua.Mua;
 
-public class ModifyKeywordWorker extends MuaWorker {
+public class ModifyKeywordWorker extends AbstractMuaWorker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ModifyKeywordWorker.class);
 

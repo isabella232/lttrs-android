@@ -31,7 +31,7 @@ import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.repository.QueryRepository;
 import rs.ltt.android.util.WorkInfoUtil;
-import rs.ltt.android.worker.MuaWorker;
+import rs.ltt.android.worker.AbstractMuaWorker;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 
 public abstract class AbstractQueryViewModel extends AndroidViewModel {
@@ -50,7 +50,7 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
 
         this.queryRepository = new QueryRepository(application, account);
         this.important = this.queryRepository.getImportant();
-        this.emailModificationWorkInfo = Transformations.map(workManager.getWorkInfosByTagLiveData(MuaWorker.TAG_EMAIL_MODIFICATION), WorkInfoUtil::allDone);
+        this.emailModificationWorkInfo = Transformations.map(workManager.getWorkInfosByTagLiveData(AbstractMuaWorker.TAG_EMAIL_MODIFICATION), WorkInfoUtil::allDone);
     }
 
     void init() {

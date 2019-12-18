@@ -37,17 +37,15 @@ import rs.ltt.jmap.common.method.MethodErrorResponse;
 import rs.ltt.jmap.common.method.error.StateMismatchMethodErrorResponse;
 import rs.ltt.jmap.mua.Mua;
 
-public abstract class MuaWorker extends Worker {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MuaWorker.class);
+public abstract class AbstractMuaWorker extends Worker {
 
     public static final String TAG_EMAIL_MODIFICATION = "email_modification";
 
-    protected static final String ACCOUNT_KEY = "account";
+    static final String ACCOUNT_KEY = "account";
 
     private final Long account;
 
-    MuaWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    AbstractMuaWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         final Data data = getInputData();
         if (data.hasKeyWithValueOfType(ACCOUNT_KEY, Long.class)) {
@@ -66,11 +64,11 @@ public abstract class MuaWorker extends Worker {
         return false;
     }
 
-    public LttrsDatabase getDatabase() {
+    protected LttrsDatabase getDatabase() {
         return LttrsDatabase.getInstance(getApplicationContext(), this.account);
     }
 
-    public Mua getMua() {
+    protected Mua getMua() {
         final AccountWithCredentials account = AppDatabase.getInstance(getApplicationContext()).accountDao().getAccount(this.account);
         return Mua.builder()
                 .username(account.username)

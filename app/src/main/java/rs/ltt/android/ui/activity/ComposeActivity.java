@@ -18,33 +18,28 @@ package rs.ltt.android.ui.activity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.databinding.DataBindingUtil;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import java.util.List;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.ActivityComposeBinding;
-import rs.ltt.android.entity.IdentityWithNameAndEmail;
 import rs.ltt.android.ui.ChipDrawableSpan;
 import rs.ltt.android.ui.model.ComposeViewModel;
-import rs.ltt.android.ui.model.LttrsViewModel;
-import rs.ltt.jmap.mua.util.EmailAddressUtil;
 
 public class ComposeActivity extends AppCompatActivity {
 
     private ActivityComposeBinding binding;
+    private ComposeViewModel composeViewModel;
 
 
     @Override
@@ -58,7 +53,20 @@ public class ComposeActivity extends AppCompatActivity {
         actionbar.setDisplayHomeAsUpEnabled(true);
 
         final ViewModelProvider viewModelProvider = new ViewModelProvider(this, getDefaultViewModelProviderFactory());
-        final ComposeViewModel viewModel = viewModelProvider.get(ComposeViewModel.class);
+        composeViewModel = viewModelProvider.get(ComposeViewModel.class);
+
+        composeViewModel.getErrorMessage().observe(this, event -> {
+            if (event.isConsumable()) {
+                final String message = event.consume();
+                new MaterialAlertDialogBuilder(this)
+                        .setTitle(message)
+                        .setPositiveButton(R.string.ok, null)
+                        .show();
+            }
+        });
+
+        binding.setComposeViewModel(composeViewModel);
+        binding.setLifecycleOwner(this);
 
         binding.to.addTextChangedListener(new TextWatcher() {
 
@@ -83,19 +91,6 @@ public class ComposeActivity extends AppCompatActivity {
 
         binding.toLabel.setOnClickListener(v -> requestFocusAndOpenKeyboard(binding.to));
         binding.placeholder.setOnClickListener(v -> requestFocusAndOpenKeyboard(binding.body));
-
-        final ArrayAdapter<String> fromAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
-        fromAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
-
-
-        viewModel.getIdentities().observe(this, identityWithNameAndEmails -> {
-            fromAdapter.clear();
-            for (IdentityWithNameAndEmail identity : identityWithNameAndEmails) {
-                fromAdapter.add(EmailAddressUtil.toString(identity.getEmailAddress()));
-            }
-            fromAdapter.notifyDataSetChanged();
-        });
-        binding.from.setAdapter(fromAdapter);
     }
 
     private void requestFocusAndOpenKeyboard(AppCompatEditText editText) {
@@ -118,9 +113,23 @@ public class ComposeActivity extends AppCompatActivity {
             case android.R.id.home:
                 onBackPressed();
                 break;
+            case R.id.action_send:
+                if (composeViewModel.send()) {
+                    finish();
+                }
+                break;
         }
         return super.onOptionsItemSelected(item);
 
+    }
+
+    @Override
+    public void onDestroy() {
+        if (isFinishing()) {
+            composeViewModel.saveDraft();
+            //TODO: however we also need to handle onSaveInstanceState() for OOM kills
+        }
+        super.onDestroy();
     }
 
     private @NonNull

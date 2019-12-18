@@ -61,7 +61,7 @@ import rs.ltt.android.worker.MarkImportantWorker;
 import rs.ltt.android.worker.ModifyKeywordWorker;
 import rs.ltt.android.worker.MoveToInboxWorker;
 import rs.ltt.android.worker.MoveToTrashWorker;
-import rs.ltt.android.worker.MuaWorker;
+import rs.ltt.android.worker.AbstractMuaWorker;
 import rs.ltt.android.worker.RemoveFromMailboxWorker;
 import rs.ltt.jmap.client.session.FileSessionCache;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
@@ -80,7 +80,7 @@ public class LttrsRepository {
 
     private static final long INITIAL_DELAY_DURATION = 4;
     private static final TimeUnit INITIAL_DELAY_TIME_UNIT = TimeUnit.SECONDS;
-    private static final Constraints CONNECTED_CONSTRAINT = new Constraints.Builder()
+    protected static final Constraints CONNECTED_CONSTRAINT = new Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build();
 
@@ -133,7 +133,7 @@ public class LttrsRepository {
         }
     }
 
-    private AccountWithCredentials requireAccount() {
+    protected AccountWithCredentials requireAccount() {
         try {
             return this.account.get();
         } catch (InterruptedException | ExecutionException e) {
@@ -241,7 +241,7 @@ public class LttrsRepository {
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(RemoveFromMailboxWorker.data(requireAccount().id, threadId, mailbox))
                     .setInitialDelay(INITIAL_DELAY_DURATION, INITIAL_DELAY_TIME_UNIT)
-                    .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
+                    .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                     .build();
             final WorkManager workManager = WorkManager.getInstance(application);
             workManager.enqueueUniqueWork(
@@ -262,7 +262,7 @@ public class LttrsRepository {
             final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(CopyToMailboxWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(CopyToMailboxWorker.data(requireAccount().id, threadId, mailbox))
-                    .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
+                    .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                     .build();
             final WorkManager workManager = WorkManager.getInstance(application);
             workManager.enqueueUniqueWork(
@@ -284,7 +284,7 @@ public class LttrsRepository {
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(ArchiveWorker.data(requireAccount().id, threadId))
                     .setInitialDelay(INITIAL_DELAY_DURATION, INITIAL_DELAY_TIME_UNIT)
-                    .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
+                    .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                     .build();
             final WorkManager workManager = WorkManager.getInstance(application);
             workManager.enqueueUniqueWork(
@@ -309,7 +309,7 @@ public class LttrsRepository {
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(MoveToInboxWorker.data(requireAccount().id, threadId))
                     .setInitialDelay(INITIAL_DELAY_DURATION, INITIAL_DELAY_TIME_UNIT)
-                    .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
+                    .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                     .build();
             final WorkManager workManager = WorkManager.getInstance(application);
             workManager.enqueueUniqueWork(
@@ -338,7 +338,7 @@ public class LttrsRepository {
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(MoveToTrashWorker.data(requireAccount().id, threadId))
                     .setInitialDelay(INITIAL_DELAY_DURATION, TimeUnit.SECONDS)
-                    .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
+                    .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                     .build();
             final WorkManager workManager = WorkManager.getInstance(application);
             workManager.enqueueUniqueWork(
@@ -372,7 +372,7 @@ public class LttrsRepository {
         final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MarkImportantWorker.class)
                 .setConstraints(CONNECTED_CONSTRAINT)
                 .setInputData(MarkImportantWorker.data(requireAccount().id, threadId))
-                .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
+                .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                 .build();
         final WorkManager workManager = WorkManager.getInstance(application);
         workManager.enqueueUniqueWork(
@@ -402,7 +402,7 @@ public class LttrsRepository {
         final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(RemoveFromMailboxWorker.class)
                 .setConstraints(CONNECTED_CONSTRAINT)
                 .setInputData(RemoveFromMailboxWorker.data(requireAccount().id, threadId, mailbox))
-                .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
+                .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                 .setInitialDelay(INITIAL_DELAY_DURATION, INITIAL_DELAY_TIME_UNIT)
                 .build();
         final WorkManager workManager = WorkManager.getInstance(application);
@@ -439,7 +439,7 @@ public class LttrsRepository {
             final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ModifyKeywordWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(ModifyKeywordWorker.data(requireAccount().id, threadId, keyword, targetState))
-                    .addTag(MuaWorker.TAG_EMAIL_MODIFICATION)
+                    .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                     .setInitialDelay(targetState ? 0 : INITIAL_DELAY_DURATION, INITIAL_DELAY_TIME_UNIT)
                     .build();
             final WorkManager workManager = WorkManager.getInstance(application);

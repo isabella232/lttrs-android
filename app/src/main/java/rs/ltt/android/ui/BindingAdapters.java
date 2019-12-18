@@ -19,22 +19,18 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
 import android.text.style.DynamicDrawableSpan;
 import android.text.style.ImageSpan;
 import android.text.style.StyleSpan;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
-
 import androidx.annotation.DrawableRes;
+import androidx.appcompat.widget.AppCompatSpinner;
 import androidx.core.content.ContextCompat;
 import androidx.core.widget.ImageViewCompat;
 import androidx.databinding.BindingAdapter;
@@ -42,13 +38,24 @@ import androidx.lifecycle.LiveData;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import rs.ltt.android.R;
+import rs.ltt.android.entity.IdentityWithNameAndEmail;
 import rs.ltt.android.entity.SubjectWithImportance;
-import rs.ltt.android.entity.ThreadHeader;
 import rs.ltt.android.entity.ThreadOverviewItem;
-import rs.ltt.jmap.mua.util.EmailAddressUtil;
 import rs.ltt.jmap.common.entity.Role;
+import rs.ltt.jmap.mua.util.EmailAddressUtil;
 import rs.ltt.jmap.mua.util.EmailBodyUtil;
 
 public class BindingAdapters {
@@ -82,9 +89,9 @@ public class BindingAdapters {
             if (sameDay(today, specifiedDate) || diff < SIX_HOURS) {
                 textView.setText(DateUtils.formatDateTime(context, receivedAt.getTime(), DateUtils.FORMAT_SHOW_TIME));
             } else if (sameYear(today, specifiedDate) || diff < THREE_MONTH) {
-                textView.setText(DateUtils.formatDateTime(context,  receivedAt.getTime(), DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_YEAR | DateUtils.FORMAT_ABBREV_ALL));
+                textView.setText(DateUtils.formatDateTime(context, receivedAt.getTime(), DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_YEAR | DateUtils.FORMAT_ABBREV_ALL));
             } else {
-                textView.setText(DateUtils.formatDateTime(context,  receivedAt.getTime(), DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_MONTH_DAY | DateUtils.FORMAT_ABBREV_ALL));
+                textView.setText(DateUtils.formatDateTime(context, receivedAt.getTime(), DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_MONTH_DAY | DateUtils.FORMAT_ABBREV_ALL));
             }
         }
     }
@@ -173,7 +180,7 @@ public class BindingAdapters {
             ImageViewCompat.setImageTintList(imageView, ColorStateList.valueOf(ContextCompat.getColor(imageView.getContext(), R.color.yellow800)));
         } else {
             imageView.setImageResource(R.drawable.ic_star_border_no_padding_black_24dp);
-            ImageViewCompat.setImageTintList(imageView, ColorStateList.valueOf(ContextCompat.getColor(imageView.getContext(), R.color.black54)));
+            ImageViewCompat.setImageTintList(imageView, ColorStateList.valueOf(ContextCompat.getColor(imageView.getContext(), R.color.colorSecondaryOnSurface)));
         }
     }
 
@@ -261,5 +268,27 @@ public class BindingAdapters {
     @BindingAdapter("editorAction")
     public static void setEditorAction(final TextInputEditText editText, final TextView.OnEditorActionListener listener) {
         editText.setOnEditorActionListener(listener);
+    }
+
+    @BindingAdapter("identities")
+    public static void setIdentities(final AppCompatSpinner spinner, final List<IdentityWithNameAndEmail> identities) {
+        final List<String> representations;
+        if (identities == null) {
+            representations = Collections.emptyList();
+        } else {
+            representations = Lists.transform(identities, new Function<IdentityWithNameAndEmail, String>() {
+                @NullableDecl
+                @Override
+                public String apply(IdentityWithNameAndEmail input) {
+                    return EmailAddressUtil.toString(input.getEmailAddress());
+                }
+            });
+        }
+        final ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                spinner.getContext(),
+                android.R.layout.simple_spinner_item,
+                representations);
+        adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
     }
 }

@@ -19,7 +19,7 @@
 
         <layer-list>
             <item>
-                <ripple android:color="@color/black12" />
+                <ripple android:color="@color/colorDivider" />
             </item>
             <item android:drawable="@drawable/ic_keyboard_arrow_down_black_24dp" android:gravity="center_vertical|right" android:end="4dp" />
         </layer-list>

@@ -20,21 +20,35 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.work.WorkerParameters;
 
-public class RefreshWorker extends AbstractMuaWorker {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    public RefreshWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+import java.util.concurrent.ExecutionException;
+
+import rs.ltt.android.entity.IdentityWithNameAndEmail;
+import rs.ltt.jmap.common.entity.Email;
+
+public class SendEmailWorker extends AbstractCreateEmailWorker {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCreateEmailWorker.class);
+
+    public SendEmailWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
     }
 
     @NonNull
     @Override
     public Result doWork() {
+        final IdentityWithNameAndEmail identity = getIdentity();
+        final Email email = buildEmail(identity);
         try {
-            getMua().refresh().get();
+            getMua().send(email, identity).get();
             return Result.success();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (ExecutionException e) {
+            LOGGER.warn("Unable to send email", e);
             return Result.failure();
+        } catch (InterruptedException e) {
+            return Result.retry();
         }
     }
 }
