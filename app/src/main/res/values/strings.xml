@@ -67,6 +67,7 @@
     <string name="add_at_least_one_recipient">Add at least one recipient.</string>
     <string name="the_address_x_is_invalid"><![CDATA[The address <%s> is invalid.]]></string>
     <string name="select_sender">Select sender.</string>
+    <string name="draft">Draft</string>
     <plurals name="unable_to_safe_accounts">
         <item quantity="one">Unable to safe account</item>
         <item quantity="many">Unable to safe accounts</item>

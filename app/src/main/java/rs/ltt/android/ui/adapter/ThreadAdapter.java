@@ -90,7 +90,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
     @Override
     public void onBindViewHolder(@NonNull AbstractThreadItemViewHolder holder, final int position) {
         if (holder instanceof ThreadHeaderViewHolder) {
-            ThreadHeaderViewHolder headerViewHolder = (ThreadHeaderViewHolder) holder;
+            final ThreadHeaderViewHolder headerViewHolder = (ThreadHeaderViewHolder) holder;
             headerViewHolder.binding.setSubject(subjectWithImportance);
             headerViewHolder.binding.setFlagged(flagged);
             headerViewHolder.binding.starToggle.setOnClickListener(v -> {
@@ -102,8 +102,8 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
             });
             Touch.expandTouchArea(headerViewHolder.binding.getRoot(), headerViewHolder.binding.starToggle, 16);
         } else if (holder instanceof ThreadItemViewHolder) {
-            ThreadItemViewHolder itemViewHolder = (ThreadItemViewHolder) holder;
-            FullEmail email = mDiffer.getItem(position - 1);
+            final ThreadItemViewHolder itemViewHolder = (ThreadItemViewHolder) holder;
+            final FullEmail email = mDiffer.getItem(position - 1);
             final boolean lastEmail = mDiffer.getItemCount() == position;
             final boolean expanded = email != null && expandedItems.contains(email.id);
             itemViewHolder.binding.setExpanded(expanded);

@@ -19,9 +19,11 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
 import android.text.style.DynamicDrawableSpan;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.text.style.StyleSpan;
 import android.view.View;
@@ -51,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 
 import rs.ltt.android.R;
+import rs.ltt.android.entity.FullEmail;
 import rs.ltt.android.entity.IdentityWithNameAndEmail;
 import rs.ltt.android.entity.SubjectWithImportance;
 import rs.ltt.android.entity.ThreadOverviewItem;
@@ -127,11 +130,30 @@ public class BindingAdapters {
     }
 
     @BindingAdapter("from")
-    public static void setFrom(final ImageView imageView, final Map.Entry<String, String> from) {
-        if (from == null) {
-            imageView.setImageDrawable(new AvatarDrawable(null, null));
+    public static void setFrom(final ImageView imageView, final FullEmail.From from) {
+        if (from instanceof FullEmail.NamedFrom) {
+            final FullEmail.NamedFrom named = (FullEmail.NamedFrom) from;
+            imageView.setImageDrawable(new AvatarDrawable(named.getName(), named.getEmail()));
         } else {
-            imageView.setImageDrawable(new AvatarDrawable(from.getKey(), from.getValue()));
+            imageView.setImageDrawable(new AvatarDrawable(null, null));
+        }
+    }
+
+    @BindingAdapter("android:text")
+    public static void setText(final TextView textView, final FullEmail.From from) {
+        if (from instanceof FullEmail.NamedFrom) {
+            final FullEmail.NamedFrom named = (FullEmail.NamedFrom) from;
+            textView.setText(named.getName());
+        } else if (from instanceof FullEmail.DraftFrom) {
+            final Context context = textView.getContext();
+            final SpannableString spannable = new SpannableString(context.getString(R.string.draft));
+            spannable.setSpan(
+                    new ForegroundColorSpan(ContextCompat.getColor(context, R.color.colorPrimary)),
+                    0,
+                    spannable.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            );
+            textView.setText(spannable);
         }
     }
 
@@ -141,20 +163,41 @@ public class BindingAdapters {
         if (from != null) {
             final boolean shorten = from.length > 1;
             for (int i = 0; i < from.length; ++i) {
-                ThreadOverviewItem.From individual = from[i];
+                final ThreadOverviewItem.From individual = from[i];
                 if (builder.length() != 0) {
                     builder.append(", ");
                 }
-                int start = builder.length();
-                builder.append(shorten ? EmailAddressUtil.shorten(individual.name) : individual.name);
-                if (!individual.seen) {
-                    builder.setSpan(new StyleSpan(Typeface.BOLD), start, builder.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                }
-                if (from.length > 3) {
-                    if (i < from.length - 3) {
-                        builder.append(" … "); //TODO small?
-                        i = from.length - 3;
+                final int start = builder.length();
+                if (individual instanceof ThreadOverviewItem.DraftFrom) {
+                    final Context context = textView.getContext();
+                    builder.append(context.getString(R.string.draft));
+                    builder.setSpan(
+                            new ForegroundColorSpan(ContextCompat.getColor(context, R.color.colorPrimary)),
+                            start,
+                            builder.length(),
+                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    );
+                } else if (individual instanceof ThreadOverviewItem.NamedFrom) {
+                    final ThreadOverviewItem.NamedFrom named = (ThreadOverviewItem.NamedFrom) individual;
+                    builder.append(shorten ? EmailAddressUtil.shorten(named.name) : named.name);
+                    if (!named.seen) {
+                        builder.setSpan(
+                                new StyleSpan(Typeface.BOLD),
+                                start,
+                                builder.length(),
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                        );
                     }
+                    if (from.length > 3) {
+                        if (i < from.length - 3) {
+                            builder.append(" … "); //TODO small?
+                            i = from.length - 3;
+                        }
+                    }
+                } else {
+                    throw new IllegalStateException(
+                            String.format("Unable to render from type %s", individual.getClass().getName())
+                    );
                 }
             }
         }
@@ -166,6 +209,9 @@ public class BindingAdapters {
         switch (style) {
             case "bold":
                 v.setTypeface(null, Typeface.BOLD);
+                break;
+            case "italic":
+                v.setTypeface(null, Typeface.ITALIC);
                 break;
             default:
                 v.setTypeface(null, Typeface.NORMAL);
@@ -189,7 +235,12 @@ public class BindingAdapters {
         if (from == null) {
             imageView.setImageDrawable(new AvatarDrawable(null, null));
         } else {
-            imageView.setImageDrawable(new AvatarDrawable(from.getValue().name, from.getKey()));
+            final ThreadOverviewItem.From value = from.getValue();
+            if (value instanceof ThreadOverviewItem.NamedFrom) {
+                imageView.setImageDrawable(new AvatarDrawable(((ThreadOverviewItem.NamedFrom) value).name, from.getKey()));
+            } else {
+                imageView.setImageDrawable(new AvatarDrawable(null, null)); //TODO do something nice to indicate draft
+            }
         }
     }
 

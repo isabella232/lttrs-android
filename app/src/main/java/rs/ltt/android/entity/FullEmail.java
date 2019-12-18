@@ -15,7 +15,7 @@
 
 package rs.ltt.android.entity;
 
-import android.util.Log;
+import androidx.room.Relation;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import androidx.room.Relation;
+import rs.ltt.jmap.common.entity.Keyword;
 
 public class FullEmail {
 
@@ -50,18 +50,18 @@ public class FullEmail {
     @Relation(parentColumn = "id", entityColumn = "emailId")
     public List<EmailBodyValueEntity> bodyValueEntities;
 
-    public String getFromAsText() {
-        return getFrom().getKey();
-    }
 
     public String getPreview() {
         return preview;
     }
 
-    public Map.Entry<String, String> getFrom() {
+    public From getFrom() {
+        if (keywords.contains(Keyword.DRAFT)) {
+            return new DraftFrom();
+        }
         for (EmailAddress emailAddress : emailAddresses) {
             if (emailAddress.type == EmailAddressType.FROM) {
-                return Maps.immutableEntry(emailAddress.getName(), emailAddress.getEmail());
+                return new NamedFrom(emailAddress);
             }
         }
         return null;
@@ -91,6 +91,30 @@ public class FullEmail {
         return toMap.values();
     }
 
+
+    public interface From {
+
+    }
+
+    public static class DraftFrom implements From {
+
+    }
+
+    public static class NamedFrom implements From {
+        private final EmailAddress emailAddress;
+
+        private NamedFrom(EmailAddress emailAddress) {
+            this.emailAddress = emailAddress;
+        }
+
+        public String getName() {
+            return this.emailAddress.getName();
+        }
+
+        public String getEmail() {
+            return this.emailAddress.getEmail();
+        }
+    }
 
 
 }

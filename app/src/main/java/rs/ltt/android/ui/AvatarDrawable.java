@@ -44,15 +44,15 @@ public class AvatarDrawable extends ColorDrawable {
 
     @Override
     public void draw(Canvas canvas) {
-        float midx = getBounds().width() / 2.0f;
-        float midy = getBounds().height() / 2.0f;
-        float radius = Math.min(getBounds().width(), getBounds().height()) / 2.0f;
+        final float midX = getBounds().width() / 2.0f;
+        final float midY = getBounds().height() / 2.0f;
+        final float radius = Math.min(getBounds().width(), getBounds().height()) / 2.0f;
         textPaint.setTextSize(radius);
-        Rect r = new Rect();
+        final Rect r = new Rect();
         canvas.getClipBounds(r);
-        int cHeight = r.height();
-        int cWidth = r.width();
-        canvas.drawCircle(midx, midy, radius, paint);
+        final int cHeight = r.height();
+        final int cWidth = r.width();
+        canvas.drawCircle(midX, midY, radius, paint);
         if (letter == null) {
             return;
         }

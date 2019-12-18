@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import androidx.room.Ignore;
 import androidx.room.Relation;
+
 import rs.ltt.jmap.common.entity.IdentifiableEmailWithKeywords;
 import rs.ltt.jmap.common.entity.IdentifiableEmailWithMailboxIds;
 import rs.ltt.jmap.common.entity.Keyword;
@@ -85,7 +86,7 @@ public class ThreadOverviewItem {
 
     public boolean showAsFlagged() {
         KeywordOverwriteEntity flaggedOverwrite = KeywordOverwriteEntity.getKeywordOverwrite(keywordOverwriteEntities, Keyword.FLAGGED);
-        return flaggedOverwrite != null ? flaggedOverwrite.value : KeywordUtil.anyHas(getOrderedEmails(),Keyword.FLAGGED);
+        return flaggedOverwrite != null ? flaggedOverwrite.value : KeywordUtil.anyHas(getOrderedEmails(), Keyword.FLAGGED);
     }
 
 
@@ -117,15 +118,20 @@ public class ThreadOverviewItem {
         LinkedHashMap<String, From> fromMap = new LinkedHashMap<>();
         final List<Email> emails = getOrderedEmails();
         for (Email email : emails) {
+            if (email.keywords.contains(Keyword.DRAFT)) {
+                fromMap.put("", new DraftFrom());
+                continue;
+            }
             final boolean seen = seenOverwrite != null ? seenOverwrite.value : email.keywords.contains(Keyword.SEEN);
             for (EmailAddress emailAddress : email.emailAddresses) {
                 if (emailAddress.type == EmailAddressType.FROM) {
                     From from = fromMap.get(emailAddress.getEmail());
                     if (from == null) {
-                        from = new From(emailAddress.getName(), seen);
+                        from = new NamedFrom(emailAddress.getName(), seen);
                         fromMap.put(emailAddress.getEmail(), from);
-                    } else {
-                        from.seen &= seen;
+                    } else if (from instanceof NamedFrom) {
+                        final NamedFrom namedFrom = (NamedFrom) from;
+                        namedFrom.seen &= seen;
                     }
                 }
             }
@@ -158,7 +164,7 @@ public class ThreadOverviewItem {
             }
         });
         final List<Email> orderedList = new ArrayList<>(emails.size());
-        for(ThreadItemEntity threadItemEntity : threadItemEntities) {
+        for (ThreadItemEntity threadItemEntity : threadItemEntities) {
             Email email = emailMap.get(threadItemEntity.emailId);
             if (email != null) {
                 orderedList.add(email);
@@ -169,7 +175,7 @@ public class ThreadOverviewItem {
 
     private Set<String> getMailboxIds() {
         ImmutableSet.Builder<String> builder = ImmutableSet.builder();
-        for(Email email : emails) {
+        for (Email email : emails) {
             builder.addAll(email.mailboxes);
         }
         return builder.build();
@@ -202,7 +208,7 @@ public class ThreadOverviewItem {
                 Objects.equal(mailboxOverwriteEntities, item.mailboxOverwriteEntities) &&
                 Objects.equal(getMailboxIds(), item.getMailboxIds()) &&
                 Objects.equal(everyHasSeenKeyword(), item.everyHasSeenKeyword()) &&
-                Arrays.equals(getFromValues(),item.getFromValues());
+                Arrays.equals(getFromValues(), item.getFromValues());
     }
 
     @Override
@@ -262,11 +268,19 @@ public class ThreadOverviewItem {
         }
     }
 
-    public static class From {
+    public interface From {
+
+    }
+
+    public static class DraftFrom implements From {
+
+    }
+
+    public static class NamedFrom implements From {
         public final String name;
         public boolean seen;
 
-        From(String name, boolean seen) {
+        NamedFrom(String name, boolean seen) {
             this.name = name;
             this.seen = seen;
         }
@@ -275,7 +289,7 @@ public class ThreadOverviewItem {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            From from = (From) o;
+            NamedFrom from = (NamedFrom) o;
             return seen == from.seen &&
                     Objects.equal(name, from.name);
         }

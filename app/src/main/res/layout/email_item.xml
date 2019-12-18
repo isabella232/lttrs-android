@@ -58,7 +58,7 @@
                 android:layout_toEndOf="@id/avatar"
                 android:fontFamily="sans-serif-medium"
                 android:maxLines="1"
-                android:text="@{email.getFromAsText()}"
+                android:text="@{email.from}"
                 android:textAppearance="?textAppearanceSubtitle1"
                 app:firstBaselineToTopHeight="28dp"
                 tools:text="Juliet Capulet" />
