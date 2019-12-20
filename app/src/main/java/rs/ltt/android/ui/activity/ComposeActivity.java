@@ -15,6 +15,8 @@
 
 package rs.ltt.android.ui.activity;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -27,20 +29,43 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.UUID;
+
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.ActivityComposeBinding;
 import rs.ltt.android.ui.ChipDrawableSpan;
+import rs.ltt.android.ui.ComposeAction;
 import rs.ltt.android.ui.model.ComposeViewModel;
+import rs.ltt.android.ui.model.ComposeViewModelFactory;
 
+//TODO handle save instance state
 public class ComposeActivity extends AppCompatActivity {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComposeActivity.class);
+
+    public static final int REQUEST_EDIT_DRAFT = 0x100;
+    public static final String WORK_REQUEST_ID = "work_request_id";
+    private static final String ACCOUNT_EXTRA = "account";
+    private static final String COMPOSE_ACTION_EXTRA = "compose_action";
+    private static final String EMAIL_ID_EXTRA = "email_id";
     private ActivityComposeBinding binding;
     private ComposeViewModel composeViewModel;
 
+    public static void editDraft(final Fragment fragment, Long account, final String emailId) {
+        final Intent intent = new Intent(fragment.getContext(), ComposeActivity.class);
+        intent.putExtra(ACCOUNT_EXTRA, account);
+        intent.putExtra(COMPOSE_ACTION_EXTRA, ComposeAction.EDIT_DRAFT.toString());
+        intent.putExtra(EMAIL_ID_EXTRA, emailId);
+        fragment.startActivityForResult(intent, REQUEST_EDIT_DRAFT);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +77,27 @@ public class ComposeActivity extends AppCompatActivity {
         actionbar.setHomeButtonEnabled(true);
         actionbar.setDisplayHomeAsUpEnabled(true);
 
-        final ViewModelProvider viewModelProvider = new ViewModelProvider(this, getDefaultViewModelProviderFactory());
+        final Intent i = getIntent();
+        final Long account;
+        if (i != null && i.hasExtra(ACCOUNT_EXTRA)) {
+            account = i.getLongExtra(ACCOUNT_EXTRA, 0L);
+        } else {
+            account = null;
+        }
+        final ComposeAction action = ComposeAction.of(i == null ? null : i.getStringExtra(COMPOSE_ACTION_EXTRA));
+        final String emailId = i == null ? null : i.getStringExtra(EMAIL_ID_EXTRA);
+        final boolean freshStart = savedInstanceState == null || savedInstanceState.isEmpty();
+
+        final ViewModelProvider viewModelProvider = new ViewModelProvider(
+                this,
+                new ComposeViewModelFactory(
+                        getApplication(),
+                        account,
+                        freshStart,
+                        action,
+                        emailId
+                )
+        );
         composeViewModel = viewModelProvider.get(ComposeViewModel.class);
 
         composeViewModel.getErrorMessage().observe(this, event -> {
@@ -124,10 +169,21 @@ public class ComposeActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        LOGGER.info("onBackPressed()");
+        final UUID uuid = composeViewModel.saveDraft();
+        if (uuid != null) {
+            final Intent intent = new Intent();
+            intent.putExtra(WORK_REQUEST_ID, uuid);
+            setResult(RESULT_OK, intent);
+        }
+        super.onBackPressed();
+    }
+
+    @Override
     public void onDestroy() {
         if (isFinishing()) {
             composeViewModel.saveDraft();
-            //TODO: however we also need to handle onSaveInstanceState() for OOM kills
         }
         super.onDestroy();
     }

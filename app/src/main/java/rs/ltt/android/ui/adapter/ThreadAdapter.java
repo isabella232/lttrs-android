@@ -37,6 +37,7 @@ import rs.ltt.android.entity.ExpandedPosition;
 import rs.ltt.android.entity.FullEmail;
 import rs.ltt.android.entity.SubjectWithImportance;
 import rs.ltt.android.ui.BindingAdapters;
+import rs.ltt.android.ui.activity.ComposeActivity;
 import rs.ltt.android.util.Touch;
 
 public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractThreadItemViewHolder> {
@@ -61,6 +62,8 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
     private Boolean flagged;
 
     private OnFlaggedToggled onFlaggedToggled;
+
+    private OnComposeActionTriggered onComposeActionTriggered;
 
     private final Set<String> expandedItems;
 
@@ -114,7 +117,6 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
             } else {
                 itemViewHolder.binding.header.setTouchDelegate(null);
             }
-
             itemViewHolder.binding.header.setOnClickListener(v -> {
                 if (expandedItems.contains(email.id)) {
                     expandedItems.remove(email.id);
@@ -123,6 +125,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
                 }
                 notifyItemChanged(position);
             });
+            itemViewHolder.binding.edit.setOnClickListener(v -> onComposeActionTriggered.onEditDraft(email.id));
         }
 
     }
@@ -150,6 +153,10 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
 
     public void setOnFlaggedToggledListener(OnFlaggedToggled listener) {
         this.onFlaggedToggled = listener;
+    }
+
+    public void setOnComposeActionTriggeredListener(OnComposeActionTriggered listener) {
+        this.onComposeActionTriggered = listener;
     }
 
     public void submitList(PagedList<FullEmail> pagedList) {

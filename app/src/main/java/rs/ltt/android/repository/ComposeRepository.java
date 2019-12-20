@@ -20,16 +20,24 @@ import android.app.Application;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
 
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import rs.ltt.android.entity.AccountWithCredentials;
+import rs.ltt.android.entity.EditableEmail;
 import rs.ltt.android.entity.IdentityWithNameAndEmail;
+import rs.ltt.android.worker.DiscardDraftWorker;
 import rs.ltt.android.worker.SaveDraftWorker;
 import rs.ltt.android.worker.SendEmailWorker;
+import rs.ltt.jmap.common.entity.EmailAddress;
 import rs.ltt.jmap.common.entity.IdentifiableIdentity;
 
 public class ComposeRepository extends LttrsRepository {
@@ -42,7 +50,11 @@ public class ComposeRepository extends LttrsRepository {
         return Transformations.switchMap(this.databaseLiveData, database -> database.identityDao().getIdentitiesLiveData());
     }
 
-    public void sendEmail(IdentifiableIdentity identity, String to, String subject, String body) {
+    public ListenableFuture<EditableEmail> getEditableEmail(final String id) {
+        return Futures.transformAsync(this.database, database -> database.threadAndEmailDao().getEditableEmail(id), MoreExecutors.directExecutor());
+    }
+
+    public void sendEmail(IdentifiableIdentity identity, Collection<EmailAddress> to, String subject, String body) {
         final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(SendEmailWorker.class)
                 .setConstraints(CONNECTED_CONSTRAINT)
                 .setInputData(SendEmailWorker.data(requireAccount().id, identity.getId(), to, subject, body))
@@ -51,12 +63,25 @@ public class ComposeRepository extends LttrsRepository {
         workManager.enqueue(workRequest);
     }
 
-    public void saveDraft(IdentifiableIdentity identity, String to, String subject, String body) {
-        final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(SaveDraftWorker.class)
+    public UUID saveDraft(final IdentifiableIdentity identity,
+                          final Collection<EmailAddress> to,
+                          final String subject,
+                          final String body,
+                          final String discard) {
+        final OneTimeWorkRequest saveDraftRequest = new OneTimeWorkRequest.Builder(SaveDraftWorker.class)
                 .setConstraints(CONNECTED_CONSTRAINT)
                 .setInputData(SendEmailWorker.data(requireAccount().id, identity.getId(), to, subject, body))
                 .build();
         final WorkManager workManager = WorkManager.getInstance(application);
-        workManager.enqueue(workRequest);
+        WorkContinuation continuation = workManager.beginWith(saveDraftRequest);
+        if (discard != null) {
+            final OneTimeWorkRequest discardPreviousDraft = new OneTimeWorkRequest.Builder(DiscardDraftWorker.class)
+                    .setConstraints(CONNECTED_CONSTRAINT)
+                    .setInputData(DiscardDraftWorker.data(requireAccount().id, discard))
+                    .build();
+            continuation = continuation.then(discardPreviousDraft);
+        }
+        continuation.enqueue();
+        return saveDraftRequest.getId();
     }
 }

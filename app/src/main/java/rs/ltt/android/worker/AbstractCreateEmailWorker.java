@@ -21,6 +21,9 @@ import androidx.annotation.NonNull;
 import androidx.work.Data;
 import androidx.work.WorkerParameters;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Collection;
 import java.util.Collections;
 
@@ -29,9 +32,12 @@ import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.EmailAddress;
 import rs.ltt.jmap.common.entity.EmailBodyPart;
 import rs.ltt.jmap.common.entity.EmailBodyValue;
+import rs.ltt.jmap.mua.Status;
 import rs.ltt.jmap.mua.util.EmailAddressUtil;
 
 public abstract class AbstractCreateEmailWorker extends AbstractMuaWorker {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCreateEmailWorker.class);
 
     private static String IDENTITY_KEY = "identity";
     private static String TO_KEY = "to";
@@ -56,16 +62,25 @@ public abstract class AbstractCreateEmailWorker extends AbstractMuaWorker {
 
     public static Data data(final Long account,
                             final String identity,
-                            final String to,
+                            final Collection<EmailAddress> to,
                             final String subject,
                             final String body) {
         return new Data.Builder()
                 .putLong(ACCOUNT_KEY, account)
                 .putString(IDENTITY_KEY, identity)
-                .putString(TO_KEY, to)
+                .putString(TO_KEY, EmailAddressUtil.toHeaderValue(to))
                 .putString(SUBJECT_KEY, subject)
                 .putString(BODY_KEY, body)
                 .build();
+    }
+
+
+    protected void refresh() {
+        try {
+            final Status status = getMua().refresh().get();
+        } catch (Exception e) {
+            LOGGER.warn("Refresh after email creation failed", e);
+        }
     }
 
     Email buildEmail(final IdentityWithNameAndEmail identity) {

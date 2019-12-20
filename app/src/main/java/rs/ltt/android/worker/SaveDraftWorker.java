@@ -18,6 +18,7 @@ package rs.ltt.android.worker;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.work.Data;
 import androidx.work.WorkerParameters;
 
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ import java.util.concurrent.ExecutionException;
 
 import rs.ltt.android.entity.IdentityWithNameAndEmail;
 import rs.ltt.jmap.common.entity.Email;
+import rs.ltt.jmap.mua.Status;
 
 public class SaveDraftWorker extends AbstractCreateEmailWorker {
 
@@ -42,8 +44,11 @@ public class SaveDraftWorker extends AbstractCreateEmailWorker {
         final IdentityWithNameAndEmail identity = getIdentity();
         final Email email = buildEmail(identity);
         try {
-            getMua().draft(email).get();
-            return Result.success();
+            final String emailId = getMua().draft(email).get();
+            LOGGER.info("Email saved as draft with id {}", emailId);
+            final Data data = new Data.Builder().putString("id", emailId).build();
+            refresh();
+            return Result.success(data);
         } catch (ExecutionException e) {
             LOGGER.warn("Unable to safe email as draft", e);
             return Result.failure();

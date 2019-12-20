@@ -18,6 +18,9 @@ package rs.ltt.android.ui.fragment;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
+import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.ui.model.LttrsViewModel;
 
 public abstract class AbstractLttrsFragment extends Fragment {
@@ -28,5 +31,19 @@ public abstract class AbstractLttrsFragment extends Fragment {
                 getDefaultViewModelProviderFactory()
         );
         return viewModelProvider.get(LttrsViewModel.class);
+    }
+
+    protected AccountWithCredentials requireAccount() {
+        final LttrsViewModel lttrsViewModel = getLttrsViewModel();
+        ListenableFuture<AccountWithCredentials> future = lttrsViewModel.getAccount();
+        if (future.isDone()) {
+            try {
+                return future.get();
+            } catch (Exception e) {
+                throw new IllegalStateException("Account information not yet available");
+            }
+        } else {
+            throw new IllegalStateException("Account information not yet available");
+        }
     }
 }

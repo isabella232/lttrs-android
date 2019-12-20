@@ -13,12 +13,8 @@
  * limitations under the License.
  */
 
-package rs.ltt.android.ui;
+package rs.ltt.android.ui.adapter;
 
-public enum ComposeAction {
-    EDIT_DRAFT, REPLY, REPLY_ALL, NEW;
-
-    public static ComposeAction of(final String value) {
-        return value == null ? NEW : ComposeAction.valueOf(value);
-    }
+public interface OnComposeActionTriggered {
+    void onEditDraft(String emailId);
 }

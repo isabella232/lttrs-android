@@ -111,7 +111,9 @@ public class ThreadViewModel extends AndroidViewModel {
         this.subjectWithImportance.addSource(importance, important -> subjectWithImportance.setValue(SubjectWithImportance.of(header.getValue(), important)));
         this.subjectWithImportance.addSource(header, threadHeader -> subjectWithImportance.setValue(SubjectWithImportance.of(threadHeader, importance.getValue())));
 
-        this.flagged = Transformations.map(header, ThreadHeader::showAsFlagged);
+        this.flagged = Transformations.map(header, h ->  h != null && h.showAsFlagged());
+
+        //TODO add LiveData that is true when header != null and display 'Thread not found' or something in UI
     }
 
     public LiveData<PagedList<FullEmail>> getEmails() {

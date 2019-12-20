@@ -16,6 +16,7 @@
 package rs.ltt.android.ui.fragment;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -26,7 +27,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
-import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -36,19 +36,27 @@ import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import com.google.common.util.concurrent.MoreExecutors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
+import java.util.UUID;
 
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.FragmentThreadBinding;
 import rs.ltt.android.entity.ExpandedPosition;
 import rs.ltt.android.entity.FullEmail;
 import rs.ltt.android.ui.ThreadModifier;
+import rs.ltt.android.ui.activity.ComposeActivity;
+import rs.ltt.android.ui.adapter.OnComposeActionTriggered;
 import rs.ltt.android.ui.adapter.OnFlaggedToggled;
 import rs.ltt.android.ui.adapter.ThreadAdapter;
 import rs.ltt.android.ui.model.ThreadViewModel;
 import rs.ltt.android.ui.model.ThreadViewModelFactory;
 
-public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedToggled {
+public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedToggled, OnComposeActionTriggered {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ThreadFragment.class);
 
     private FragmentThreadBinding binding;
     private ThreadViewModel threadViewModel;
@@ -104,6 +112,7 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
             requireActivity().invalidateOptionsMenu();
         });
         threadAdapter.setOnFlaggedToggledListener(this);
+        threadAdapter.setOnComposeActionTriggeredListener(this);
         return binding.getRoot();
     }
 
@@ -123,6 +132,19 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
             }, MoreExecutors.directExecutor());
         } else {
             threadAdapter.submitList(fullEmails);
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        LOGGER.info("on activity result code={}, result={}, intent={}", requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == ComposeActivity.REQUEST_EDIT_DRAFT) {
+            if (resultCode == ComposeActivity.RESULT_OK) {
+                //TODO react to 'discard draft' signal and go to draft view or whereever we came from
+                final UUID uuid = (UUID) data.getSerializableExtra(ComposeActivity.WORK_REQUEST_ID);
+                LOGGER.info("Returned uuid {}", uuid);
+            }
         }
     }
 
@@ -195,5 +217,14 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
             return (ThreadModifier) activity;
         }
         throw new IllegalStateException("Activity does not implement ThreadModifier");
+    }
+
+    @Override
+    public void onEditDraft(String emailId) {
+        ComposeActivity.editDraft(
+                this,
+                requireAccount().id,
+                emailId
+        );
     }
 }

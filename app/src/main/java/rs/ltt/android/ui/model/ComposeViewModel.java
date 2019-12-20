@@ -24,19 +24,26 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.common.base.Strings;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import rs.ltt.android.R;
 import rs.ltt.android.entity.AccountWithCredentials;
+import rs.ltt.android.entity.EditableEmail;
 import rs.ltt.android.entity.IdentityWithNameAndEmail;
 import rs.ltt.android.repository.ComposeRepository;
 import rs.ltt.android.repository.MainRepository;
+import rs.ltt.android.ui.ComposeAction;
 import rs.ltt.android.util.Event;
 import rs.ltt.jmap.common.entity.EmailAddress;
 import rs.ltt.jmap.mua.util.EmailAddressUtil;
@@ -46,7 +53,8 @@ public class ComposeViewModel extends AndroidViewModel {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComposeViewModel.class);
 
     private final ComposeRepository repository;
-    private final MainRepository mainRepository;
+    private final ComposeAction composeAction;
+    private final ListenableFuture<EditableEmail> email;
 
     private final MutableLiveData<Event<String>> errorMessage = new MutableLiveData<>();
 
@@ -58,12 +66,25 @@ public class ComposeViewModel extends AndroidViewModel {
 
     private boolean emailHasBeenStored = false;
 
-    public ComposeViewModel(@NonNull Application application) {
+    public ComposeViewModel(@NonNull final Application application,
+                            final Long id,
+                            final boolean freshStart,
+                            final ComposeAction composeAction,
+                            final String emailId) {
         super(application);
-        this.mainRepository = new MainRepository(application);
-        ListenableFuture<AccountWithCredentials> account = this.mainRepository.getAccount(null);
+        this.composeAction = composeAction;
+        final MainRepository mainRepository = new MainRepository(application);
+        final ListenableFuture<AccountWithCredentials> account = mainRepository.getAccount(id);
         this.repository = new ComposeRepository(application, account);
         this.identities = this.repository.getIdentities();
+        if (composeAction == ComposeAction.NEW) {
+            this.email = null;
+        } else {
+            this.email = this.repository.getEditableEmail(emailId);
+        }
+        if (freshStart && this.email != null) {
+            initializeWithEmail();
+        }
     }
 
     public LiveData<Event<String>> getErrorMessage() {
@@ -111,30 +132,49 @@ public class ComposeViewModel extends AndroidViewModel {
             return false;
         }
         LOGGER.info("sending with identity {}", identity.getId());
-        this.repository.sendEmail(identity, to.getValue(), subject.getValue(), body.getValue());
+        this.repository.sendEmail(identity, toEmailAddresses, subject.getValue(), body.getValue());
         this.emailHasBeenStored = true;
         return true;
     }
 
-    public void saveDraft() {
+    public UUID saveDraft() {
         if (this.emailHasBeenStored) {
             LOGGER.info("Not storing as draft. Email has already been stored.");
+            return null;
         }
         final IdentityWithNameAndEmail identity = getIdentity();
         if (identity == null) {
             LOGGER.info("Not storing draft. No identity has been selected");
-            return;
+            return null;
         }
-        final String to = Strings.nullToEmpty(this.to.getValue());
+        final Collection<EmailAddress> to = EmailAddressUtil.parse(Strings.nullToEmpty(this.to.getValue()));
         final String subject = Strings.nullToEmpty(this.subject.getValue());
         final String body = Strings.nullToEmpty(this.body.getValue());
-        if (to.trim().isEmpty() && subject.trim().isEmpty() && body.trim().isEmpty()) {
+        if (to.isEmpty() && subject.trim().isEmpty() && body.trim().isEmpty()) {
             LOGGER.info("not storing draft. To, subject and body are empty.");
-            return;
+            return null;
+        }
+        final EditableEmail email = getEmail();
+        if (this.composeAction == ComposeAction.EDIT_DRAFT) {
+            if (email != null
+                    && EmailAddressUtil.equalCollections(email.getTo(), to)
+                    && subject.equals(email.subject)
+                    && body.equals(email.getText())) {
+                LOGGER.info("Not storing draft. Nothing has been changed");
+                return null;
+            }
         }
         LOGGER.info("Saving draft");
-        this.repository.saveDraft(identity, to, subject, body);
-        this.emailHasBeenStored = false;
+        final String discard;
+        if (this.composeAction == ComposeAction.EDIT_DRAFT) {
+            discard = email != null ? email.id : null;
+            LOGGER.info("Requesting to delete previous draft={}", email.id);
+        } else {
+            discard = null;
+        }
+        final UUID uuid = this.repository.saveDraft(identity, to, subject, body, discard);
+        this.emailHasBeenStored = true;
+        return uuid;
     }
 
     private IdentityWithNameAndEmail getIdentity() {
@@ -150,5 +190,36 @@ public class ComposeViewModel extends AndroidViewModel {
         this.errorMessage.postValue(
                 new Event<>(getApplication().getString(res, objects))
         );
+    }
+
+    private EditableEmail getEmail() {
+        if (this.email != null && this.email.isDone()) {
+            try {
+                return this.email.get();
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private void initializeWithEmail() {
+        Futures.addCallback(this.email, new FutureCallback<EditableEmail>() {
+            @Override
+            public void onSuccess(@NullableDecl EditableEmail result) {
+                initializeWithEmail(result);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+
+            }
+        }, MoreExecutors.directExecutor());
+    }
+
+    private void initializeWithEmail(final EditableEmail email) {
+        to.postValue(EmailAddressUtil.toHeaderValue(email.getTo()));
+        subject.postValue(email.subject);
+        body.postValue(email.getText());
     }
 }

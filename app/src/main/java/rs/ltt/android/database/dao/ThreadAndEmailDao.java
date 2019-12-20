@@ -17,10 +17,6 @@ package rs.ltt.android.database.dao;
 
 import android.util.Log;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
-import java.util.List;
-
 import androidx.lifecycle.LiveData;
 import androidx.paging.DataSource;
 import androidx.room.Dao;
@@ -30,13 +26,19 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Transaction;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
+import rs.ltt.android.entity.EditableEmail;
 import rs.ltt.android.entity.EmailBodyPartEntity;
 import rs.ltt.android.entity.EmailBodyValueEntity;
 import rs.ltt.android.entity.EmailEmailAddressEntity;
 import rs.ltt.android.entity.EmailEntity;
+import rs.ltt.android.entity.EmailInReplyToEntity;
 import rs.ltt.android.entity.EmailKeywordEntity;
 import rs.ltt.android.entity.EmailMailboxEntity;
 import rs.ltt.android.entity.EmailWithKeywords;
@@ -155,6 +157,9 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
     abstract void insertEmailAddresses(List<EmailEmailAddressEntity> entities);
 
     @Insert
+    abstract void insertInReplyTo(List<EmailInReplyToEntity> entities);
+
+    @Insert
     abstract void insertMailboxes(List<EmailMailboxEntity> entities);
 
     @Insert
@@ -175,8 +180,16 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
     public abstract List<EmailWithMailboxes> getEmailsWithMailboxes(String threadId);
 
     @Transaction
+     @Query("select id from email where id=:id")
+    public abstract EmailWithKeywords getEmailWithKeyword(String id);
+
+    @Transaction
     @Query("select id,receivedAt,preview,email.threadId from thread_item join email on thread_item.emailId=email.id where thread_item.threadId=:threadId order by position")
     public abstract DataSource.Factory<Integer, FullEmail> getEmails(String threadId);
+
+    @Transaction
+    @Query("select id,subject from email where id=:id")
+    public abstract ListenableFuture<EditableEmail> getEditableEmail(String id);
 
     @Transaction
     @Query("select subject,email.threadId from thread_item join email on thread_item.emailId=email.id where thread_item.threadId=:threadId order by position limit 1")
@@ -241,6 +254,7 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
     private void insertEmails(final Email[] emails) {
         for (Email email : emails) {
             insert(EmailEntity.of(email));
+            insertInReplyTo(EmailInReplyToEntity.of(email));
             insertEmailAddresses(EmailEmailAddressEntity.of(email));
             insertMailboxes(EmailMailboxEntity.of(email));
             insertKeywords(EmailKeywordEntity.of(email));

@@ -36,6 +36,7 @@ import rs.ltt.android.entity.EmailBodyPartEntity;
 import rs.ltt.android.entity.EmailBodyValueEntity;
 import rs.ltt.android.entity.EmailEmailAddressEntity;
 import rs.ltt.android.entity.EmailEntity;
+import rs.ltt.android.entity.EmailInReplyToEntity;
 import rs.ltt.android.entity.EmailKeywordEntity;
 import rs.ltt.android.entity.EmailMailboxEntity;
 import rs.ltt.android.entity.EntityStateEntity;
@@ -57,6 +58,7 @@ import rs.ltt.android.entity.ThreadItemEntity;
                 ThreadEntity.class,
                 ThreadItemEntity.class,
                 EmailEntity.class,
+                EmailInReplyToEntity.class,
                 EmailEmailAddressEntity.class,
                 EmailKeywordEntity.class,
                 EmailMailboxEntity.class,

@@ -16,6 +16,7 @@
 package rs.ltt.android.entity;
 
 import java.util.Date;
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
