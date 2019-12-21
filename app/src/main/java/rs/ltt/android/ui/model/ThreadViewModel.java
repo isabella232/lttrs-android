@@ -21,14 +21,26 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
 import androidx.paging.PagedList;
+import androidx.work.Data;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import rs.ltt.android.entity.AccountWithCredentials;
@@ -40,9 +52,12 @@ import rs.ltt.android.entity.SubjectWithImportance;
 import rs.ltt.android.entity.ThreadHeader;
 import rs.ltt.android.repository.ThreadRepository;
 import rs.ltt.android.util.CombinedListsLiveData;
+import rs.ltt.android.util.Event;
 import rs.ltt.jmap.common.entity.Role;
 
 public class ThreadViewModel extends AndroidViewModel {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ThreadViewModel.class);
 
     public final AtomicBoolean jumpedToFirstUnread = new AtomicBoolean(false);
     public final ListenableFuture<List<ExpandedPosition>> expandedPositions;
@@ -50,6 +65,7 @@ public class ThreadViewModel extends AndroidViewModel {
     private final String threadId;
     private final String label;
     private final ThreadRepository threadRepository;
+    private final MutableLiveData<Event<String>> threadViewRedirect = new MutableLiveData<>();
     private LiveData<PagedList<FullEmail>> emails;
     private MediatorLiveData<SubjectWithImportance> subjectWithImportance;
     private LiveData<Boolean> flagged;
@@ -116,6 +132,10 @@ public class ThreadViewModel extends AndroidViewModel {
         //TODO add LiveData that is true when header != null and display 'Thread not found' or something in UI
     }
 
+    public LiveData<Event<String>> getThreadViewRedirect() {
+        return this.threadViewRedirect;
+    }
+
     public LiveData<PagedList<FullEmail>> getEmails() {
         return emails;
     }
@@ -167,6 +187,27 @@ public class ThreadViewModel extends AndroidViewModel {
 
     public void markNotImportant() {
         this.threadRepository.markNotImportant(this.threadId);
+    }
+
+    public void waitForEdit(UUID uuid) {
+        final WorkManager workManager = WorkManager.getInstance(getApplication());
+        LiveData<WorkInfo> liveData = workManager.getWorkInfoByIdLiveData(uuid);
+        liveData.observeForever(new Observer<WorkInfo>() {
+            @Override
+            public void onChanged(WorkInfo workInfo) {
+                if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                    final Data data = workInfo.getOutputData();
+                    final String threadId = data.getString("threadId");
+                    if (threadId != null && !ThreadViewModel.this.threadId.equals(threadId)) {
+                        LOGGER.info("redirecting to thread {}", threadId);
+                        threadViewRedirect.postValue(new Event<>(threadId));
+                    }
+                    liveData.removeObserver(this);
+                } else if (workInfo.getState() == WorkInfo.State.FAILED) {
+                    liveData.removeObserver(this);
+                }
+            }
+        });
     }
 
     public static class MenuConfiguration {

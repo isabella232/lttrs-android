@@ -33,14 +33,14 @@ public class DiscardDraftWorker extends AbstractMuaWorker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiscardDraftWorker.class);
 
-    private static final String EMAIL_ID_KEY = "emailId";
+    private static final String DISCARD_ID_KEY = "discard";
 
     private final String emailId;
 
     public DiscardDraftWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         final Data data = workerParams.getInputData();
-        this.emailId = data.getString(EMAIL_ID_KEY);
+        this.emailId = data.getString(DISCARD_ID_KEY);
     }
 
     @NonNull
@@ -71,7 +71,7 @@ public class DiscardDraftWorker extends AbstractMuaWorker {
     public static Data data(Long account, String emailId) {
         return new Data.Builder()
                 .putLong(ACCOUNT_KEY, account)
-                .putString(EMAIL_ID_KEY, emailId)
+                .putString(DISCARD_ID_KEY, emailId)
                 .build();
     }
 }

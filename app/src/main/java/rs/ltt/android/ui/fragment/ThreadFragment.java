@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.UUID;
 
+import rs.ltt.android.LttrsNavigationDirections;
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.FragmentThreadBinding;
 import rs.ltt.android.entity.ExpandedPosition;
@@ -53,6 +54,7 @@ import rs.ltt.android.ui.adapter.OnFlaggedToggled;
 import rs.ltt.android.ui.adapter.ThreadAdapter;
 import rs.ltt.android.ui.model.ThreadViewModel;
 import rs.ltt.android.ui.model.ThreadViewModelFactory;
+import rs.ltt.android.util.Event;
 
 public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedToggled, OnComposeActionTriggered {
 
@@ -113,7 +115,20 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
         });
         threadAdapter.setOnFlaggedToggledListener(this);
         threadAdapter.setOnComposeActionTriggeredListener(this);
+        threadViewModel.getThreadViewRedirect().observe(getViewLifecycleOwner(), this::onThreadViewRedirect);
         return binding.getRoot();
+    }
+
+    private void onThreadViewRedirect(final Event<String> event) {
+        if (event.isConsumable()) {
+            final String threadId = event.consume();
+            final NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
+            navController.navigate(LttrsNavigationDirections.actionToThread(
+                    threadId,
+                    null,
+                    true
+            ));
+        }
     }
 
     private void onEmailsChanged(PagedList<FullEmail> fullEmails) {
@@ -141,9 +156,13 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == ComposeActivity.REQUEST_EDIT_DRAFT) {
             if (resultCode == ComposeActivity.RESULT_OK) {
-                //TODO react to 'discard draft' signal and go to draft view or whereever we came from
                 final UUID uuid = (UUID) data.getSerializableExtra(ComposeActivity.WORK_REQUEST_ID);
+                if (uuid != null) {
+                    threadViewModel.waitForEdit(uuid);
+                }
+                //TODO react to 'discard draft' signal and go to draft view or whereever we came from
                 LOGGER.info("Returned uuid {}", uuid);
+
             }
         }
     }

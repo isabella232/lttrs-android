@@ -45,9 +45,13 @@ public class SaveDraftWorker extends AbstractCreateEmailWorker {
         final Email email = buildEmail(identity);
         try {
             final String emailId = getMua().draft(email).get();
-            LOGGER.info("Email saved as draft with id {}", emailId);
-            final Data data = new Data.Builder().putString("id", emailId).build();
             refresh();
+            final String threadId = getDatabase().threadAndEmailDao().getThreadId(emailId);
+            LOGGER.info("Email saved as draft with id {} in thread {}", emailId, threadId);
+            final Data data = new Data.Builder()
+                    .putString("emailId", emailId)
+                    .putString("threadId", threadId)
+                    .build();
             return Result.success(data);
         } catch (ExecutionException e) {
             LOGGER.warn("Unable to safe email as draft", e);

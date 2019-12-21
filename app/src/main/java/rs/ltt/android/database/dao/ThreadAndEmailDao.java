@@ -171,6 +171,9 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
     @Insert
     abstract void insertEmailBodyParts(List<EmailBodyPartEntity> entities);
 
+    @Query("select threadId from email where id=:emailId")
+    public abstract String getThreadId(String emailId);
+
     @Transaction
     @Query("select id from email where threadId=:threadId")
     public abstract List<EmailWithKeywords> getEmailsWithKeywords(String threadId);
