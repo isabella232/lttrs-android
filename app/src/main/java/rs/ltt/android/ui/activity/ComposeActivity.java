@@ -136,6 +136,8 @@ public class ComposeActivity extends AppCompatActivity {
 
         binding.toLabel.setOnClickListener(v -> requestFocusAndOpenKeyboard(binding.to));
         binding.placeholder.setOnClickListener(v -> requestFocusAndOpenKeyboard(binding.body));
+
+        //TODO once we handle instance state ourselves we need to call ChipDrawableSpan.reset() on `to`
     }
 
     private void requestFocusAndOpenKeyboard(AppCompatEditText editText) {

@@ -24,6 +24,7 @@ import android.text.Editable;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.ImageSpan;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 
@@ -46,6 +47,43 @@ public class ChipDrawableSpan extends ImageSpan {
     private ChipDrawableSpan(@NonNull final ChipDrawable drawable, final EmailAddressToken token) {
         super(drawable);
         this.emailAddressToken = token;
+    }
+
+    public static void apply(final Context context, final Editable editable, final boolean requireExplicitDelimiter) {
+        final Set<EmailAddressToken> tokens = new HashSet<>(EmailAddressTokenizer.tokenize(editable, requireExplicitDelimiter));
+        final ChipDrawableSpan[] spans = editable.getSpans(0, editable.length() - 1, ChipDrawableSpan.class);
+        for (ChipDrawableSpan span : spans) {
+            if (tokens.remove(span.emailAddressToken)) {
+                continue;
+            }
+            editable.removeSpan(span);
+        }
+        for (EmailAddressToken token : tokens) {
+            final ChipDrawable chip = ChipDrawable.createFromResource(context, R.xml.address);
+            if (EmailAddressUtil.isValid(token.getEmailAddress())) {
+                chip.setChipBackgroundColorResource(R.color.colorSurface);
+            } else {
+                chip.setChipBackgroundColorResource(R.color.colorSurfaceWarning);
+            }
+            final EmailAddress emailAddress = token.getEmailAddress();
+            if (TextUtils.isEmpty(emailAddress.getName())) {
+                chip.setText(emailAddress.getEmail());
+            } else {
+                chip.setText(emailAddress.getName());
+            }
+            chip.setBounds(0, 0, chip.getIntrinsicWidth(), chip.getIntrinsicHeight());
+            ChipDrawableSpan span = new ChipDrawableSpan(chip, token);
+            editable.setSpan(span, token.getStart(), token.getEnd() + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+    }
+
+    public static void reset(EditText editText) {
+        final Editable editable = editText.getEditableText();
+        if (TextUtils.isEmpty(editable)) {
+            return;
+        }
+        editable.clearSpans();
+        ChipDrawableSpan.apply(editText.getContext(), editable, editText.hasFocus());
     }
 
     @Override
@@ -89,34 +127,6 @@ public class ChipDrawableSpan extends ImageSpan {
         canvas.translate(x, transY);
         drawable.draw(canvas);
         canvas.restore();
-    }
-
-    public static void apply(final Context context, final Editable editable, final boolean requireExplicitDelimiter) {
-        final Set<EmailAddressToken> tokens = new HashSet<>(EmailAddressTokenizer.tokenize(editable, requireExplicitDelimiter));
-        final ChipDrawableSpan[] spans = editable.getSpans(0, editable.length() - 1, ChipDrawableSpan.class);
-        for (ChipDrawableSpan span : spans) {
-            if (tokens.remove(span.emailAddressToken)) {
-                continue;
-            }
-            editable.removeSpan(span);
-        }
-        for (EmailAddressToken token : tokens) {
-            final ChipDrawable chip = ChipDrawable.createFromResource(context, R.xml.address);
-            if (EmailAddressUtil.isValid(token.getEmailAddress())) {
-                chip.setChipBackgroundColorResource(R.color.white);
-            } else {
-                chip.setChipBackgroundColorResource(R.color.red300);
-            }
-            final EmailAddress emailAddress = token.getEmailAddress();
-            if (TextUtils.isEmpty(emailAddress.getName())) {
-                chip.setText(emailAddress.getEmail());
-            } else {
-                chip.setText(emailAddress.getName());
-            }
-            chip.setBounds(0, 0, chip.getIntrinsicWidth(), chip.getIntrinsicHeight());
-            ChipDrawableSpan span = new ChipDrawableSpan(chip, token);
-            editable.setSpan(span, token.getStart(), token.getEnd() + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
     }
 
 }
