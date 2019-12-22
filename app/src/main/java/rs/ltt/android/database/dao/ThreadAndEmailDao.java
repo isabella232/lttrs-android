@@ -41,6 +41,7 @@ import rs.ltt.android.entity.EmailEntity;
 import rs.ltt.android.entity.EmailInReplyToEntity;
 import rs.ltt.android.entity.EmailKeywordEntity;
 import rs.ltt.android.entity.EmailMailboxEntity;
+import rs.ltt.android.entity.EmailMessageIdEntity;
 import rs.ltt.android.entity.EmailWithKeywords;
 import rs.ltt.android.entity.EmailWithMailboxes;
 import rs.ltt.android.entity.EntityStateEntity;
@@ -160,6 +161,9 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
     abstract void insertInReplyTo(List<EmailInReplyToEntity> entities);
 
     @Insert
+    abstract void insertMessageId(List<EmailMessageIdEntity> entities);
+
+    @Insert
     abstract void insertMailboxes(List<EmailMailboxEntity> entities);
 
     @Insert
@@ -191,7 +195,7 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
     public abstract DataSource.Factory<Integer, FullEmail> getEmails(String threadId);
 
     @Transaction
-    @Query("select id,subject from email where id=:id")
+    @Query("select id,threadId,subject from email where id=:id")
     public abstract ListenableFuture<EditableEmail> getEditableEmail(String id);
 
     @Transaction
@@ -258,6 +262,7 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
         for (Email email : emails) {
             insert(EmailEntity.of(email));
             insertInReplyTo(EmailInReplyToEntity.of(email));
+            insertMessageId(EmailMessageIdEntity.of(email));
             insertEmailAddresses(EmailEmailAddressEntity.of(email));
             insertMailboxes(EmailMailboxEntity.of(email));
             insertKeywords(EmailKeywordEntity.of(email));
@@ -280,7 +285,7 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
         if (updatedProperties != null) {
             for (Email email : update.getUpdated()) {
                 if (!emailExists(email.getId())) {
-                    Log.d("lttrs", "skipping updates to email " + email.getId() + " because we don’t have that");
+                    LOGGER.warn("skipping updates to email {} because we don’t have that", email.getId());
                     continue;
                 }
                 for (String property : updatedProperties) {
@@ -297,19 +302,21 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
                             throw new IllegalArgumentException("Unable to update property '" + property + "'");
                     }
                 }
-
-                deleteKeywordToggle(email.getId());
-                deleteMailboxOverwrite(email.getId());
-                final int executed = markAsExecuted(email.getId());
-                if (executed > 0) {
-                    LOGGER.info("Marked {} query item overwrites as executed", executed);
-                }
-
+                deleteOverwrites(email.getId());
             }
         }
-        for (String id : update.getDestroyed()) {
+        for (final String id : update.getDestroyed()) {
             deleteEmail(id);
         }
         throwOnUpdateConflict(EntityType.EMAIL, update.getOldTypedState(), update.getNewTypedState());
+    }
+
+    private void deleteOverwrites(final String emailId) {
+        deleteKeywordToggle(emailId);
+        deleteMailboxOverwrite(emailId);
+        final int executed = markAsExecuted(emailId);
+        if (executed > 0) {
+            LOGGER.info("Marked {} query item overwrites as executed", executed);
+        }
     }
 }

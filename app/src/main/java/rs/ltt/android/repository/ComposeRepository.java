@@ -39,6 +39,8 @@ import rs.ltt.android.worker.SaveDraftWorker;
 import rs.ltt.android.worker.SendEmailWorker;
 import rs.ltt.jmap.common.entity.EmailAddress;
 import rs.ltt.jmap.common.entity.IdentifiableIdentity;
+import rs.ltt.jmap.common.entity.Keyword;
+import rs.ltt.jmap.common.entity.Role;
 
 public class ComposeRepository extends LttrsRepository {
 
@@ -83,5 +85,26 @@ public class ComposeRepository extends LttrsRepository {
         }
         continuation.enqueue();
         return saveDraftRequest.getId();
+    }
+
+    public boolean discard(EditableEmail editableEmail) {
+        final OneTimeWorkRequest discardDraft = new OneTimeWorkRequest.Builder(DiscardDraftWorker.class)
+                .setConstraints(CONNECTED_CONSTRAINT)
+                .setInputData(DiscardDraftWorker.data(requireAccount().id, editableEmail.id))
+                .build();
+        final WorkManager workManager = WorkManager.getInstance(application);
+        final boolean isOnlyEmailInThread = editableEmail.isOnlyEmailInThread();
+        if (isOnlyEmailInThread) {
+            insertQueryItemOverwrite(editableEmail.threadId);
+        }
+        workManager.enqueue(discardDraft);
+        return isOnlyEmailInThread;
+    }
+
+    private void insertQueryItemOverwrite(final String threadId) {
+        IO_EXECUTOR.execute(() -> {
+            insertQueryItemOverwrite(threadId, Role.DRAFTS);
+            insertQueryItemOverwrite(threadId, Keyword.DRAFT);
+        });
     }
 }

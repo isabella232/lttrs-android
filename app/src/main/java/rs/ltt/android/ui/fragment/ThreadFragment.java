@@ -156,12 +156,17 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == ComposeActivity.REQUEST_EDIT_DRAFT) {
             if (resultCode == ComposeActivity.RESULT_OK) {
-                final UUID uuid = (UUID) data.getSerializableExtra(ComposeActivity.WORK_REQUEST_ID);
+                final UUID uuid = (UUID) data.getSerializableExtra(ComposeActivity.EDITING_TASK_ID_EXTRA);
+                final boolean threadDiscarded = data.getBooleanExtra(ComposeActivity.DISCARDED_THREAD_EXTRA, false);
                 if (uuid != null) {
                     threadViewModel.waitForEdit(uuid);
+                } else if (threadDiscarded) {
+                    final NavController navController = Navigation.findNavController(
+                            requireActivity(),
+                            R.id.nav_host_fragment
+                    );
+                    navController.popBackStack();
                 }
-                //TODO react to 'discard draft' signal and go to draft view or whereever we came from
-                LOGGER.info("Returned uuid {}", uuid);
 
             }
         }

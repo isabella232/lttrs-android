@@ -34,6 +34,8 @@ public class EditableEmail {
 
     public String id;
 
+    public String threadId;
+
     public String subject;
 
     @Relation(entity = EmailEmailAddressEntity.class, parentColumn = "id", entityColumn = "emailId", projection = {"email", "name", "type"})
@@ -48,6 +50,12 @@ public class EditableEmail {
     @Relation(entity = EmailInReplyToEntity.class, parentColumn = "id", entityColumn = "emailId", projection = {"id"})
     public List<String> inReplyTo;
 
+    @Relation(entity = EmailMessageIdEntity.class, parentColumn = "id", entityColumn = "emailId", projection = {"id"})
+    public List<String> messageId;
+
+    @Relation(entity = ThreadItemEntity.class, parentColumn = "threadId", entityColumn = "threadId", projection = {"emailId"})
+    public List<String> emailsInThread;
+
 
     public String getText() {
         final ArrayList<EmailBodyPartEntity> textBody = new ArrayList<>();
@@ -61,6 +69,10 @@ public class EditableEmail {
         Map<String, EmailBodyValueEntity> map = Maps.uniqueIndex(bodyValueEntities, value -> value.partId);
         EmailBodyValueEntity value = map.get(first.partId);
         return value.value;
+    }
+
+    public boolean isOnlyEmailInThread() {
+        return emailsInThread != null && emailsInThread.size() == 1 && emailsInThread.contains(id);
     }
 
     public Collection<rs.ltt.jmap.common.entity.EmailAddress> getTo() {

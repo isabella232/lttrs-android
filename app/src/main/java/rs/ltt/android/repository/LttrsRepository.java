@@ -76,7 +76,7 @@ public class LttrsRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LttrsRepository.class);
 
-    private static final Executor IO_EXECUTOR = Executors.newSingleThreadExecutor();
+    protected static final Executor IO_EXECUTOR = Executors.newSingleThreadExecutor();
 
     private static final long INITIAL_DELAY_DURATION = 4;
     private static final TimeUnit INITIAL_DELAY_TIME_UNIT = TimeUnit.SECONDS;
@@ -151,7 +151,7 @@ public class LttrsRepository {
         requireDatabase().overwriteDao().insert(keywordOverwriteEntity);
     }
 
-    private void insertQueryItemOverwrite(final String threadId, final Role role) {
+    protected void insertQueryItemOverwrite(final String threadId, final Role role) {
         MailboxOverviewItem mailbox = requireDatabase().mailboxDao().getMailboxOverviewItem(role);
         if (mailbox != null) {
             insertQueryItemOverwrite(threadId, mailbox);
@@ -169,7 +169,7 @@ public class LttrsRepository {
         );
     }
 
-    private void insertQueryItemOverwrite(final String threadId, final String keyword) {
+    protected void insertQueryItemOverwrite(final String threadId, final String keyword) {
         insertQueryItemOverwrite(threadId,
                 EmailQuery.of(
                         EmailFilterCondition.builder()

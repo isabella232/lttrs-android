@@ -64,7 +64,7 @@ public class ComposeViewModel extends AndroidViewModel {
     private final MutableLiveData<String> body = new MutableLiveData<>();
     private final LiveData<List<IdentityWithNameAndEmail>> identities;
 
-    private boolean emailHasBeenStored = false;
+    private boolean draftHasBeenHandled = false;
 
     public ComposeViewModel(@NonNull final Application application,
                             final Long id,
@@ -111,6 +111,13 @@ public class ComposeViewModel extends AndroidViewModel {
         return this.selectedIdentityPosition;
     }
 
+    public boolean discard() {
+        final EditableEmail email = getEmail();
+        final boolean isOnlyEmailInThread = email == null || repository.discard(email);
+        this.draftHasBeenHandled = true;
+        return isOnlyEmailInThread;
+    }
+
     public boolean send() {
         final IdentityWithNameAndEmail identity = getIdentity();
         if (identity == null) {
@@ -133,12 +140,12 @@ public class ComposeViewModel extends AndroidViewModel {
         }
         LOGGER.info("sending with identity {}", identity.getId());
         this.repository.sendEmail(identity, toEmailAddresses, subject.getValue(), body.getValue());
-        this.emailHasBeenStored = true;
+        this.draftHasBeenHandled = true;
         return true;
     }
 
     public UUID saveDraft() {
-        if (this.emailHasBeenStored) {
+        if (this.draftHasBeenHandled) {
             LOGGER.info("Not storing as draft. Email has already been stored.");
             return null;
         }
@@ -168,12 +175,12 @@ public class ComposeViewModel extends AndroidViewModel {
         final String discard;
         if (this.composeAction == ComposeAction.EDIT_DRAFT) {
             discard = email != null ? email.id : null;
-            LOGGER.info("Requesting to delete previous draft={}", email.id);
+            LOGGER.info("Requesting to delete previous draft={}", discard);
         } else {
             discard = null;
         }
         final UUID uuid = this.repository.saveDraft(identity, to, subject, body, discard);
-        this.emailHasBeenStored = true;
+        this.draftHasBeenHandled = true;
         return uuid;
     }
 

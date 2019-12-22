@@ -15,7 +15,6 @@
 
 package rs.ltt.android.ui.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -49,10 +48,10 @@ import rs.ltt.android.ui.model.ComposeViewModelFactory;
 //TODO handle save instance state
 public class ComposeActivity extends AppCompatActivity {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ComposeActivity.class);
-
     public static final int REQUEST_EDIT_DRAFT = 0x100;
-    public static final String WORK_REQUEST_ID = "work_request_id";
+    public static final String EDITING_TASK_ID_EXTRA = "work_request_id";
+    public static final String DISCARDED_THREAD_EXTRA = "discarded_thread";
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComposeActivity.class);
     private static final String ACCOUNT_EXTRA = "account";
     private static final String COMPOSE_ACTION_EXTRA = "compose_action";
     private static final String EMAIL_ID_EXTRA = "email_id";
@@ -165,6 +164,9 @@ public class ComposeActivity extends AppCompatActivity {
                     finish();
                 }
                 break;
+            case R.id.action_discard:
+                discardDraft();
+                break;
         }
         return super.onOptionsItemSelected(item);
 
@@ -176,10 +178,18 @@ public class ComposeActivity extends AppCompatActivity {
         final UUID uuid = composeViewModel.saveDraft();
         if (uuid != null) {
             final Intent intent = new Intent();
-            intent.putExtra(WORK_REQUEST_ID, uuid);
+            intent.putExtra(EDITING_TASK_ID_EXTRA, uuid);
             setResult(RESULT_OK, intent);
         }
         super.onBackPressed();
+    }
+
+    private void discardDraft() {
+        final boolean isOnlyEmailInThread = composeViewModel.discard();
+        Intent intent = new Intent();
+        intent.putExtra(DISCARDED_THREAD_EXTRA, isOnlyEmailInThread);
+        setResult(RESULT_OK, intent);
+        finish();
     }
 
     @Override
