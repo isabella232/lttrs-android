@@ -59,9 +59,20 @@ public class ComposeActivity extends AppCompatActivity {
     private ComposeViewModel composeViewModel;
 
     public static void editDraft(final Fragment fragment, Long account, final String emailId) {
+        launch(fragment,account,emailId,ComposeAction.EDIT_DRAFT);
+    }
+
+    public static void replyAll(final Fragment fragment, Long account, final String emailId) {
+        launch(fragment, account, emailId, ComposeAction.REPLY_ALL);
+    }
+
+    private static void launch(final Fragment fragment,
+                               final Long account,
+                               final String emailId,
+                               final ComposeAction action) {
         final Intent intent = new Intent(fragment.getContext(), ComposeActivity.class);
         intent.putExtra(ACCOUNT_EXTRA, account);
-        intent.putExtra(COMPOSE_ACTION_EXTRA, ComposeAction.EDIT_DRAFT.toString());
+        intent.putExtra(COMPOSE_ACTION_EXTRA, action.toString());
         intent.putExtra(EMAIL_ID_EXTRA, emailId);
         fragment.startActivityForResult(intent, REQUEST_EDIT_DRAFT);
     }

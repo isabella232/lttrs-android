@@ -251,4 +251,13 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
                 emailId
         );
     }
+
+    @Override
+    public void onReplyAll(String emailId) {
+        ComposeActivity.replyAll(
+                this,
+                requireAccount().id,
+                emailId
+        );
+    }
 }

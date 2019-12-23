@@ -76,7 +76,11 @@ public class EditableEmail {
     }
 
     public Collection<rs.ltt.jmap.common.entity.EmailAddress> getTo() {
-        return Collections2.transform(Collections2.filter(emailAddresses, input -> input != null && input.type == EmailAddressType.TO), new Function<EmailAddress, rs.ltt.jmap.common.entity.EmailAddress>() {
+        return getAddresses(EmailAddressType.TO);
+    }
+
+    public Collection<rs.ltt.jmap.common.entity.EmailAddress> getAddresses(final EmailAddressType type) {
+        return Collections2.transform(Collections2.filter(emailAddresses, input -> input != null && input.type == type), new Function<EmailAddress, rs.ltt.jmap.common.entity.EmailAddress>() {
             @NullableDecl
             @Override
             public rs.ltt.jmap.common.entity.EmailAddress apply(@NullableDecl EmailAddress input) {

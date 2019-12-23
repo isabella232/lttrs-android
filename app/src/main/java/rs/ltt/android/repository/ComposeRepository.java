@@ -27,6 +27,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,12 +57,13 @@ public class ComposeRepository extends LttrsRepository {
         return Futures.transformAsync(this.database, database -> database.threadAndEmailDao().getEditableEmail(id), MoreExecutors.directExecutor());
     }
 
-    public void sendEmail(IdentifiableIdentity identity, ComposeViewModel.Draft draft) {
+    public void sendEmail(IdentifiableIdentity identity, ComposeViewModel.Draft draft, final Collection<String> inReplyTo) {
         final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(SendEmailWorker.class)
                 .setConstraints(CONNECTED_CONSTRAINT)
                 .setInputData(SendEmailWorker.data(
                         requireAccount().id,
                         identity.getId(),
+                        inReplyTo,
                         draft.getTo(),
                         draft.getSubject(),
                         draft.getBody()
@@ -86,12 +88,14 @@ public class ComposeRepository extends LttrsRepository {
 
     public UUID saveDraft(final IdentifiableIdentity identity,
                           final ComposeViewModel.Draft draft,
+                          final Collection<String> inReplyTo,
                           final EditableEmail discard) {
         final OneTimeWorkRequest saveDraftRequest = new OneTimeWorkRequest.Builder(SaveDraftWorker.class)
                 .setConstraints(CONNECTED_CONSTRAINT)
                 .setInputData(SendEmailWorker.data(
                         requireAccount().id,
                         identity.getId(),
+                        inReplyTo,
                         draft.getTo(),
                         draft.getSubject(),
                         draft.getBody()

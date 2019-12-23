@@ -18,6 +18,7 @@ package rs.ltt.android.ui.model;
 import android.app.Application;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -34,12 +35,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import rs.ltt.android.R;
 import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.entity.EditableEmail;
+import rs.ltt.android.entity.EmailAddressType;
 import rs.ltt.android.entity.IdentityWithNameAndEmail;
 import rs.ltt.android.repository.ComposeRepository;
 import rs.ltt.android.repository.MainRepository;
@@ -67,10 +70,10 @@ public class ComposeViewModel extends AndroidViewModel {
     private boolean draftHasBeenHandled = false;
 
     ComposeViewModel(@NonNull final Application application,
-                            final Long id,
-                            final boolean freshStart,
-                            final ComposeAction composeAction,
-                            final String emailId) {
+                     final Long id,
+                     final boolean freshStart,
+                     final ComposeAction composeAction,
+                     final String emailId) {
         super(application);
         this.composeAction = composeAction;
         final MainRepository mainRepository = new MainRepository(application);
@@ -138,19 +141,35 @@ public class ComposeViewModel extends AndroidViewModel {
         }
         LOGGER.info("sending with identity {}", identity.getId());
         final EditableEmail editableEmail = getEmail();
-        if (this.composeAction == ComposeAction.EDIT_DRAFT && currentDraft.unedited(editableEmail)) {
+        if (this.composeAction == ComposeAction.EDIT_DRAFT
+                && editableEmail != null
+                && currentDraft.unedited(Draft.edit(editableEmail))) {
             LOGGER.info("draft remains unedited. submitting...");
             this.repository.submitEmail(identity, editableEmail);
         } else {
-            this.repository.sendEmail(identity, currentDraft);
+            final Collection<String> inReplyTo = inReplyTo(editableEmail, composeAction);
+            this.repository.sendEmail(identity, currentDraft, inReplyTo);
         }
         this.draftHasBeenHandled = true;
         return true;
     }
 
+    private static Collection<String> inReplyTo(@Nullable EditableEmail editableEmail, ComposeAction action) {
+        if (editableEmail == null) {
+            return Collections.emptyList();
+        }
+        if (action == ComposeAction.EDIT_DRAFT) {
+            return editableEmail.inReplyTo;
+        }
+        if (action == ComposeAction.REPLY_ALL) {
+            return editableEmail.messageId;
+        }
+        return Collections.emptyList();
+    }
+
     public UUID saveDraft() {
         if (this.draftHasBeenHandled) {
-            LOGGER.info("Not storing as draft. Email has already been stored.");
+            LOGGER.info("Not storing as draft. Email has already been handled.");
             return null;
         }
         final IdentityWithNameAndEmail identity = getIdentity();
@@ -164,11 +183,11 @@ public class ComposeViewModel extends AndroidViewModel {
             return null;
         }
         final EditableEmail editableEmail = getEmail();
-        if (this.composeAction == ComposeAction.EDIT_DRAFT) {
-            if (currentDraft.unedited(editableEmail)) {
-                LOGGER.info("Not storing draft. Nothing has been changed");
-                return null;
-            }
+        final Draft originalDraft = Draft.with(this.composeAction, editableEmail);
+        if (originalDraft != null && currentDraft.unedited(originalDraft)) {
+            LOGGER.info("Not storing draft. Nothing has been changed");
+            draftHasBeenHandled = true;
+            return null;
         }
         LOGGER.info("Saving draft");
         final EditableEmail discard;
@@ -178,7 +197,8 @@ public class ComposeViewModel extends AndroidViewModel {
         } else {
             discard = null;
         }
-        final UUID uuid = this.repository.saveDraft(identity, currentDraft, discard);
+        final Collection<String> inReplyTo = inReplyTo(editableEmail, composeAction);
+        final UUID uuid = this.repository.saveDraft(identity, currentDraft, inReplyTo, discard);
         this.draftHasBeenHandled = true;
         return uuid;
     }
@@ -224,9 +244,10 @@ public class ComposeViewModel extends AndroidViewModel {
     }
 
     private void initializeWithEmail(final EditableEmail email) {
-        to.postValue(EmailAddressUtil.toHeaderValue(email.getTo()));
-        subject.postValue(email.subject);
-        body.postValue(email.getText());
+        final Draft draft = Draft.with(composeAction, email);
+        to.postValue(EmailAddressUtil.toHeaderValue(draft.to));
+        subject.postValue(draft.subject);
+        body.postValue(draft.body);
     }
 
     private Draft getCurrentDraft() {
@@ -252,6 +273,40 @@ public class ComposeViewModel extends AndroidViewModel {
             );
         }
 
+        private static Draft edit(EditableEmail email) {
+            return new Draft(
+                    email.getTo(),
+                    email.subject,
+                    email.getText()
+            );
+        }
+
+        private static Draft replyAll(EditableEmail email) {
+            final Collection<EmailAddress> to;
+            final Collection<EmailAddress> replyTo = email.getAddresses(EmailAddressType.REPLY_TO);
+            if (replyTo.size() > 0) {
+                to = replyTo;
+            } else {
+                final Collection<EmailAddress> from = email.getAddresses(EmailAddressType.FROM);
+                to = from;
+            }
+            final String subject = email.subject;
+            return new Draft(to, subject, "");
+        }
+
+        public static Draft with(final ComposeAction action, EditableEmail editableEmail) {
+            switch (action) {
+                case NEW:
+                    return null;
+                case EDIT_DRAFT:
+                    return edit(editableEmail);
+                case REPLY_ALL:
+                    return replyAll(editableEmail);
+                default:
+                    throw new IllegalStateException(String.format("Unknown action %s", action));
+            }
+        }
+
         public boolean isEmpty() {
             return to.isEmpty() && subject.trim().isEmpty() && body.trim().isEmpty();
         }
@@ -268,11 +323,11 @@ public class ComposeViewModel extends AndroidViewModel {
             return body;
         }
 
-        public boolean unedited(final EditableEmail editableEmail) {
-            return editableEmail != null
-                    && EmailAddressUtil.equalCollections(editableEmail.getTo(), to)
-                    && subject.equals(editableEmail.subject)
-                    && body.equals(editableEmail.getText());
+        public boolean unedited(final Draft draft) {
+            return draft != null
+                    && EmailAddressUtil.equalCollections(draft.getTo(), to)
+                    && subject.equals(draft.subject)
+                    && body.equals(draft.body);
         }
     }
 }

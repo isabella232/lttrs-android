@@ -126,6 +126,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
                 notifyItemChanged(position);
             });
             itemViewHolder.binding.edit.setOnClickListener(v -> onComposeActionTriggered.onEditDraft(email.id));
+            itemViewHolder.binding.replyAll.setOnClickListener(v -> onComposeActionTriggered.onReplyAll(email.id));
         }
 
     }

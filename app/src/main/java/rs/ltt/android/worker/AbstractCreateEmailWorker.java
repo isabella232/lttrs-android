@@ -24,8 +24,10 @@ import androidx.work.WorkerParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import rs.ltt.android.entity.IdentityWithNameAndEmail;
 import rs.ltt.jmap.common.entity.Email;
@@ -40,11 +42,13 @@ public abstract class AbstractCreateEmailWorker extends AbstractMuaWorker {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCreateEmailWorker.class);
 
     private static String IDENTITY_KEY = "identity";
+    private static String IN_REPLY_TO_KEY = "in_reply_to";
     private static String TO_KEY = "to";
     private static String SUBJECT_KEY = "subject";
     private static String BODY_KEY = "body";
 
     private final String identity;
+    private final List<String> inReplyTo;
     private final Collection<EmailAddress> to;
     private final String subject;
     private final String body;
@@ -58,16 +62,20 @@ public abstract class AbstractCreateEmailWorker extends AbstractMuaWorker {
         this.to = to == null ? Collections.emptyList() : EmailAddressUtil.parse(to);
         this.subject = data.getString(SUBJECT_KEY);
         this.body = data.getString(BODY_KEY);
+        final String[] inReplyTo = data.getStringArray(IN_REPLY_TO_KEY);
+        this.inReplyTo = inReplyTo == null ? Collections.emptyList() : Arrays.asList(inReplyTo);
     }
 
     public static Data data(final Long account,
                             final String identity,
+                            final Collection<String> inReplyTo,
                             final Collection<EmailAddress> to,
                             final String subject,
                             final String body) {
         return new Data.Builder()
                 .putLong(ACCOUNT_KEY, account)
                 .putString(IDENTITY_KEY, identity)
+                .putStringArray(IN_REPLY_TO_KEY, inReplyTo.toArray(new String[0]))
                 .putString(TO_KEY, EmailAddressUtil.toHeaderValue(to))
                 .putString(SUBJECT_KEY, subject)
                 .putString(BODY_KEY, body)
@@ -94,6 +102,7 @@ public abstract class AbstractCreateEmailWorker extends AbstractMuaWorker {
                 .build();
         return Email.builder()
                 .from(identity.getEmailAddress())
+                .inReplyTo(this.inReplyTo)
                 .to(this.to)
                 .subject(this.subject)
                 .bodyValue(partId, emailBodyValue)
