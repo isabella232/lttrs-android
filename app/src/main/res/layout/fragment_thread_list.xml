@@ -50,7 +50,7 @@
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/compose"
             app:backgroundTint="@color/colorPrimary"
-            app:tint="@color/white"
+            app:tint="@color/colorOnPrimary"
             android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

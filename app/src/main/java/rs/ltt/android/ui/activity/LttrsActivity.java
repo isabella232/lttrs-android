@@ -17,19 +17,13 @@ package rs.ltt.android.ui.activity;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewAnimationUtils;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.TranslateAnimation;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -348,15 +342,6 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
 
     public void animateShowSearchToolbar() {
         setSearchToolbarColors();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            animateShowSearchToolbarLollipop();
-        } else {
-            animateShowSearchToolbarLegacy();
-        }
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void animateShowSearchToolbarLollipop() {
         final int toolbarIconWidth = getResources().getDimensionPixelSize(R.dimen.toolbar_icon_width);
         final int width = binding.toolbar.getWidth() - ((toolbarIconWidth * NUM_TOOLBAR_ICON) / 2);
         Animator createCircularReveal = ViewAnimationUtils.createCircularReveal(binding.toolbar, Theme.isRtl(this) ? binding.toolbar.getWidth() - width : width, binding.toolbar.getHeight() / 2, 0.0f, (float) width);
@@ -364,23 +349,7 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
         createCircularReveal.start();
     }
 
-    private void animateShowSearchToolbarLegacy() {
-        TranslateAnimation translateAnimation = new TranslateAnimation(0.0f, 0.0f, (float) (-binding.toolbar.getHeight()), 0.0f);
-        translateAnimation.setDuration(220);
-        binding.toolbar.clearAnimation();
-        binding.toolbar.startAnimation(translateAnimation);
-    }
-
     public void animateCloseSearchToolbar() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            animateCloseSearchToolbarLollipop();
-        } else {
-            animateCloseSearchToolbarLegacy();
-        }
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void animateCloseSearchToolbarLollipop() {
         final int toolbarIconWidth = getResources().getDimensionPixelSize(R.dimen.toolbar_icon_width);
         final int width = binding.toolbar.getWidth() - ((toolbarIconWidth * NUM_TOOLBAR_ICON) / 2);
         Animator createCircularReveal = ViewAnimationUtils.createCircularReveal(binding.toolbar, Theme.isRtl(this) ? binding.toolbar.getWidth() - width : width, binding.toolbar.getHeight() / 2, (float) width, 0.0f);
@@ -395,40 +364,14 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
         createCircularReveal.start();
     }
 
-    private void animateCloseSearchToolbarLegacy() {
-        AlphaAnimation alphaAnimation = new AlphaAnimation(1.0f, 0.0f);
-        Animation translateAnimation = new TranslateAnimation(0.0f, 0.0f, 0.0f, (float) (-binding.toolbar.getHeight()));
-        AnimationSet animationSet = new AnimationSet(true);
-        animationSet.addAnimation(alphaAnimation);
-        animationSet.addAnimation(translateAnimation);
-        animationSet.setDuration(220);
-        animationSet.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                resetToolbarColors();
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
-        binding.toolbar.startAnimation(animationSet);
-    }
-
     private void resetToolbarColors() {
         binding.toolbar.setBackgroundColor(Theme.getColor(LttrsActivity.this, R.attr.colorPrimary));
         binding.drawerLayout.setStatusBarBackgroundColor(Theme.getColor(LttrsActivity.this, R.attr.colorPrimaryDark));
     }
 
     private void setSearchToolbarColors() {
-        binding.toolbar.setBackgroundColor(ContextCompat.getColor(this, android.R.color.white));
-        binding.drawerLayout.setStatusBarBackgroundColor(ContextCompat.getColor(this, R.color.quantum_grey_600));
+        binding.toolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.colorSurface));
+        binding.drawerLayout.setStatusBarBackgroundColor(ContextCompat.getColor(this, R.color.colorStatusBarSearch));
     }
 
     @Override

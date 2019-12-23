@@ -15,7 +15,9 @@
 
 <resources>
     <color name="colorSurface">#ff121212</color>
+    <color name="colorOnSurface">#ffffffff</color> <!-- white 100 -->
     <color name="colorSecondaryOnSurface">#83ffffff</color> <!-- white 70 -->
     <color name="colorDivider">#1fffffff</color>
     <color name="colorSurfaceWarning">#ffB71C1C</color> <!-- red 900 -->
+    <color name="colorStatusBarSearch">#ff000000</color>
 </resources>
