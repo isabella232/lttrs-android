@@ -50,6 +50,7 @@ import rs.ltt.android.ui.ComposeAction;
 import rs.ltt.android.util.Event;
 import rs.ltt.jmap.common.entity.EmailAddress;
 import rs.ltt.jmap.mua.util.EmailAddressUtil;
+import rs.ltt.jmap.mua.util.EmailUtil;
 
 public class ComposeViewModel extends AndroidViewModel {
 
@@ -282,16 +283,12 @@ public class ComposeViewModel extends AndroidViewModel {
         }
 
         private static Draft replyAll(EditableEmail email) {
-            final Collection<EmailAddress> to;
-            final Collection<EmailAddress> replyTo = email.getAddresses(EmailAddressType.REPLY_TO);
-            if (replyTo.size() > 0) {
-                to = replyTo;
-            } else {
-                final Collection<EmailAddress> from = email.getAddresses(EmailAddressType.FROM);
-                to = from;
-            }
-            final String subject = email.subject;
-            return new Draft(to, subject, "");
+            EmailUtil.ReplyAddresses replyAddresses = EmailUtil.replyAll(email);
+            return new Draft(
+                    replyAddresses.getTo(),
+                    EmailUtil.getResponseSubject(email),
+                    ""
+            );
         }
 
         public static Draft with(final ComposeAction action, EditableEmail editableEmail) {

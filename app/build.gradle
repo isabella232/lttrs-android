@@ -46,7 +46,7 @@ dependencies {
     def work_version = "2.3.0-beta01"
 
     implementation "androidx.appcompat:appcompat:$appcompat_version"
-    implementation ('rs.ltt.jmap:jmap-mua:0.2.0') {
+    implementation ('rs.ltt.jmap:jmap-mua:0.2.1') {
         changing = true
     }
 

@@ -30,7 +30,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class EditableEmail {
+import rs.ltt.jmap.common.entity.IdentifiableEmailWithAddresses;
+import rs.ltt.jmap.common.entity.IdentifiableEmailWithSubject;
+
+public class EditableEmail implements IdentifiableEmailWithAddresses, IdentifiableEmailWithSubject {
 
     public String id;
 
@@ -75,11 +78,36 @@ public class EditableEmail {
         return emailsInThread != null && emailsInThread.size() == 1 && emailsInThread.contains(id);
     }
 
+    @Override
+    public Collection<rs.ltt.jmap.common.entity.EmailAddress> getSender() {
+        return getAddresses(EmailAddressType.SENDER);
+    }
+
+    @Override
+    public Collection<rs.ltt.jmap.common.entity.EmailAddress> getFrom() {
+        return getAddresses(EmailAddressType.FROM);
+    }
+
     public Collection<rs.ltt.jmap.common.entity.EmailAddress> getTo() {
         return getAddresses(EmailAddressType.TO);
     }
 
-    public Collection<rs.ltt.jmap.common.entity.EmailAddress> getAddresses(final EmailAddressType type) {
+    @Override
+    public Collection<rs.ltt.jmap.common.entity.EmailAddress> getCc() {
+        return getAddresses(EmailAddressType.CC);
+    }
+
+    @Override
+    public Collection<rs.ltt.jmap.common.entity.EmailAddress> getBcc() {
+        return getAddresses(EmailAddressType.BCC);
+    }
+
+    @Override
+    public Collection<rs.ltt.jmap.common.entity.EmailAddress> getReplyTo() {
+        return getAddresses(EmailAddressType.REPLY_TO);
+    }
+
+    private Collection<rs.ltt.jmap.common.entity.EmailAddress> getAddresses(final EmailAddressType type) {
         return Collections2.transform(Collections2.filter(emailAddresses, input -> input != null && input.type == type), new Function<EmailAddress, rs.ltt.jmap.common.entity.EmailAddress>() {
             @NullableDecl
             @Override
@@ -89,4 +117,13 @@ public class EditableEmail {
         });
     }
 
+    @Override
+    public String getSubject() {
+        return subject;
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
 }
