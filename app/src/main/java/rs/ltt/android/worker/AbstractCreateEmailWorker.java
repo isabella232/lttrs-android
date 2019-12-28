@@ -44,12 +44,14 @@ public abstract class AbstractCreateEmailWorker extends AbstractMuaWorker {
     private static String IDENTITY_KEY = "identity";
     private static String IN_REPLY_TO_KEY = "in_reply_to";
     private static String TO_KEY = "to";
+    private static String CC_KEY = "cc";
     private static String SUBJECT_KEY = "subject";
     private static String BODY_KEY = "body";
 
     private final String identity;
     private final List<String> inReplyTo;
     private final Collection<EmailAddress> to;
+    private final Collection<EmailAddress> cc;
     private final String subject;
     private final String body;
 
@@ -60,6 +62,8 @@ public abstract class AbstractCreateEmailWorker extends AbstractMuaWorker {
         this.identity = data.getString(IDENTITY_KEY);
         final String to = data.getString(TO_KEY);
         this.to = to == null ? Collections.emptyList() : EmailAddressUtil.parse(to);
+        final String cc = data.getString(CC_KEY);
+        this.cc = cc == null ? Collections.emptyList() : EmailAddressUtil.parse(cc);
         this.subject = data.getString(SUBJECT_KEY);
         this.body = data.getString(BODY_KEY);
         final String[] inReplyTo = data.getStringArray(IN_REPLY_TO_KEY);
@@ -70,6 +74,7 @@ public abstract class AbstractCreateEmailWorker extends AbstractMuaWorker {
                             final String identity,
                             final Collection<String> inReplyTo,
                             final Collection<EmailAddress> to,
+                            final Collection<EmailAddress> cc,
                             final String subject,
                             final String body) {
         return new Data.Builder()
@@ -77,6 +82,7 @@ public abstract class AbstractCreateEmailWorker extends AbstractMuaWorker {
                 .putString(IDENTITY_KEY, identity)
                 .putStringArray(IN_REPLY_TO_KEY, inReplyTo.toArray(new String[0]))
                 .putString(TO_KEY, EmailAddressUtil.toHeaderValue(to))
+                .putString(CC_KEY, EmailAddressUtil.toHeaderValue(cc))
                 .putString(SUBJECT_KEY, subject)
                 .putString(BODY_KEY, body)
                 .build();
@@ -104,6 +110,7 @@ public abstract class AbstractCreateEmailWorker extends AbstractMuaWorker {
                 .from(identity.getEmailAddress())
                 .inReplyTo(this.inReplyTo)
                 .to(this.to)
+                .cc(this.cc)
                 .subject(this.subject)
                 .bodyValue(partId, emailBodyValue)
                 .textBody(emailBodyPart)

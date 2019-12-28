@@ -65,6 +65,7 @@ public class ComposeRepository extends LttrsRepository {
                         identity.getId(),
                         inReplyTo,
                         draft.getTo(),
+                        draft.getCc(),
                         draft.getSubject(),
                         draft.getBody()
                 ))
@@ -97,6 +98,7 @@ public class ComposeRepository extends LttrsRepository {
                         identity.getId(),
                         inReplyTo,
                         draft.getTo(),
+                        draft.getCc(),
                         draft.getSubject(),
                         draft.getBody()
                 ))

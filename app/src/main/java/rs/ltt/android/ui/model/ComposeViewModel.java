@@ -268,28 +268,35 @@ public class ComposeViewModel extends AndroidViewModel {
     private void initializeWithEmail(final EditableEmail email) {
         final Draft draft = Draft.with(composeAction, email);
         to.postValue(EmailAddressUtil.toHeaderValue(draft.to));
+        cc.postValue(EmailAddressUtil.toHeaderValue(draft.cc));
+        if (draft.cc.size() > 0) {
+            extendedAddresses.postValue(true);
+        }
         subject.postValue(draft.subject);
         body.postValue(draft.body);
     }
 
     private Draft getCurrentDraft() {
-        return Draft.of(this.to, this.subject, this.body);
+        return Draft.of(this.to, this.cc, this.subject, this.body);
     }
 
     public static class Draft {
         private final Collection<EmailAddress> to;
+        private final Collection<EmailAddress> cc;
         private final String subject;
         private final String body;
 
-        private Draft(Collection<EmailAddress> to, String subject, String body) {
+        private Draft(Collection<EmailAddress> to, Collection<EmailAddress> cc, String subject, String body) {
             this.to = to;
+            this.cc = cc;
             this.subject = subject;
             this.body = body;
         }
 
-        public static Draft of(LiveData<String> to, LiveData<String> subject, LiveData<String> body) {
+        public static Draft of(LiveData<String> to, LiveData<String> cc, LiveData<String> subject, LiveData<String> body) {
             return new Draft(
                     EmailAddressUtil.parse(Strings.nullToEmpty(to.getValue())),
+                    EmailAddressUtil.parse(Strings.nullToEmpty(cc.getValue())),
                     Strings.nullToEmpty(subject.getValue()),
                     Strings.nullToEmpty(body.getValue())
             );
@@ -298,6 +305,7 @@ public class ComposeViewModel extends AndroidViewModel {
         private static Draft edit(EditableEmail email) {
             return new Draft(
                     email.getTo(),
+                    email.getCc(),
                     email.subject,
                     email.getText()
             );
@@ -307,6 +315,7 @@ public class ComposeViewModel extends AndroidViewModel {
             EmailUtil.ReplyAddresses replyAddresses = EmailUtil.replyAll(email);
             return new Draft(
                     replyAddresses.getTo(),
+                    replyAddresses.getCc(),
                     EmailUtil.getResponseSubject(email),
                     ""
             );
@@ -331,6 +340,10 @@ public class ComposeViewModel extends AndroidViewModel {
 
         public Collection<EmailAddress> getTo() {
             return to;
+        }
+
+        public Collection<EmailAddress> getCc() {
+            return cc;
         }
 
         public String getSubject() {
