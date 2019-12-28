@@ -21,7 +21,9 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -59,7 +61,7 @@ public class ComposeActivity extends AppCompatActivity {
     private ComposeViewModel composeViewModel;
 
     public static void editDraft(final Fragment fragment, Long account, final String emailId) {
-        launch(fragment,account,emailId,ComposeAction.EDIT_DRAFT);
+        launch(fragment, account, emailId, ComposeAction.EDIT_DRAFT);
     }
 
     public static void replyAll(final Fragment fragment, Long account, final String emailId) {
@@ -123,31 +125,31 @@ public class ComposeActivity extends AppCompatActivity {
         binding.setComposeViewModel(composeViewModel);
         binding.setLifecycleOwner(this);
 
-        binding.to.addTextChangedListener(new TextWatcher() {
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                ChipDrawableSpan.apply(ComposeActivity.this, editable, binding.to.hasFocus());
-            }
-        });
+        binding.to.addTextChangedListener(new ChipTextWatcher(binding.to));
         binding.to.setOnFocusChangeListener(
                 (v, hasFocus) -> ChipDrawableSpan.apply(this, binding.to.getEditableText(), hasFocus)
         );
+
+        binding.cc.addTextChangedListener(new ChipTextWatcher(binding.cc));
+        binding.cc.setOnFocusChangeListener(
+                (v, hasFocus) -> ChipDrawableSpan.apply(this, binding.cc.getEditableText(), hasFocus)
+        );
+
+        binding.moreAddresses.setOnClickListener((v -> composeViewModel.showExtendedAddresses()));
+
+        binding.subject.setOnFocusChangeListener(this::focusOnBodyOrSubject);
+        binding.body.setOnFocusChangeListener(this::focusOnBodyOrSubject);
 
         binding.toLabel.setOnClickListener(v -> requestFocusAndOpenKeyboard(binding.to));
         binding.placeholder.setOnClickListener(v -> requestFocusAndOpenKeyboard(binding.body));
 
         //TODO once we handle instance state ourselves we need to call ChipDrawableSpan.reset() on `to`
+    }
+
+    private void focusOnBodyOrSubject(final View view, final boolean hasFocus) {
+        if (hasFocus) {
+            composeViewModel.suggestHideExtendedAddresses();
+        }
     }
 
     private void requestFocusAndOpenKeyboard(AppCompatEditText editText) {
@@ -218,5 +220,29 @@ public class ComposeActivity extends AppCompatActivity {
             throw new IllegalStateException("No ActionBar found");
         }
         return actionBar;
+    }
+
+    private static class ChipTextWatcher implements TextWatcher {
+
+        private final EditText editText;
+
+        private ChipTextWatcher(EditText editText) {
+            this.editText = editText;
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            ChipDrawableSpan.apply(editText.getContext(), editable, editText.hasFocus());
+        }
     }
 }

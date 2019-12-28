@@ -63,7 +63,9 @@ public class ComposeViewModel extends AndroidViewModel {
     private final MutableLiveData<Event<String>> errorMessage = new MutableLiveData<>();
 
     private final MutableLiveData<Integer> selectedIdentityPosition = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> extendedAddresses = new MutableLiveData<>();
     private final MutableLiveData<String> to = new MutableLiveData<>();
+    private final MutableLiveData<String> cc = new MutableLiveData<>();
     private final MutableLiveData<String> subject = new MutableLiveData<>();
     private final MutableLiveData<String> body = new MutableLiveData<>();
     private final LiveData<List<IdentityWithNameAndEmail>> identities;
@@ -99,6 +101,14 @@ public class ComposeViewModel extends AndroidViewModel {
         return this.to;
     }
 
+    public MutableLiveData<String> getCc() {
+        return this.cc;
+    }
+
+    public LiveData<Boolean> getExtendedAddresses() {
+        return this.extendedAddresses;
+    }
+
     public MutableLiveData<String> getBody() {
         return this.body;
     }
@@ -113,6 +123,17 @@ public class ComposeViewModel extends AndroidViewModel {
 
     public MutableLiveData<Integer> getSelectedIdentityPosition() {
         return this.selectedIdentityPosition;
+    }
+
+    public void showExtendedAddresses() {
+        this.extendedAddresses.postValue(true);
+    }
+
+    public void suggestHideExtendedAddresses() {
+        final String cc = Strings.nullToEmpty(this.cc.getValue());
+        if (cc.isEmpty()) {
+            this.extendedAddresses.postValue(false);
+        }
     }
 
     public boolean discard() {

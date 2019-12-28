@@ -68,6 +68,7 @@
     <string name="the_address_x_is_invalid"><![CDATA[The address <%s> is invalid.]]></string>
     <string name="select_sender">Select sender.</string>
     <string name="draft">Draft</string>
+    <string name="compose_cc">Cc</string>
     <plurals name="unable_to_safe_accounts">
         <item quantity="one">Unable to safe account</item>
         <item quantity="many">Unable to safe accounts</item>

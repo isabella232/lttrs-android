@@ -19,6 +19,8 @@
 
     <data>
 
+        <import type="android.view.View" />
+
         <variable
             name="composeViewModel"
             type="rs.ltt.android.ui.model.ComposeViewModel" />
@@ -142,8 +144,8 @@
                         android:id="@+id/more_addresses_wrapper"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
                         android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
                         android:layout_marginEnd="4dp"
                         android:gravity="center_vertical"
                         android:minHeight="56dp">
@@ -151,6 +153,7 @@
 
                         <ImageButton
                             android:id="@+id/more_addresses"
+                            android:visibility="@{composeViewModel.extendedAddresses ? View.GONE : View.VISIBLE}"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:background="?attr/selectableItemBackgroundBorderless"
@@ -166,11 +169,62 @@
                     android:background="@color/colorDivider" />
 
                 <RelativeLayout
+                    android:visibility="@{composeViewModel.extendedAddresses ? View.VISIBLE : View.GONE}"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="56dp">
+
+                    <LinearLayout
+                        android:id="@+id/cc_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:minWidth="72dp"
+                        android:minHeight="56dp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="2dp"
+                        android:soundEffectsEnabled="false">
+
+                        <TextView
+
+                            style="@style/TextAppearance.MaterialComponents.Subtitle1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/compose_cc"
+                            android:textColor="@color/colorSecondaryOnSurface" />
+                    </LinearLayout>
+
+                    <rs.ltt.android.ui.widget.EmailAddressEditText
+                        android:id="@+id/cc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_toEndOf="@id/cc_label"
+                        android:background="@android:color/transparent"
+                        android:imeOptions="flagNoExtractUi"
+                        android:lineSpacingExtra="4sp"
+                        android:paddingStart="0dp"
+                        android:paddingTop="8dp"
+                        android:paddingEnd="8dp"
+                        android:paddingBottom="8dp"
+                        android:text="@={composeViewModel.cc}" />
+
+                </RelativeLayout>
+
+                <View
+                    android:visibility="@{composeViewModel.extendedAddresses ? View.VISIBLE : View.GONE}"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/divider_height"
+                    android:background="@color/colorDivider" />
+
+
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="56dp">
 
                     <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/subject"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
