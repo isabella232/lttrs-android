@@ -17,7 +17,9 @@ package rs.ltt.android.ui;
 
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.text.Layout;
 import android.text.TextPaint;
@@ -26,15 +28,18 @@ import android.text.style.LeadingMarginSpan;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 
+import org.hsluv.HUSLColorConverter;
+
 
 public class QuoteSpan extends CharacterStyle implements LeadingMarginSpan {
 
 
-    private static int[] quoteColors = {0xff008577, 0xffa00743, 0xff1e5d06, 0xff6c4a06};
+    //private static int[] quoteColors = {0xff008577, 0xffa00743, 0xff1e5d06, 0xff6c4a06};
 
     private final int depth;
 
     private final int color;
+    private final boolean nightMode;
 
     private final int paddingPerLayer;
 
@@ -46,10 +51,11 @@ public class QuoteSpan extends CharacterStyle implements LeadingMarginSpan {
     private static final float PADDING_LEFT_SP = 1.5f;
     private static final float PADDING_RIGHT_SP = 8f;
 
-    public QuoteSpan(int depth, Context contex) {
-        DisplayMetrics metrics = contex.getResources().getDisplayMetrics();
+    public QuoteSpan(final int depth, final Context context) {
+        final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         this.depth = depth;
-        this.color = quoteColors[Math.min(depth, quoteColors.length)-1];
+        this.nightMode = (context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+        this.color = color(depth - 1, nightMode);
         this.width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, WIDTH_SP, metrics);
 
         this.paddingPerLayer = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, PADDING_LEFT_SP, metrics);
@@ -71,17 +77,27 @@ public class QuoteSpan extends CharacterStyle implements LeadingMarginSpan {
     @Override
     public void drawLeadingMargin(Canvas c, Paint p, int x, int dir, int top, int baseline, int bottom,
                                   CharSequence text, int start, int end, boolean first, Layout layout) {
-        Paint.Style style = p.getStyle();
-        int color = p.getColor();
+        final Paint.Style style = p.getStyle();
+        final int color = p.getColor();
         p.setStyle(Paint.Style.FILL);
         p.setColor(this.color);
-        for(int i = 0; i < depth; ++i) {
-            int dc = quoteColors[Math.min(i, quoteColors.length - 1)];
+        for (int i = 0; i < depth; ++i) {
+            final int dc = color(i, this.nightMode);
             p.setColor(dc);
             int additionalDistance = paddingPerLayer * i * width;
             c.drawRect(x + dir * paddingPerLayer + additionalDistance, top, x + dir * (paddingPerLayer + additionalDistance + width), bottom, p);
         }
         p.setStyle(style);
         p.setColor(color);
+    }
+
+    private static int color(int level, boolean dark) {
+        final double[] hsluv = new double[]{
+                (173.1 + (level * 80)) % 360,
+                70,
+                dark ? 70 : 40,
+        };
+        double[] rgb = HUSLColorConverter.hsluvToRgb(hsluv);
+        return Color.rgb((int) Math.round(rgb[0] * 255), (int) Math.round(rgb[1] * 255), (int) Math.round(rgb[2] * 255));
     }
 }
