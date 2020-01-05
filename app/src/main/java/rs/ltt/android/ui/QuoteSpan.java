@@ -94,10 +94,10 @@ public class QuoteSpan extends CharacterStyle implements LeadingMarginSpan {
     private static int color(int level, boolean dark) {
         final double[] hsluv = new double[]{
                 (173.1 + (level * 80)) % 360,
-                70,
-                dark ? 70 : 40,
+                80,
+                dark ? 70 : 50,
         };
-        double[] rgb = HUSLColorConverter.hsluvToRgb(hsluv);
+        final double[] rgb = HUSLColorConverter.hsluvToRgb(hsluv);
         return Color.rgb((int) Math.round(rgb[0] * 255), (int) Math.round(rgb[1] * 255), (int) Math.round(rgb[2] * 255));
     }
 }
