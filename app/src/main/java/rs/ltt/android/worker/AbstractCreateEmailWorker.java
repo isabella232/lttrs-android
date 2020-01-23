@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 
 import rs.ltt.android.entity.IdentityWithNameAndEmail;
+import rs.ltt.android.util.UserAgent;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.EmailAddress;
 import rs.ltt.jmap.common.entity.EmailBodyPart;
@@ -111,6 +112,7 @@ public abstract class AbstractCreateEmailWorker extends AbstractMuaWorker {
                 .inReplyTo(this.inReplyTo)
                 .to(this.to)
                 .cc(this.cc)
+                .userAgent(UserAgent.get(getApplicationContext()))
                 .subject(this.subject)
                 .bodyValue(partId, emailBodyValue)
                 .textBody(emailBodyPart)
