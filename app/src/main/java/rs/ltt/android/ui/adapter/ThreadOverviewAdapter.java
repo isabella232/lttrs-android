@@ -93,7 +93,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
             return;
         }
         if (holder instanceof ThreadOverviewViewHolder) {
-            ThreadOverviewViewHolder threadOverviewHolder = (ThreadOverviewViewHolder) holder;
+            final ThreadOverviewViewHolder threadOverviewHolder = (ThreadOverviewViewHolder) holder;
             final ThreadOverviewItem item = getItem(position);
             if (item == null) {
                 return;
@@ -119,12 +119,17 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
                     onThreadClicked.onThreadClicked(item.threadId, item.everyHasSeenKeyword());
                 }
             });
+            threadOverviewHolder.binding.avatar.setOnClickListener(v -> {
+                if (selectionTracker != null) {
+                    selectionTracker.select(item.emailId);
+                }
+            });
             if (selected) {
-                threadOverviewHolder.binding.middleGround.setBackgroundColor(ContextCompat.getColor(context, R.color.primary12));
+                threadOverviewHolder.binding.threadLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.primary12));
             } else {
                 final TypedValue outValue = new TypedValue();
                 context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
-                threadOverviewHolder.binding.middleGround.setBackgroundResource(outValue.resourceId);
+                threadOverviewHolder.binding.threadLayout.setBackgroundResource(outValue.resourceId);
             }
         }
     }
