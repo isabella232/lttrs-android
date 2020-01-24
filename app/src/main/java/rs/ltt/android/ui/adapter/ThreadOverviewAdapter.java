@@ -15,13 +15,20 @@
 
 package rs.ltt.android.ui.adapter;
 
+import android.content.Context;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.paging.PagedListAdapter;
+import androidx.recyclerview.selection.ItemDetailsLookup;
+import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -50,6 +57,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
 
     private OnFlaggedToggled onFlaggedToggled;
     private OnThreadClicked onThreadClicked;
+    private SelectionTracker<String> selectionTracker;
     private ListenableFuture<MailboxWithRoleAndName> importantMailbox;
 
 
@@ -79,7 +87,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
     }
 
     @Override
-    public void onBindViewHolder(@NonNull AbstractThreadOverviewViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull AbstractThreadOverviewViewHolder holder, final int position) {
         if (holder instanceof ThreadOverviewLoadingViewHolder) {
             ((ThreadOverviewLoadingViewHolder) holder).binding.loading.setVisibility(isLoading ? View.VISIBLE : View.GONE);
             return;
@@ -90,8 +98,10 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
             if (item == null) {
                 return;
             }
-            threadOverviewHolder.binding.setThread(item);
-            threadOverviewHolder.binding.setIsImportant(item.isInMailbox(getImportantMailbox()));
+            final boolean selected = selectionTracker != null && selectionTracker.isSelected(item.emailId);
+            final Context context = threadOverviewHolder.binding.getRoot().getContext();
+            threadOverviewHolder.binding.getRoot().setActivated(selected);
+            threadOverviewHolder.setThread(item, position);
             threadOverviewHolder.binding.starToggle.setOnClickListener(v -> {
                 if (onFlaggedToggled != null) {
                     final boolean target = !item.showAsFlagged();
@@ -100,11 +110,22 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
                 }
             });
             Touch.expandTouchArea(threadOverviewHolder.binding.getRoot(), threadOverviewHolder.binding.starToggle, 16);
-            threadOverviewHolder.binding.getRoot().setOnClickListener(v -> {
+            threadOverviewHolder.binding.foreground.setOnClickListener(v -> {
+                if (selectionTracker != null && selectionTracker.isSelected(item.emailId)) {
+                    LOGGER.debug("Do not process click on thread because thread was selected");
+                    return;
+                }
                 if (onThreadClicked != null) {
                     onThreadClicked.onThreadClicked(item.threadId, item.everyHasSeenKeyword());
                 }
             });
+            if (selected) {
+                threadOverviewHolder.binding.middleGround.setBackgroundColor(ContextCompat.getColor(context, R.color.primary12));
+            } else {
+                final TypedValue outValue = new TypedValue();
+                context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+                threadOverviewHolder.binding.middleGround.setBackgroundResource(outValue.resourceId);
+            }
         }
     }
 
@@ -131,6 +152,10 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
 
     public void setImportantMailbox(ListenableFuture<MailboxWithRoleAndName> importantMailbox) {
         this.importantMailbox = importantMailbox;
+    }
+
+    public void setTracker(SelectionTracker<String> selectionTracker) {
+        this.selectionTracker = selectionTracker;
     }
 
     @Override
@@ -167,10 +192,32 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
     public class ThreadOverviewViewHolder extends AbstractThreadOverviewViewHolder {
 
         final public ThreadOverviewItemBinding binding;
+        private int position;
 
         ThreadOverviewViewHolder(@NonNull ThreadOverviewItemBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
+        }
+
+        public void setThread(final ThreadOverviewItem thread, int position) {
+            this.binding.setThread(thread);
+            this.position = position;
+            this.binding.setIsImportant(thread.isInMailbox(getImportantMailbox()));
+        }
+
+        public ItemDetailsLookup.ItemDetails<String> getItemDetails() {
+            return new ItemDetailsLookup.ItemDetails<String>() {
+                @Override
+                public int getPosition() {
+                    return position;
+                }
+
+                @Nullable
+                @Override
+                public String getSelectionKey() {
+                    return binding.getThread().emailId;
+                }
+            };
         }
     }
 

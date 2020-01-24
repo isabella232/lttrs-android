@@ -232,6 +232,10 @@ public class BindingAdapters {
 
     @BindingAdapter("from")
     public static void setThreadOverviewFrom(final ImageView imageView, final Map.Entry<String, ThreadOverviewItem.From> from) {
+        if (imageView.isActivated()) {
+            imageView.setImageResource(R.drawable.ic_selected_24dp);
+            return;
+        }
         if (from == null) {
             imageView.setImageDrawable(new AvatarDrawable(null, null));
         } else {
