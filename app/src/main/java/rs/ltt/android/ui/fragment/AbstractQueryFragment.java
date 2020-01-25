@@ -53,8 +53,11 @@ import rs.ltt.jmap.mua.util.Label;
 
 public abstract class AbstractQueryFragment extends AbstractLttrsFragment implements OnFlaggedToggled, ThreadOverviewAdapter.OnThreadClicked, QueryItemTouchHelper.OnQueryItemSwipe {
 
+    private static final String SELECTION_ID = "thread-items";
+
     private final ThreadOverviewAdapter threadOverviewAdapter = new ThreadOverviewAdapter();
     protected FragmentThreadListBinding binding;
+    private SelectionTracker<String> tracker;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -77,13 +80,14 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         });
 
         binding.threadList.setAdapter(threadOverviewAdapter);
-        final SelectionTracker<String> tracker = new SelectionTracker.Builder<>(
-                "mySelection",
+        tracker = new SelectionTracker.Builder<>(
+                SELECTION_ID,
                 binding.threadList,
                 new ThreadOverviewItemKeyProvider(threadOverviewAdapter),
                 new ThreadOverviewItemDetailsLookup(binding.threadList),
                 StorageStrategy.createStringStorage()
         ).withSelectionPredicate(SelectionPredicates.createSelectAnything()).build();
+        tracker.onRestoreInstanceState(savedInstanceState);
         threadOverviewAdapter.setTracker(tracker);
         binding.setViewModel(viewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
@@ -145,6 +149,12 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
     }
 
     protected abstract AbstractQueryViewModel getQueryViewModel();
+
+    @Override
+    public void onSaveInstanceState(@NonNull final Bundle outState) {
+        tracker.onSaveInstanceState(outState);
+        super.onSaveInstanceState(outState);
+    }
 
     @Override
     public void onThreadClicked(String threadId, boolean everyHasSeen) {
