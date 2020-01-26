@@ -19,7 +19,10 @@ package rs.ltt.android.ui.fragment;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -51,12 +54,14 @@ import rs.ltt.android.ui.model.AbstractQueryViewModel;
 import rs.ltt.jmap.mua.util.Label;
 
 
-public abstract class AbstractQueryFragment extends AbstractLttrsFragment implements OnFlaggedToggled, ThreadOverviewAdapter.OnThreadClicked, QueryItemTouchHelper.OnQueryItemSwipe {
+public abstract class AbstractQueryFragment extends AbstractLttrsFragment implements OnFlaggedToggled,
+        ThreadOverviewAdapter.OnThreadClicked, QueryItemTouchHelper.OnQueryItemSwipe, ActionMode.Callback {
 
     private static final String SELECTION_ID = "thread-items";
 
     private final ThreadOverviewAdapter threadOverviewAdapter = new ThreadOverviewAdapter();
     protected FragmentThreadListBinding binding;
+    private ActionMode actionMode = null;
     private SelectionTracker<String> tracker;
 
     @Override
@@ -87,13 +92,26 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
                 new ThreadOverviewItemDetailsLookup(binding.threadList),
                 StorageStrategy.createStringStorage()
         ).withSelectionPredicate(SelectionPredicates.createSelectAnything()).build();
-        tracker.onRestoreInstanceState(savedInstanceState);
         threadOverviewAdapter.setTracker(tracker);
+        tracker.addObserver(new SelectionTracker.SelectionObserver<String>() {
+            @Override
+            public void onSelectionChanged() {
+                toggleActionMode();
+            }
+
+            public void onSelectionRestored() {
+                toggleActionMode();
+            }
+        });
+        tracker.onRestoreInstanceState(savedInstanceState);
         binding.setViewModel(viewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
         binding.compose.setOnClickListener((v) -> {
             startActivity(new Intent(requireActivity(), ComposeActivity.class));
         });
+        if (showComposeButton() && actionMode == null) {
+            binding.compose.show();
+        }
 
         binding.swipeToRefresh.setColorSchemeResources(R.color.colorAccent);
 
@@ -116,6 +134,19 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         new ItemTouchHelper(queryItemTouchHelper).attachToRecyclerView(binding.threadList);
 
         return binding.getRoot();
+    }
+
+    private void toggleActionMode() {
+        if (tracker.hasSelection()) {
+            if (this.actionMode == null) {
+                this.actionMode = requireActivity().startActionMode(this);
+            }
+            if (this.actionMode != null) { //might be null if prepareActionMode returned false
+                this.actionMode.setTitle(String.valueOf(tracker.getSelection().size()));
+            }
+        } else if (actionMode != null) {
+            actionMode.finish();
+        }
     }
 
     private void emailModification(boolean allDone) {
@@ -187,4 +218,32 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
     }
 
     protected abstract void onQueryItemSwiped(ThreadOverviewItem item);
+
+    protected abstract boolean showComposeButton();
+
+    @Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        this.actionMode = mode;
+        binding.compose.hide();
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        return true;
+    }
+
+    @Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        return false;
+    }
+
+    @Override
+    public void onDestroyActionMode(ActionMode mode) {
+        tracker.clearSelection();
+        if (showComposeButton()) {
+            binding.compose.show();
+        }
+        this.actionMode = null;
+    }
 }

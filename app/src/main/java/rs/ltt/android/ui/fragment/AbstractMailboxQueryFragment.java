@@ -59,7 +59,6 @@ public abstract class AbstractMailboxQueryFragment extends AbstractQueryFragment
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        binding.compose.show();
         mailboxQueryViewModel.getMailbox().observe(getViewLifecycleOwner(), mailboxOverviewItem -> {
             if (mailboxOverviewItem == null) {
                 return;
@@ -84,6 +83,11 @@ public abstract class AbstractMailboxQueryFragment extends AbstractQueryFragment
         }
     }
 
+
+    @Override
+    protected boolean showComposeButton() {
+        return true;
+    }
 
     protected abstract String getMailboxId();
 

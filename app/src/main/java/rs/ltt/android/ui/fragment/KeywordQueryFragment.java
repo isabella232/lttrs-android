@@ -59,12 +59,6 @@ public class KeywordQueryFragment extends AbstractQueryFragment {
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        binding.compose.show();
-    }
-
-    @Override
     protected AbstractQueryViewModel getQueryViewModel() {
         return keywordQueryViewModel;
     }
@@ -104,5 +98,10 @@ public class KeywordQueryFragment extends AbstractQueryFragment {
 
         snackbar.setAction(R.string.undo, v -> keywordQueryViewModel.addKeyword(threadId));
         snackbar.show();
+    }
+
+    @Override
+    protected boolean showComposeButton() {
+        return true;
     }
 }

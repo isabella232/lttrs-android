@@ -83,6 +83,11 @@ public class SearchQueryFragment extends AbstractQueryFragment {
         archive(item);
     }
 
+    @Override
+    protected boolean showComposeButton() {
+        return false;
+    }
+
     public interface OnTermSearched {
         void onTermSearched(String term);
     }

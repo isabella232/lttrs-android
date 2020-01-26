@@ -125,7 +125,8 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
                 }
             });
             if (selected) {
-                threadOverviewHolder.binding.threadLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.primary12));
+                threadOverviewHolder.binding.threadLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.selected_background));
+                //threadOverviewHolder.binding.threadLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.accent12));
             } else {
                 final TypedValue outValue = new TypedValue();
                 context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
