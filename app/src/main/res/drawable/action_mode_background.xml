@@ -14,13 +14,13 @@
   -->
 
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:insetLeft="-2dp"
-    android:insetTop="-2dp"
-    android:insetRight="-2dp"
+    android:insetLeft="-3dp"
+    android:insetTop="-3dp"
+    android:insetRight="-3dp"
     android:insetBottom="0dp">
 
     <shape>
-        <solid android:color="#ff121212" />
+        <solid android:color="@color/colorActionModeBackground" />
 
         <stroke
             android:width="2dp"

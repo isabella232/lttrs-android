@@ -14,6 +14,7 @@
   -->
 
 <resources>
+    <color name="colorActionModeBackground">#ff212121</color> <!-- gray 900 -->
     <color name="colorSurface">#ff121212</color>
     <color name="colorOnSurface">#ffffffff</color> <!-- white 100 -->
     <color name="colorSecondaryOnSurface">#83ffffff</color> <!-- white 70 -->

@@ -39,6 +39,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import rs.ltt.android.LttrsNavigationDirections;
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.FragmentThreadListBinding;
@@ -58,6 +61,8 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         ThreadOverviewAdapter.OnThreadClicked, QueryItemTouchHelper.OnQueryItemSwipe, ActionMode.Callback {
 
     private static final String SELECTION_ID = "thread-items";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractQueryFragment.class);
 
     private final ThreadOverviewAdapter threadOverviewAdapter = new ThreadOverviewAdapter();
     protected FragmentThreadListBinding binding;
@@ -139,13 +144,13 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
     private void toggleActionMode() {
         if (tracker.hasSelection()) {
             if (this.actionMode == null) {
-                this.actionMode = requireActivity().startActionMode(this);
-            }
-            if (this.actionMode != null) { //might be null if prepareActionMode returned false
+                this.actionMode = requireLttrsActivity().beginActionMode(this);
+            } else {
                 this.actionMode.setTitle(String.valueOf(tracker.getSelection().size()));
+                this.actionMode.invalidate();
             }
         } else if (actionMode != null) {
-            actionMode.finish();
+            requireLttrsActivity().endActionMode();
         }
     }
 
@@ -222,14 +227,19 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
     protected abstract boolean showComposeButton();
 
     @Override
-    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+    public boolean onCreateActionMode(final ActionMode mode, final Menu menu) {
+        LOGGER.debug("onCreateActionMode()");
         this.actionMode = mode;
+        this.actionMode.getMenuInflater().inflate(R.menu.thread_item_action_mode, menu);
+        this.actionMode.setTitle(String.valueOf(tracker.getSelection().size()));
         binding.compose.hide();
         return true;
     }
 
     @Override
     public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        LOGGER.debug("onPrepareActionMode()");
+
         return true;
     }
 

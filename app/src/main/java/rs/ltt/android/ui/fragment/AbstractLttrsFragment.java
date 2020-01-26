@@ -15,17 +15,20 @@
 
 package rs.ltt.android.ui.fragment;
 
+import android.app.Activity;
+
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
 import rs.ltt.android.entity.AccountWithCredentials;
+import rs.ltt.android.ui.activity.LttrsActivity;
 import rs.ltt.android.ui.model.LttrsViewModel;
 
-public abstract class AbstractLttrsFragment extends Fragment {
+abstract class AbstractLttrsFragment extends Fragment {
 
-    protected LttrsViewModel getLttrsViewModel() {
+    LttrsViewModel getLttrsViewModel() {
         final ViewModelProvider viewModelProvider = new ViewModelProvider(
                 requireActivity(),
                 getDefaultViewModelProviderFactory()
@@ -33,7 +36,15 @@ public abstract class AbstractLttrsFragment extends Fragment {
         return viewModelProvider.get(LttrsViewModel.class);
     }
 
-    protected AccountWithCredentials requireAccount() {
+    LttrsActivity requireLttrsActivity() {
+        final Activity activity = getActivity();
+        if (activity instanceof LttrsActivity) {
+            return (LttrsActivity) activity;
+        }
+        throw new IllegalStateException("Fragment is not attached to LttrsActivity");
+    }
+
+    AccountWithCredentials requireAccount() {
         final LttrsViewModel lttrsViewModel = getLttrsViewModel();
         ListenableFuture<AccountWithCredentials> future = lttrsViewModel.getAccount();
         if (future.isDone()) {

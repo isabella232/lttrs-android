@@ -21,8 +21,10 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewAnimationUtils;
 
 import androidx.annotation.NonNull;
@@ -33,6 +35,7 @@ import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -65,7 +68,7 @@ import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mua.util.KeywordLabel;
 import rs.ltt.jmap.mua.util.Label;
 
-public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, ThreadModifier, SearchQueryFragment.OnTermSearched, NavController.OnDestinationChangedListener, MenuItem.OnActionExpandListener {
+public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, ThreadModifier, SearchQueryFragment.OnTermSearched, NavController.OnDestinationChangedListener, MenuItem.OnActionExpandListener, DrawerLayout.DrawerListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LttrsActivity.class);
 
@@ -80,6 +83,7 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
     private LttrsViewModel lttrsViewModel;
     private MenuItem mSearchItem;
     private SearchView mSearchView;
+    private ActionMode actionMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +102,8 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
                 this,
                 R.id.nav_host_fragment
         );
+
+        binding.drawerLayout.addDrawerListener(this);
 
         labelListAdapter.setOnMailboxOverviewItemSelectedListener((label, currentlySelected) -> {
             binding.drawerLayout.closeDrawer(GravityCompat.START);
@@ -318,6 +324,7 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
 
     @Override
     public void onDestinationChanged(@NonNull NavController controller, @NonNull NavDestination destination, @Nullable Bundle arguments) {
+        endActionMode();
         configureActionBarForDestination(destination);
     }
 
@@ -378,5 +385,37 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
     public void onTermSearched(final String term) {
         lttrsViewModel.setCurrentSearchTerm(term);
         labelListAdapter.setSelectedLabel(null);
+    }
+
+    public ActionMode beginActionMode(final ActionMode.Callback callback) {
+        this.actionMode = startActionMode(callback);
+        return this.actionMode;
+    }
+
+    public void endActionMode() {
+        if (this.actionMode != null) {
+            this.actionMode.finish();
+        }
+        this.actionMode = null;
+    }
+
+    @Override
+    public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+        endActionMode();
+    }
+
+    @Override
+    public void onDrawerOpened(@NonNull View drawerView) {
+
+    }
+
+    @Override
+    public void onDrawerClosed(@NonNull View drawerView) {
+
+    }
+
+    @Override
+    public void onDrawerStateChanged(int newState) {
+
     }
 }
