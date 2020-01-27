@@ -324,7 +324,10 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
 
     @Override
     public void onDestinationChanged(@NonNull NavController controller, @NonNull NavDestination destination, @Nullable Bundle arguments) {
-        endActionMode();
+        LOGGER.debug("onDestinationChanged({})", destination.getLabel());
+        if (destination.getId() == R.id.thread) {
+            endActionMode();
+        }
         configureActionBarForDestination(destination);
     }
 
