@@ -27,6 +27,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import rs.ltt.android.R;
 import rs.ltt.android.entity.ThreadOverviewItem;
+import rs.ltt.android.ui.ActionModeMenuConfiguration;
 import rs.ltt.android.ui.QueryItemTouchHelper;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
 import rs.ltt.android.ui.model.KeywordQueryViewModel;
@@ -92,7 +93,7 @@ public class KeywordQueryFragment extends AbstractQueryFragment {
         keywordQueryViewModel.removeKeyword(threadId);
 
         final Snackbar snackbar = Snackbar.make(
-                this.binding.getRoot(),getString(R.string.removed_from_x, keywordLabel.getName()),
+                this.binding.getRoot(), getString(R.string.removed_from_x, keywordLabel.getName()),
                 Snackbar.LENGTH_LONG
         );
 
@@ -103,5 +104,16 @@ public class KeywordQueryFragment extends AbstractQueryFragment {
     @Override
     protected boolean showComposeButton() {
         return true;
+    }
+
+    @Override
+    protected ActionModeMenuConfiguration.QueryType getQueryType() {
+        if (Keyword.FLAGGED.equals(keywordQueryViewModel.getKeyword())) {
+            return ActionModeMenuConfiguration.QueryType.FLAGGED;
+        } else if (Keyword.DRAFT.equals(keywordQueryViewModel.getKeyword())) {
+            return ActionModeMenuConfiguration.QueryType.SPECIAL;
+        } else {
+            return ActionModeMenuConfiguration.QueryType.LABEL;
+        }
     }
 }

@@ -19,7 +19,6 @@ package rs.ltt.android.ui.fragment;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.view.ActionMode;
 import androidx.databinding.DataBindingUtil;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -46,6 +46,7 @@ import rs.ltt.android.LttrsNavigationDirections;
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.FragmentThreadListBinding;
 import rs.ltt.android.entity.ThreadOverviewItem;
+import rs.ltt.android.ui.ActionModeMenuConfiguration;
 import rs.ltt.android.ui.OnLabelOpened;
 import rs.ltt.android.ui.QueryItemTouchHelper;
 import rs.ltt.android.ui.activity.ComposeActivity;
@@ -239,7 +240,34 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
     @Override
     public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
         LOGGER.debug("onPrepareActionMode()");
+        final ActionModeMenuConfiguration.QueryType queryType = getQueryType();
+        final ActionModeMenuConfiguration.SelectionInfo selectionInfo = ActionModeMenuConfiguration.SelectionInfo.vote(
+                tracker.getSelection(),
+                threadOverviewAdapter
+        );
+        final MenuItem archive = menu.findItem(R.id.action_archive);
+        final MenuItem removeLabel = menu.findItem(R.id.action_remove_label);
+        final MenuItem markRead = menu.findItem(R.id.action_mark_read);
+        final MenuItem markUnRead = menu.findItem(R.id.action_mark_unread);
+        final MenuItem markImportant = menu.findItem(R.id.action_mark_important);
+        final MenuItem markNotImportant = menu.findItem(R.id.action_mark_not_important);
+        final MenuItem addFlag = menu.findItem(R.id.action_add_flag);
+        final MenuItem removeFlag = menu.findItem(R.id.action_remove_flag);
 
+        if (queryType == ActionModeMenuConfiguration.QueryType.SPECIAL) {
+            archive.setVisible(false);
+            removeLabel.setVisible(false);
+        } else if (queryType == ActionModeMenuConfiguration.QueryType.INBOX) {
+            removeLabel.setVisible(false);
+        } else {
+            archive.setVisible(false);
+        }
+        markRead.setVisible(!selectionInfo.read);
+        markUnRead.setVisible(selectionInfo.read);
+        markImportant.setVisible(queryType != ActionModeMenuConfiguration.QueryType.IMPORTANT && !selectionInfo.important);
+        markNotImportant.setVisible(queryType != ActionModeMenuConfiguration.QueryType.IMPORTANT && selectionInfo.important);
+        addFlag.setVisible(queryType != ActionModeMenuConfiguration.QueryType.FLAGGED && !selectionInfo.flagged);
+        removeFlag.setVisible(queryType != ActionModeMenuConfiguration.QueryType.FLAGGED && selectionInfo.flagged);
         return true;
     }
 
@@ -256,4 +284,6 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         }
         this.actionMode = null;
     }
+
+    protected abstract ActionModeMenuConfiguration.QueryType getQueryType();
 }

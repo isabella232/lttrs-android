@@ -27,6 +27,7 @@ import androidx.core.util.Preconditions;
 import androidx.lifecycle.ViewModelProvider;
 
 import rs.ltt.android.entity.ThreadOverviewItem;
+import rs.ltt.android.ui.ActionModeMenuConfiguration;
 import rs.ltt.android.ui.QueryItemTouchHelper;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
 import rs.ltt.android.ui.model.SearchQueryViewModel;
@@ -86,6 +87,11 @@ public class SearchQueryFragment extends AbstractQueryFragment {
     @Override
     protected boolean showComposeButton() {
         return false;
+    }
+
+    @Override
+    protected ActionModeMenuConfiguration.QueryType getQueryType() {
+        return ActionModeMenuConfiguration.QueryType.SPECIAL;
     }
 
     public interface OnTermSearched {

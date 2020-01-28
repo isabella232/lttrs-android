@@ -26,6 +26,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.ThreadOverviewItem;
+import rs.ltt.android.ui.ActionModeMenuConfiguration;
 import rs.ltt.android.ui.QueryItemTouchHelper;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
 import rs.ltt.android.ui.model.MailboxQueryViewModel;
@@ -90,5 +91,21 @@ public abstract class AbstractMailboxQueryFragment extends AbstractQueryFragment
     }
 
     protected abstract String getMailboxId();
+
+    @Override
+    protected ActionModeMenuConfiguration.QueryType getQueryType() {
+        final MailboxOverviewItem mailbox = mailboxQueryViewModel != null ? mailboxQueryViewModel.getMailbox().getValue() : null;
+        if (mailbox == null) {
+            return ActionModeMenuConfiguration.QueryType.SPECIAL;
+        } else if (mailbox.role == Role.INBOX) {
+            return ActionModeMenuConfiguration.QueryType.INBOX;
+        } else if (mailbox.role == Role.FLAGGED) {
+            return ActionModeMenuConfiguration.QueryType.FLAGGED;
+        } else if (mailbox.role == null || mailbox.role == Role.IMPORTANT) {
+            return ActionModeMenuConfiguration.QueryType.IMPORTANT;
+        } else {
+            return ActionModeMenuConfiguration.QueryType.SPECIAL;
+        }
+    }
 
 }

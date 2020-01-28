@@ -148,6 +148,10 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
         }
     }
 
+    public boolean isImportant(ThreadOverviewItem item) {
+        return item.isInMailbox(getImportantMailbox());
+    }
+
     public void setLoading(final boolean loading) {
         final boolean before = this.isLoading;
         this.isLoading = loading;
@@ -208,7 +212,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
         public void setThread(final ThreadOverviewItem thread, int position) {
             this.binding.setThread(thread);
             this.position = position;
-            this.binding.setIsImportant(thread.isInMailbox(getImportantMailbox()));
+            this.binding.setIsImportant(isImportant(thread));
         }
 
         public ItemDetailsLookup.ItemDetails<String> getItemDetails() {

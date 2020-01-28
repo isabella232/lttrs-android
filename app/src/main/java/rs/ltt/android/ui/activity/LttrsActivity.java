@@ -21,7 +21,6 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,6 +30,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -391,7 +391,7 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
     }
 
     public ActionMode beginActionMode(final ActionMode.Callback callback) {
-        this.actionMode = startActionMode(callback);
+        this.actionMode = startSupportActionMode(callback);
         return this.actionMode;
     }
 
