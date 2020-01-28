@@ -18,8 +18,11 @@
 
     <string name="archive">Archive</string>
     <string name="mark_unread">Mark unread</string>
+    <string name="mark_read">Mark read</string>
     <string name="delete">Delete</string>
     <string name="mark_important">Mark important</string>
+    <string name="add_flag">Add flag</string>
+    <string name="remove_flag">Add flag</string>
     <string name="search">Search</string>
     <string name="to_x">to %s</string>
     <string name="move_to_inbox">Move to inbox</string>
