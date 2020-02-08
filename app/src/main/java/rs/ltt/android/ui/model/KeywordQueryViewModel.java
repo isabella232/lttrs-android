@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import rs.ltt.android.entity.AccountWithCredentials;
@@ -55,10 +56,10 @@ public class KeywordQueryViewModel extends AbstractQueryViewModel {
     }
 
     public void removeKeyword(final String threadId) {
-        queryRepository.removeKeyword(threadId, this.keyword);
+        queryRepository.removeKeyword(ImmutableSet.of(threadId), this.keyword);
     }
 
     public void addKeyword(final String threadId) {
-        queryRepository.addKeyword(threadId, this.keyword);
+        queryRepository.addKeyword(ImmutableSet.of(threadId), this.keyword);
     }
 }

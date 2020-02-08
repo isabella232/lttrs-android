@@ -325,8 +325,8 @@ public class SetupViewModel extends AndroidViewModel {
     }
 
     private boolean isNetworkAvailable() {
-        final ConnectivityManager cm = (ConnectivityManager) getApplication().getSystemService(Context.CONNECTIVITY_SERVICE);
-        final NetworkInfo info = cm.getActiveNetworkInfo();
+        final ConnectivityManager cm = getApplication().getSystemService(ConnectivityManager.class);
+        final NetworkInfo info = cm != null ? cm.getActiveNetworkInfo() : null;
         return info != null && info.isConnected();
     }
 

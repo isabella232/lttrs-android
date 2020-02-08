@@ -29,6 +29,7 @@ import androidx.work.Data;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -84,7 +85,7 @@ public class ThreadViewModel extends AndroidViewModel {
         this.expandedPositions = this.threadRepository.getExpandedPositions(threadId);
         this.expandedPositions.addListener(() -> {
             if (triggerRead) {
-                threadRepository.markRead(threadId);
+                threadRepository.markRead(ImmutableSet.of(threadId));
             }
         }, MoreExecutors.directExecutor());
 
@@ -153,11 +154,11 @@ public class ThreadViewModel extends AndroidViewModel {
     }
 
     public void toggleFlagged(final String threadId, final boolean target) {
-        threadRepository.toggleFlagged(threadId, target);
+        threadRepository.toggleFlagged(ImmutableSet.of(threadId), target);
     }
 
     public void markUnread() {
-        threadRepository.markUnRead(threadId);
+        threadRepository.markUnRead(ImmutableSet.of(threadId));
     }
 
     public String getLabel() {
@@ -169,7 +170,7 @@ public class ThreadViewModel extends AndroidViewModel {
     }
 
     public void archive() {
-        this.threadRepository.archive(this.threadId);
+        this.threadRepository.archive(ImmutableSet.of(this.threadId));
     }
 
     public MailboxWithRoleAndName getMailbox() {
@@ -182,11 +183,11 @@ public class ThreadViewModel extends AndroidViewModel {
     }
 
     public void markImportant() {
-        this.threadRepository.markImportant(this.threadId);
+        this.threadRepository.markImportant(ImmutableSet.of(this.threadId));
     }
 
     public void markNotImportant() {
-        this.threadRepository.markNotImportant(this.threadId);
+        this.threadRepository.markNotImportant(ImmutableSet.of(this.threadId));
     }
 
     public void waitForEdit(UUID uuid) {

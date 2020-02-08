@@ -20,6 +20,7 @@ import android.util.Log;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import androidx.lifecycle.LiveData;
@@ -82,8 +83,8 @@ public abstract class MailboxDao extends AbstractEntityDao {
     @Query("select distinct mailbox.id,role,name from email join email_mailbox on email_mailbox.emailId=email.id join mailbox on email_mailbox.mailboxId=mailbox.id where threadId=:threadId")
     public abstract LiveData<List<MailboxWithRoleAndName>> getMailboxesForThreadLiveData(String threadId);
 
-    @Query("select distinct mailbox.id,role,name from email join email_mailbox on email_mailbox.emailId=email.id join mailbox on email_mailbox.mailboxId=mailbox.id where threadId=:threadId")
-    public abstract List<MailboxWithRoleAndName> getMailboxesForThread(String threadId);
+    @Query("select distinct mailbox.id,role,name from email join email_mailbox on email_mailbox.emailId=email.id join mailbox on email_mailbox.mailboxId=mailbox.id where threadId in (:threadIds)")
+    public abstract List<MailboxWithRoleAndName> getMailboxesForThreads(Collection<String> threadIds);
 
     @Query("select count((select 1 where not exists(select * from email_mailbox join mailbox on email_mailbox.mailboxId=mailbox.id where mailbox.role=:role and email_mailbox.emailId=email.id))) > 0 from email where threadId=:threadId")
     public abstract LiveData<Boolean> isAnyNotIn(String threadId, Role role);

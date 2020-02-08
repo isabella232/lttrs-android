@@ -18,13 +18,17 @@ package rs.ltt.android.worker;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.work.Data;
 import androidx.work.WorkerParameters;
 
+import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -33,46 +37,57 @@ import rs.ltt.android.entity.EmailWithMailboxes;
 import rs.ltt.android.entity.QueryItemOverwriteEntity;
 import rs.ltt.jmap.mua.Mua;
 
-public class MoveToTrashWorker extends AbstractMailboxModificationWorker {
+public class MoveToTrashWorker extends AbstractMuaWorker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MoveToTrashWorker.class);
 
+    private static final String THREAD_IDS_KEY = "threadIds";
+
+    private final Collection<String> threadIds;
+
     public MoveToTrashWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
+        final Data data = workerParams.getInputData();
+        final String[] threadIds = data.getStringArray(THREAD_IDS_KEY);
+        this.threadIds = threadIds != null ? Sets.newHashSet(threadIds) : Collections.emptySet();
     }
 
-    @Override
     protected ListenableFuture<Boolean> modify(List<EmailWithMailboxes> emails) {
-        final LttrsDatabase database = getDatabase();
         final Mua mua = getMua();
-        LOGGER.info("Modifying {} emails in thread {}", emails.size(), threadId);
-        ListenableFuture<Boolean> future = mua.moveToTrash(emails);
+        LOGGER.info("Modifying {} emails in threads {}", emails.size(), threadIds);
+        return mua.moveToTrash(emails);
+    }
+
+
+    @NonNull
+    @Override
+    public Result doWork() {
+        LttrsDatabase database = getDatabase();
+        List<EmailWithMailboxes> emails = database.threadAndEmailDao().getEmailsWithMailboxes(threadIds);
         try {
-            if (!future.get()) {
-                LOGGER.info(
-                        "No changes were made to thread {}. Deleting keyword query overwrites",
-                        threadId
-                );
-                database.overwriteDao().deleteQueryOverwritesByThread(
-                        threadId,
-                        QueryItemOverwriteEntity.Type.KEYWORD
-                );
+            final boolean madeChanges = modify(emails).get();
+            if (!madeChanges) {
+                LOGGER.info("No changes were made to threads {}", threadIds);
+                database.overwriteDao().revertMoveToTrashOverwrites(threadIds);
             }
-        } catch (ExecutionException | InterruptedException e) {
-            if (e instanceof ExecutionException && !shouldRetry((ExecutionException) e)) {
-                LOGGER.warn(
-                        String.format(
-                                "Unable to modify emails in thread %s. Deleting keyword query overwrites",
-                                threadId
-                        ),
-                        e
-                );
-                database.overwriteDao().deleteQueryOverwritesByThread(
-                        threadId,
-                        QueryItemOverwriteEntity.Type.KEYWORD
-                );
+            return Result.success();
+        } catch (ExecutionException e) {
+            LOGGER.warn(String.format("Unable to modify emails in threads {}", threadIds), e);
+            if (shouldRetry(e)) {
+                return Result.retry();
+            } else {
+                database.overwriteDao().revertMoveToTrashOverwrites(threadIds);
+                return Result.failure();
             }
+        } catch (InterruptedException e) {
+            return Result.retry();
         }
-        return future;
+    }
+
+    public static Data data(Long account, Collection<String> threadIds) {
+        return new Data.Builder()
+                .putLong(ACCOUNT_KEY, account)
+                .putStringArray(THREAD_IDS_KEY, threadIds.toArray(new String[0]))
+                .build();
     }
 }

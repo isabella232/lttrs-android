@@ -17,6 +17,7 @@ package rs.ltt.android.database.dao;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.util.Collection;
 import java.util.List;
 
 import androidx.lifecycle.LiveData;
@@ -41,41 +42,56 @@ public abstract class OverwriteDao {
     private static final Logger LOGGER = LoggerFactory.getLogger(OverwriteDao.class);
 
     @Insert(onConflict = REPLACE)
-    public abstract void insert(KeywordOverwriteEntity keywordToggle);
+    public abstract void insertKeywordOverwrites(Collection<KeywordOverwriteEntity> keywordOverwriteEntities);
 
     @Insert(onConflict = REPLACE)
-    public abstract void insert(MailboxOverwriteEntity entity);
+    public abstract void insertMailboxOverwrites(Collection<MailboxOverwriteEntity> mailboxOverwriteEntities);
 
     @Insert(onConflict = REPLACE)
-    public abstract void insert(QueryItemOverwriteEntity queryItemOverwriteEntity);
+    public abstract void insertQueryOverwrites(Collection<QueryItemOverwriteEntity> queryItemOverwriteEntities);
 
     @Delete
-    public abstract void delete(QueryItemOverwriteEntity queryItemOverwriteEntity);
+    public abstract void deleteQueryOverwrites(Collection<QueryItemOverwriteEntity> queryItemOverwriteEntity);
 
     @Query("delete from query_item_overwrite where threadId=:threadId and type=:type")
     public abstract int deleteQueryOverwritesByThread(String threadId, QueryItemOverwriteEntity.Type type);
 
+    @Query("delete from query_item_overwrite where threadId in (:threadIds)")
+    public abstract int deleteQueryOverwritesByThread(Collection<String> threadIds);
+
     @Query("delete from mailbox_overwrite where threadId=:threadId")
     protected abstract int deleteMailboxOverwritesByThread(String threadId);
+
+    @Query("delete from mailbox_overwrite where threadId in (:threadIds)")
+    protected abstract int deleteMailboxOverwritesByThread(Collection<String> threadIds);
 
     @Query("delete from keyword_overwrite where threadId=:threadId")
     protected abstract int deleteKeywordOverwritesByThread(String threadId);
 
     @Transaction
-    public void revertKeywordOverwrites(String threadId) {
-        int keywordOverwrites = deleteKeywordOverwritesByThread(threadId);
-        int queryOverwrites = deleteQueryOverwritesByThread(threadId, QueryItemOverwriteEntity.Type.KEYWORD);
+    public void revertKeywordOverwrites(final String threadId) {
+        final int keywordOverwrites = deleteKeywordOverwritesByThread(threadId);
+        final int queryOverwrites = deleteQueryOverwritesByThread(threadId, QueryItemOverwriteEntity.Type.KEYWORD);
         if (keywordOverwrites > 0 || queryOverwrites > 0) {
             LOGGER.info("Deleted {} keyword overwrites and {} query overwrites for thread {}", keywordOverwrites, queryOverwrites, threadId);
         }
     }
 
     @Transaction
-    public void revertMailboxOverwrites(String threadId) {
-        int mailboxOverwrites = deleteMailboxOverwritesByThread(threadId);
-        int queryOverwrites = deleteQueryOverwritesByThread(threadId, QueryItemOverwriteEntity.Type.MAILBOX);
+    public void revertMailboxOverwrites(final String threadId) {
+        final int mailboxOverwrites = deleteMailboxOverwritesByThread(threadId);
+        final int queryOverwrites = deleteQueryOverwritesByThread(threadId, QueryItemOverwriteEntity.Type.MAILBOX);
         if (mailboxOverwrites > 0 || queryOverwrites > 0) {
             LOGGER.info("Deleted {} mailbox overwrites and {} query overwrites for thread {}", mailboxOverwrites, queryOverwrites, threadId);
+        }
+    }
+
+    @Transaction
+    public void revertMoveToTrashOverwrites(final Collection<String> threadIds) {
+        final int mailboxOverwrites = deleteMailboxOverwritesByThread(threadIds);
+        final int queryOverwrites = deleteQueryOverwritesByThread(threadIds);
+        if (mailboxOverwrites > 0 || queryOverwrites > 0) {
+            LOGGER.info("Deleted {} mailbox overwrites and {} query overwrites for threads {}", mailboxOverwrites, queryOverwrites, threadIds);
         }
     }
 

@@ -15,14 +15,15 @@
 
 package rs.ltt.android.entity;
 
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+
 import com.google.common.base.Objects;
+import com.google.common.collect.Collections2;
 
 import java.util.Collection;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.room.Entity;
-import androidx.room.ForeignKey;
 import rs.ltt.jmap.common.entity.Role;
 
 import static androidx.room.ForeignKey.CASCADE;
@@ -45,6 +46,10 @@ public class MailboxOverwriteEntity {
     public String role;
     public boolean value;
 
+    public static Collection<MailboxOverwriteEntity> of(Collection<String> threadIds, @NonNull Role role, boolean value) {
+        return Collections2.transform(threadIds, threadId -> of(threadId, role, value));
+    }
+
     public static MailboxOverwriteEntity of(String threadId, @NonNull Role role, boolean value) {
         MailboxOverwriteEntity entity = new MailboxOverwriteEntity();
         entity.threadId = threadId;
@@ -54,6 +59,9 @@ public class MailboxOverwriteEntity {
         return entity;
     }
 
+    public static Collection<MailboxOverwriteEntity> of(Collection<String> threadIds, @NonNull String label, boolean value) {
+        return Collections2.transform(threadIds, threadId -> of(threadId, label, value));
+    }
 
     public static MailboxOverwriteEntity of(String threadId, @NonNull String label, boolean value) {
         MailboxOverwriteEntity entity = new MailboxOverwriteEntity();

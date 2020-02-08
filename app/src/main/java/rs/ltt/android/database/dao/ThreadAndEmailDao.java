@@ -31,6 +31,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.List;
 
 import rs.ltt.android.entity.EditableEmail;
@@ -185,6 +186,10 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
     @Transaction
     @Query("select id from email where threadId=:threadId")
     public abstract List<EmailWithMailboxes> getEmailsWithMailboxes(String threadId);
+
+    @Transaction
+    @Query("select id from email where threadId in (:threadIds)")
+    public abstract List<EmailWithMailboxes> getEmailsWithMailboxes(Collection<String> threadIds);
 
     @Transaction
      @Query("select id from email where id=:id")

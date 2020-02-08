@@ -22,6 +22,7 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import rs.ltt.android.entity.AccountWithCredentials;
@@ -58,7 +59,7 @@ public class MailboxQueryViewModel extends AbstractQueryViewModel {
         }
         Log.d("lttrs", "remove " + item.emailId + " from " + mailbox.name);
 
-        queryRepository.removeFromMailbox(item.threadId, mailbox);
+        queryRepository.removeFromMailbox(ImmutableSet.of(item.threadId), mailbox);
     }
 
     public void copyToMailbox(ThreadOverviewItem item) {
@@ -66,7 +67,7 @@ public class MailboxQueryViewModel extends AbstractQueryViewModel {
         if (mailbox == null) {
             throw new IllegalStateException("No mailbox associated with MailboxQueryViewModel");
         }
-        queryRepository.copyToMailbox(item.threadId, mailbox);
+        queryRepository.copyToMailbox(ImmutableSet.of(item.threadId), mailbox);
     }
 
     public LiveData<MailboxOverviewItem> getMailbox() {

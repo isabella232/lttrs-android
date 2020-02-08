@@ -23,6 +23,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 import androidx.work.WorkInfo;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.slf4j.Logger;
@@ -87,23 +88,23 @@ public class LttrsViewModel extends AndroidViewModel {
     }
 
     public void cancelMoveToTrash(final WorkInfo workInfo, final String threadId) {
-        this.threadRepository.cancelMoveToTrash(workInfo, threadId);
+        this.threadRepository.cancelMoveToTrash(workInfo, ImmutableSet.of(threadId));
     }
 
     public void archive(final String threadId) {
-        this.threadRepository.archive(threadId);
+        this.threadRepository.archive(ImmutableSet.of(threadId));
     }
 
     public void moveToInbox(final String threadId) {
-        this.threadRepository.moveToInbox(threadId);
+        this.threadRepository.moveToInbox(ImmutableSet.of(threadId));
     }
 
     public void removeFromMailbox(final String threadId, final IdentifiableMailboxWithRole mailbox) {
-        this.threadRepository.removeFromMailbox(threadId, mailbox);
+        this.threadRepository.removeFromMailbox(ImmutableSet.of(threadId), mailbox);
     }
 
     public void copyToMailbox(final String threadId, final IdentifiableMailboxWithRole mailbox) {
-        this.threadRepository.copyToMailbox(threadId, mailbox);
+        this.threadRepository.copyToMailbox(ImmutableSet.of(threadId), mailbox);
     }
 
     public LiveData<Boolean> getHasAccounts() {

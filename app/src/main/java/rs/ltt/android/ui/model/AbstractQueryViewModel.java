@@ -24,6 +24,7 @@ import androidx.lifecycle.Transformations;
 import androidx.paging.PagedList;
 import androidx.work.WorkManager;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import rs.ltt.android.entity.AccountWithCredentials;
@@ -109,14 +110,14 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
     protected abstract LiveData<EmailQuery> getQuery();
 
     public void toggleFlagged(String threadId, boolean target) {
-        this.queryRepository.toggleFlagged(threadId, target);
+        this.queryRepository.toggleFlagged(ImmutableSet.of(threadId), target);
     }
 
     public void archive(ThreadOverviewItem item) {
-        queryRepository.archive(item.threadId);
+        queryRepository.archive(ImmutableSet.of(item.threadId));
     }
 
     public void moveToInbox(ThreadOverviewItem item) {
-        queryRepository.moveToInbox(item.threadId);
+        queryRepository.moveToInbox(ImmutableSet.of(item.threadId));
     }
 }
