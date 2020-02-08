@@ -27,12 +27,15 @@ import androidx.work.WorkManager;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.util.Collection;
+
 import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.repository.QueryRepository;
 import rs.ltt.android.util.WorkInfoUtil;
 import rs.ltt.android.worker.AbstractMuaWorker;
+import rs.ltt.jmap.common.entity.Keyword;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 
 public abstract class AbstractQueryViewModel extends AndroidViewModel {
@@ -113,11 +116,29 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
         this.queryRepository.toggleFlagged(ImmutableSet.of(threadId), target);
     }
 
-    public void archive(ThreadOverviewItem item) {
-        queryRepository.archive(ImmutableSet.of(item.threadId));
+    public void markRead(final Collection<String> threadIds) {
+        queryRepository.markRead(threadIds);
     }
 
-    public void moveToInbox(ThreadOverviewItem item) {
-        queryRepository.moveToInbox(ImmutableSet.of(item.threadId));
+    public void markUnread(final Collection<String> threadIds) {
+        queryRepository.markUnRead(threadIds);
     }
+
+    public void markImportant(final Collection<String> threadIds) {
+        queryRepository.markImportant(threadIds);
+    }
+
+    public void markNotImportant(final Collection<String> threadIds) {
+        queryRepository.markNotImportant(threadIds);
+    }
+
+    public void addFlag(final Collection<String> threadIds) {
+        queryRepository.addKeyword(threadIds, Keyword.FLAGGED);
+    }
+
+    public void removeFlag(final Collection<String> threadIds) {
+        queryRepository.removeKeyword(threadIds, Keyword.FLAGGED);
+    }
+
+
 }

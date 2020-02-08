@@ -16,7 +16,6 @@
 package rs.ltt.android.ui.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -98,7 +97,8 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
             if (item == null) {
                 return;
             }
-            final boolean selected = selectionTracker != null && selectionTracker.isSelected(item.emailId);
+            final boolean selected = selectionTracker != null && selectionTracker.isSelected(item.threadId
+            );
             final Context context = threadOverviewHolder.binding.getRoot().getContext();
             threadOverviewHolder.binding.getRoot().setActivated(selected);
             threadOverviewHolder.setThread(item, position);
@@ -121,7 +121,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
             });
             threadOverviewHolder.binding.avatar.setOnClickListener(v -> {
                 if (selectionTracker != null) {
-                    selectionTracker.select(item.emailId);
+                    selectionTracker.select(item.threadId);
                 }
             });
             if (selected) {
@@ -225,7 +225,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
                 @Nullable
                 @Override
                 public String getSelectionKey() {
-                    return binding.getThread().emailId;
+                    return binding.getThread().threadId;
                 }
             };
         }

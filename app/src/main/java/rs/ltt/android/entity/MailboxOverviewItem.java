@@ -15,23 +15,16 @@
 
 package rs.ltt.android.entity;
 
-import com.google.common.base.Objects;
-
 import androidx.annotation.NonNull;
 
-import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
+import com.google.common.base.Objects;
+
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mua.util.Label;
 
-public class MailboxOverviewItem implements IdentifiableMailboxWithRole, Label {
-
-    @NonNull public String id;
+public class MailboxOverviewItem extends MailboxWithRoleAndName implements Label {
 
     public String parentId;
-
-    public String name;
-
-    public Role role;
 
     public Integer sortOrder;
 

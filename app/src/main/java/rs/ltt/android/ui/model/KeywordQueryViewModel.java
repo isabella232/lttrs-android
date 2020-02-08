@@ -54,12 +54,4 @@ public class KeywordQueryViewModel extends AbstractQueryViewModel {
     protected LiveData<EmailQuery> getQuery() {
         return emailQueryLiveData;
     }
-
-    public void removeKeyword(final String threadId) {
-        queryRepository.removeKeyword(ImmutableSet.of(threadId), this.keyword);
-    }
-
-    public void addKeyword(final String threadId) {
-        queryRepository.addKeyword(ImmutableSet.of(threadId), this.keyword);
-    }
 }

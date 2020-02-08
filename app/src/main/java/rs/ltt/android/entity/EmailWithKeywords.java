@@ -15,12 +15,13 @@
 
 package rs.ltt.android.entity;
 
+import androidx.room.Relation;
+
 import com.google.common.collect.Maps;
 
 import java.util.Map;
 import java.util.Set;
 
-import androidx.room.Relation;
 import rs.ltt.jmap.common.entity.IdentifiableEmailWithKeywords;
 
 public class EmailWithKeywords implements IdentifiableEmailWithKeywords {

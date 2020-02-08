@@ -26,6 +26,8 @@ import androidx.annotation.NonNull;
 import androidx.core.util.Preconditions;
 import androidx.lifecycle.ViewModelProvider;
 
+import java.util.Collection;
+
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.ui.ActionModeMenuConfiguration;
 import rs.ltt.android.ui.QueryItemTouchHelper;
@@ -87,6 +89,11 @@ public class SearchQueryFragment extends AbstractQueryFragment {
     @Override
     protected boolean showComposeButton() {
         return false;
+    }
+
+    @Override
+    void removeLabel(Collection<String> threadIds) {
+        throw new IllegalStateException("SearchQueryFragment should not offer remove label button");
     }
 
     @Override

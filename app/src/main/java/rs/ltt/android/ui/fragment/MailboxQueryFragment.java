@@ -22,7 +22,9 @@ import androidx.core.util.Preconditions;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
-import com.google.android.material.snackbar.Snackbar;
+import com.google.common.collect.ImmutableSet;
+
+import java.util.Collection;
 
 import rs.ltt.android.LttrsNavigationDirections;
 import rs.ltt.android.R;
@@ -53,17 +55,15 @@ public class MailboxQueryFragment extends AbstractMailboxQueryFragment {
 
     @Override
     protected void onQueryItemSwiped(final ThreadOverviewItem item) {
-        //swipe should be disabled when mailbox is null.
+        removeLabel(ImmutableSet.of(item.threadId));
+    }
+
+    @Override
+    void removeLabel(Collection<String> threadIds) {
         final MailboxOverviewItem mailbox = Preconditions.checkNotNull(
                 mailboxQueryViewModel.getMailbox().getValue(),
                 "MailboxQueryViewModel had no information about the mailbox we were viewing"
         );
-        mailboxQueryViewModel.removeFromMailbox(item);
-        final Snackbar snackbar = Snackbar.make(
-                this.binding.getRoot(),getString(R.string.removed_from_x, mailbox.getName()),
-                Snackbar.LENGTH_LONG
-        );
-        snackbar.setAction(R.string.undo, v -> mailboxQueryViewModel.copyToMailbox(item));
-        snackbar.show();
+        requireLttrsActivity().removeFromMailbox(threadIds, mailbox);
     }
 }

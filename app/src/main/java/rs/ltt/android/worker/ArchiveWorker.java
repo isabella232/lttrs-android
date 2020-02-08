@@ -17,15 +17,15 @@ package rs.ltt.android.worker;
 
 import android.content.Context;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
-import java.util.List;
-
 import androidx.annotation.NonNull;
 import androidx.work.WorkerParameters;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 import rs.ltt.android.entity.EmailWithMailboxes;
 

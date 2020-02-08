@@ -19,12 +19,11 @@ import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
-
-import com.google.common.base.CharMatcher;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.google.common.base.CharMatcher;
 
 import rs.ltt.android.database.AppDatabase;
 

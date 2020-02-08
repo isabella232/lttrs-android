@@ -16,7 +16,6 @@
 package rs.ltt.android.repository;
 
 import android.app.Application;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.util.Preconditions;
@@ -43,7 +42,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -59,13 +57,13 @@ import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.QueryEntity;
 import rs.ltt.android.entity.QueryItemOverwriteEntity;
 import rs.ltt.android.util.FutureLiveData;
+import rs.ltt.android.worker.AbstractMuaWorker;
 import rs.ltt.android.worker.ArchiveWorker;
 import rs.ltt.android.worker.CopyToMailboxWorker;
 import rs.ltt.android.worker.MarkImportantWorker;
 import rs.ltt.android.worker.ModifyKeywordWorker;
 import rs.ltt.android.worker.MoveToInboxWorker;
 import rs.ltt.android.worker.MoveToTrashWorker;
-import rs.ltt.android.worker.AbstractMuaWorker;
 import rs.ltt.android.worker.RemoveFromMailboxWorker;
 import rs.ltt.jmap.client.session.FileSessionCache;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
@@ -354,10 +352,6 @@ public class LttrsRepository {
         });
     }
 
-    public ListenableFuture<LiveData<WorkInfo>> moveToTrash(final String threadId) {
-        return moveToTrash(ImmutableSet.of(threadId));
-    }
-
     public ListenableFuture<LiveData<WorkInfo>> moveToTrash(final Collection<String> threadIds) {
         final SettableFuture<LiveData<WorkInfo>> future = SettableFuture.create();
         IO_EXECUTOR.execute(() -> {
@@ -468,6 +462,7 @@ public class LttrsRepository {
     private void toggleKeyword(final Collection<String> threadIds, final String keyword, final boolean targetState) {
         Preconditions.checkNotNull(threadIds);
         Preconditions.checkNotNull(keyword);
+        LOGGER.info("toggle keyword {} for threads {}", keyword, threadIds);
         IO_EXECUTOR.execute(() -> {
             final Collection<KeywordOverwriteEntity> entities = Collections2.transform(
                     threadIds,

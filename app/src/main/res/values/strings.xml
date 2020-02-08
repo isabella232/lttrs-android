@@ -31,9 +31,19 @@
     <string name="remove_label">Remove label</string>
     <string name="search_hint">Search email</string>
     <string name="mark_not_important">Mark not important</string>
-    <string name="removed_from_x">Removed from %s</string>
-    <string name="archived">Archived</string>
+    <plurals name="n_removed_from_x">
+        <item quantity="one">%d removed from %s</item>
+        <item quantity="other">%d removed from %s</item>
+    </plurals>
+    <plurals name="n_archived">
+        <item quantity="one">%d archived</item>
+        <item quantity="other">%d archived</item>
+    </plurals>
     <string name="undo">Undo</string>
+    <plurals name="n_deleted">
+        <item quantity="one">%d deleted</item>
+        <item quantity="other">%d deleted</item>
+    </plurals>
     <string name="deleted">Deleted</string>
     <string name="sign_in">Sign in</string>
     <string name="email_address">Email address</string>

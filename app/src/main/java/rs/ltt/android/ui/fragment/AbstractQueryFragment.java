@@ -37,10 +37,13 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.snackbar.Snackbar;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
 
 import rs.ltt.android.LttrsNavigationDirections;
 import rs.ltt.android.R;
@@ -173,16 +176,13 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         getQueryViewModel().toggleFlagged(threadId, target);
     }
 
+
     protected void archive(ThreadOverviewItem item) {
-        final AbstractQueryViewModel queryViewModel = getQueryViewModel();
-        queryViewModel.archive(item);
-        final Snackbar snackbar = Snackbar.make(
-                this.binding.getRoot(),
-                R.string.archived,
-                Snackbar.LENGTH_LONG
-        );
-        snackbar.setAction(R.string.undo, v -> queryViewModel.moveToInbox(item));
-        snackbar.show();
+        archive(ImmutableSet.of(item.threadId));
+    }
+
+    protected void archive(Collection<String> threadIds) {
+        requireLttrsActivity().archive(threadIds);
     }
 
     protected abstract AbstractQueryViewModel getQueryViewModel();
@@ -273,8 +273,43 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
 
     @Override
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        final Collection<String> threadIds = Sets.newHashSet(tracker.getSelection());
+        switch (item.getItemId()) {
+            case R.id.action_archive:
+                archive(threadIds);
+                tracker.clearSelection();
+                return true;
+            case R.id.action_remove_label:
+                removeLabel(threadIds);
+                tracker.clearSelection();
+                return true;
+            case R.id.action_mark_read:
+                getQueryViewModel().markRead(threadIds);
+                return true;
+            case R.id.action_mark_unread:
+                getQueryViewModel().markUnread(threadIds);
+                return true;
+            case R.id.action_mark_important:
+                getQueryViewModel().markImportant(threadIds);
+                return true;
+            case R.id.action_mark_not_important:
+                getQueryViewModel().markNotImportant(threadIds);
+                return true;
+            case R.id.action_add_flag:
+                getQueryViewModel().addFlag(threadIds);
+                return true;
+            case R.id.action_remove_flag:
+                getQueryViewModel().removeFlag(threadIds);
+                return true;
+            case R.id.action_move_to_trash:
+                requireLttrsActivity().moveToTrash(threadIds);
+                tracker.clearSelection();
+                return true;
+        }
         return false;
     }
+
+    abstract void removeLabel(Collection<String> threadIds);
 
     @Override
     public void onDestroyActionMode(ActionMode mode) {

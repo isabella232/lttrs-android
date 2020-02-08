@@ -42,7 +42,6 @@ import java.util.UUID;
 import rs.ltt.android.R;
 import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.entity.EditableEmail;
-import rs.ltt.android.entity.EmailAddressType;
 import rs.ltt.android.entity.IdentityWithNameAndEmail;
 import rs.ltt.android.repository.ComposeRepository;
 import rs.ltt.android.repository.MainRepository;

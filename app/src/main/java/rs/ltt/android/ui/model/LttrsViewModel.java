@@ -29,6 +29,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.List;
 
 import rs.ltt.android.entity.AccountWithCredentials;
@@ -83,28 +84,44 @@ public class LttrsViewModel extends AndroidViewModel {
         this.mainRepository.insertSearchSuggestion(term);
     }
 
-    public ListenableFuture<LiveData<WorkInfo>> moveToTrash(final String threadId) {
-        return this.threadRepository.moveToTrash(threadId);
+    public ListenableFuture<LiveData<WorkInfo>> moveToTrash(final Collection<String> threadIds) {
+        return this.threadRepository.moveToTrash(threadIds);
     }
 
-    public void cancelMoveToTrash(final WorkInfo workInfo, final String threadId) {
-        this.threadRepository.cancelMoveToTrash(workInfo, ImmutableSet.of(threadId));
+    public void cancelMoveToTrash(final WorkInfo workInfo, final Collection<String> threadIds) {
+        this.threadRepository.cancelMoveToTrash(workInfo, threadIds);
     }
 
-    public void archive(final String threadId) {
+    public void archive(String threadId) {
         this.threadRepository.archive(ImmutableSet.of(threadId));
     }
 
-    public void moveToInbox(final String threadId) {
+    public void archive(Collection<String> threadIds) {
+        this.threadRepository.archive(threadIds);
+    }
+
+    public void moveToInbox(String threadId) {
         this.threadRepository.moveToInbox(ImmutableSet.of(threadId));
     }
 
-    public void removeFromMailbox(final String threadId, final IdentifiableMailboxWithRole mailbox) {
-        this.threadRepository.removeFromMailbox(ImmutableSet.of(threadId), mailbox);
+    public void moveToInbox(Collection<String> threadIds) {
+        this.threadRepository.moveToInbox(threadIds);
     }
 
-    public void copyToMailbox(final String threadId, final IdentifiableMailboxWithRole mailbox) {
-        this.threadRepository.copyToMailbox(ImmutableSet.of(threadId), mailbox);
+    public void removeFromMailbox(final Collection<String> threadIds, final IdentifiableMailboxWithRole mailbox) {
+        this.threadRepository.removeFromMailbox(threadIds, mailbox);
+    }
+
+    public void copyToMailbox(final Collection<String> threadIds, final IdentifiableMailboxWithRole mailbox) {
+        this.threadRepository.copyToMailbox(threadIds, mailbox);
+    }
+
+    public void removeKeyword(final Collection<String> threadIds, final String keyword) {
+        this.threadRepository.removeKeyword(threadIds, keyword);
+    }
+
+    public void addKeyword(final Collection<String> threadIds, final String keyword) {
+        this.threadRepository.addKeyword(threadIds, keyword);
     }
 
     public LiveData<Boolean> getHasAccounts() {

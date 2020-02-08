@@ -52,7 +52,7 @@ public class ActionModeMenuConfiguration {
             int flagged = 0;
             final List<ThreadOverviewItem> threadOverviewItems = currentList.snapshot();
             for (ThreadOverviewItem thread : threadOverviewItems) {
-                if (thread != null && selection.contains(thread.emailId)) {
+                if (thread != null && selection.contains(thread.threadId)) {
                     if (thread.everyHasSeenKeyword()) {
                         read++;
                     } else {

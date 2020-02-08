@@ -37,7 +37,6 @@ import rs.ltt.android.entity.ExpandedPosition;
 import rs.ltt.android.entity.FullEmail;
 import rs.ltt.android.entity.SubjectWithImportance;
 import rs.ltt.android.ui.BindingAdapters;
-import rs.ltt.android.ui.activity.ComposeActivity;
 import rs.ltt.android.util.Touch;
 
 public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractThreadItemViewHolder> {

@@ -34,7 +34,6 @@ import java.util.concurrent.ExecutionException;
 
 import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.entity.EmailWithMailboxes;
-import rs.ltt.android.entity.QueryItemOverwriteEntity;
 import rs.ltt.jmap.mua.Mua;
 
 public class MoveToTrashWorker extends AbstractMuaWorker {

@@ -15,15 +15,16 @@
 
 package rs.ltt.android.entity;
 
-import com.google.common.collect.ImmutableList;
-
-import java.util.List;
-
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
+
+import com.google.common.collect.ImmutableList;
+
+import java.util.List;
+
 import rs.ltt.jmap.mua.util.QueryResultItem;
 
 @Entity(tableName = "query_item",

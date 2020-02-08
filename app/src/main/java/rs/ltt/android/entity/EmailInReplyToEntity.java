@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableList;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import rs.ltt.jmap.common.entity.Email;
 

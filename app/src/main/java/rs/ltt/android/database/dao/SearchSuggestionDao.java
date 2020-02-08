@@ -22,6 +22,7 @@ import android.provider.BaseColumns;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
+
 import rs.ltt.android.R;
 import rs.ltt.android.entity.SearchSuggestionEntity;
 

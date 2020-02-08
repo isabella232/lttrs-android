@@ -44,12 +44,14 @@ import androidx.navigation.Navigation;
 import androidx.work.WorkInfo;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import rs.ltt.android.LttrsNavigationDirections;
@@ -66,6 +68,7 @@ import rs.ltt.android.ui.model.LttrsViewModel;
 import rs.ltt.android.util.MainThreadExecutor;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mua.util.KeywordLabel;
+import rs.ltt.jmap.mua.util.KeywordUtil;
 import rs.ltt.jmap.mua.util.Label;
 
 public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, ThreadModifier, SearchQueryFragment.OnTermSearched, NavController.OnDestinationChangedListener, MenuItem.OnActionExpandListener, DrawerLayout.DrawerListener {
@@ -254,10 +257,19 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
 
     @Override
     public void archive(final String threadId) {
-        final Snackbar snackbar = Snackbar.make(binding.getRoot(), R.string.archived, Snackbar.LENGTH_LONG);
-        snackbar.setAction(R.string.undo, v -> lttrsViewModel.moveToInbox(threadId));
+        archive(ImmutableSet.of(threadId));
+    }
+
+    public void archive(Collection<String> threadIds) {
+        final int count = threadIds.size();
+        lttrsViewModel.archive(threadIds);
+        final Snackbar snackbar = Snackbar.make(
+                this.binding.getRoot(),
+                getResources().getQuantityString(R.plurals.n_archived, count, count),
+                Snackbar.LENGTH_LONG
+        );
+        snackbar.setAction(R.string.undo, v -> lttrsViewModel.moveToInbox(threadIds));
         snackbar.show();
-        lttrsViewModel.archive(threadId);
     }
 
     @Override
@@ -270,13 +282,22 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
 
     @Override
     public void moveToTrash(final String threadId) {
-        final Snackbar snackbar = Snackbar.make(binding.getRoot(), R.string.deleted, Snackbar.LENGTH_LONG);
-        final ListenableFuture<LiveData<WorkInfo>> future = lttrsViewModel.moveToTrash(threadId);
+        moveToTrash(ImmutableSet.of(threadId));
+    }
+
+    public void moveToTrash(final Collection<String> threadIds) {
+        final int count = threadIds.size();
+        final Snackbar snackbar = Snackbar.make(
+                binding.getRoot(),
+                getResources().getQuantityString(R.plurals.n_deleted, count, count),
+                Snackbar.LENGTH_LONG
+        );
+        final ListenableFuture<LiveData<WorkInfo>> future = lttrsViewModel.moveToTrash(threadIds);
         snackbar.setAction(R.string.undo, v -> {
             try {
                 final LiveData<WorkInfo> workInfoLiveData = future.get();
                 final WorkInfo workInfo = workInfoLiveData.getValue();
-                lttrsViewModel.cancelMoveToTrash(workInfo, threadId);
+                lttrsViewModel.cancelMoveToTrash(workInfo, threadIds);
             } catch (Exception e) {
                 LOGGER.warn("Unable to cancel moveToTrash operation", e);
             }
@@ -297,14 +318,36 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
 
     @Override
     public void removeFromMailbox(String threadId, MailboxWithRoleAndName mailbox) {
+        removeFromMailbox(ImmutableSet.of(threadId), mailbox);
+    }
+
+    public void removeFromMailbox(Collection<String> threadIds, MailboxWithRoleAndName mailbox) {
+        final int count = threadIds.size();
         final Snackbar snackbar = Snackbar.make(
                 binding.getRoot(),
-                getString(R.string.removed_from_x, mailbox.name),
+                getResources().getQuantityString(R.plurals.n_removed_from_x, count, count, mailbox.name),
                 Snackbar.LENGTH_LONG
         );
-        snackbar.setAction(R.string.undo, v -> lttrsViewModel.copyToMailbox(threadId, mailbox));
+        snackbar.setAction(R.string.undo, v -> lttrsViewModel.copyToMailbox(threadIds, mailbox));
         snackbar.show();
-        lttrsViewModel.removeFromMailbox(threadId, mailbox);
+        lttrsViewModel.removeFromMailbox(threadIds, mailbox);
+    }
+
+    public void removeFromKeyword(Collection<String> threadIds, final String keyword) {
+        final int count = threadIds.size();
+        final Snackbar snackbar = Snackbar.make(
+                binding.getRoot(),
+                getResources().getQuantityString(
+                        R.plurals.n_removed_from_x,
+                        count,
+                        count,
+                        KeywordLabel.of(keyword).getName()
+                ),
+                Snackbar.LENGTH_LONG
+        );
+        snackbar.setAction(R.string.undo, v -> lttrsViewModel.addKeyword(threadIds, keyword));
+        snackbar.show();
+        lttrsViewModel.removeKeyword(threadIds, keyword);
     }
 
     @Override

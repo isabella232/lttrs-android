@@ -45,9 +45,9 @@ public class ThreadOverviewItemKeyProvider extends ItemKeyProvider<String> {
         LOGGER.info("attempting to get key for position {}", position);
         final ThreadOverviewItem item = threadOverviewAdapter.getItem(position);
         if (item != null) {
-            LOGGER.info("email id "+item.emailId);
+            LOGGER.info("thread id {} ", item.threadId);
         }
-        return item == null ? null : item.emailId;
+        return item == null ? null : item.threadId;
     }
 
     @Override
@@ -59,8 +59,8 @@ public class ThreadOverviewItemKeyProvider extends ItemKeyProvider<String> {
         final int offset = currentList.getPositionOffset();
         final List<ThreadOverviewItem> snapshot = currentList.snapshot();
         int i = 0;
-        for(final ThreadOverviewItem item : snapshot) {
-            if (item != null && key.equals(item.emailId)) {
+        for (final ThreadOverviewItem item : snapshot) {
+            if (item != null && key.equals(item.threadId)) {
                 return offset + i;
             }
             ++i;

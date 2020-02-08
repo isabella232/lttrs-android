@@ -15,12 +15,13 @@
 
 package rs.ltt.android.database.dao;
 
-import java.util.Arrays;
-import java.util.List;
-
 import androidx.room.Dao;
 import androidx.room.Query;
 import androidx.room.Transaction;
+
+import java.util.Arrays;
+import java.util.List;
+
 import rs.ltt.android.entity.EntityState;
 import rs.ltt.android.entity.EntityType;
 import rs.ltt.jmap.mua.cache.ObjectsState;

@@ -15,11 +15,11 @@
 
 package rs.ltt.android.entity;
 
-import java.util.Collection;
-
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+
+import java.util.Collection;
 
 import static androidx.room.ForeignKey.CASCADE;
 

@@ -23,9 +23,10 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.material.snackbar.Snackbar;
+import com.google.common.collect.ImmutableSet;
 
-import rs.ltt.android.R;
+import java.util.Collection;
+
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.ui.ActionModeMenuConfiguration;
 import rs.ltt.android.ui.QueryItemTouchHelper;
@@ -90,20 +91,18 @@ public class KeywordQueryFragment extends AbstractQueryFragment {
     }
 
     private void removeKeyword(final String threadId) {
-        keywordQueryViewModel.removeKeyword(threadId);
-
-        final Snackbar snackbar = Snackbar.make(
-                this.binding.getRoot(), getString(R.string.removed_from_x, keywordLabel.getName()),
-                Snackbar.LENGTH_LONG
-        );
-
-        snackbar.setAction(R.string.undo, v -> keywordQueryViewModel.addKeyword(threadId));
-        snackbar.show();
+        removeLabel(ImmutableSet.of(threadId));
     }
 
     @Override
     protected boolean showComposeButton() {
         return true;
+    }
+
+    @Override
+    void removeLabel(Collection<String> threadIds) {
+        requireLttrsActivity().removeFromKeyword(threadIds, keywordQueryViewModel.getKeyword());
+
     }
 
     @Override

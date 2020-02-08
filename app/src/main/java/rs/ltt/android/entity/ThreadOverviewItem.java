@@ -15,6 +15,9 @@
 
 package rs.ltt.android.entity;
 
+import androidx.room.Ignore;
+import androidx.room.Relation;
+
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
@@ -32,9 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-
-import androidx.room.Ignore;
-import androidx.room.Relation;
 
 import rs.ltt.jmap.common.entity.IdentifiableEmailWithKeywords;
 import rs.ltt.jmap.common.entity.IdentifiableEmailWithMailboxIds;

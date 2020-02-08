@@ -28,7 +28,6 @@ import java.util.concurrent.ExecutionException;
 
 import rs.ltt.android.entity.IdentityWithNameAndEmail;
 import rs.ltt.jmap.common.entity.Email;
-import rs.ltt.jmap.mua.Status;
 
 public class SaveDraftWorker extends AbstractCreateEmailWorker {
 
