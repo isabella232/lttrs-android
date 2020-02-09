@@ -20,10 +20,14 @@ If the above screenshots don’t do enough to convince you, you can watch this
   aims to support one specific work flow. Users who desire a different work flow may find
   [K-9 Mail](https://github.com/k9mail/k-9) or [FairEmail](https://github.com/M66B/FairEmail) more suitable.
 * **Minimal external dependencies**. Third party libraries are often of poor quality and end up being
-  unmaintained. Therfor we will only rely on well-known, well tested libraries from reputable vendors.
-* Ltt.rs is based on **[jmap-mua](https://github.com/iNPUTmice/jmap)**, a headless email client, or a
+  unmaintained. Therfore we will only rely on well known, well tested libraries from reputable vendors.
+* **[Autocrypt](https://autocrypt.org/) as a first class feature**¹. With its strict UX guidelines autocrypt
+  fits right into Ltt.rs.
+* Ltt.rs is **based on [jmap-mua](https://github.com/iNPUTmice/jmap)**, a headless email client, or a
   library that handles everything an email client would aside from data storage and UI. There is also
   [lttrs-cli](https://github.com/iNPUTmice/lttrs-cli) which uses the same library.
+  
+¹: Planned feature.
 
 ### Try it
 
