@@ -32,6 +32,11 @@ public class LttrsApplication extends Application implements Configuration.Provi
     @NonNull
     @Override
     public Configuration getWorkManagerConfiguration() {
+        //jmap-mua methods regularly use ifInState parameters that require use to have an up to date
+        //local cache. However at the same time this prevents us from launching two modifications at
+        //the same time as the second call would fail with a state miss match.
+        //Therefor all our email modifications (thus far the only thing happening in WorkManager)
+        //are single threaded.
         LOGGER.info("Create single threaded WorkManager configuration");
         return new Configuration.Builder()
                 .setExecutor(Executors.newSingleThreadExecutor())
