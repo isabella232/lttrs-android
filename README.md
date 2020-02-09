@@ -26,7 +26,8 @@ If the above screenshots don’t do enough to convince you, you can watch this
 * Ltt.rs is **based on [jmap-mua](https://github.com/iNPUTmice/jmap)**, a headless email client, or a
   library that handles everything an email client would aside from data storage and UI. There is also
   [lttrs-cli](https://github.com/iNPUTmice/lttrs-cli) which uses the same library.
-  
+* When in doubt: **Look at Gmail for inspiration.**
+
 ¹: Planned feature.
 
 ### Try it
