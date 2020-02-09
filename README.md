@@ -18,6 +18,6 @@ library.
 
 ## Try it
 
-JMAP servers are currently rare. As of Februrary 2020 you need to compile 
+JMAP servers are currently rare. As of February 2020 you need to compile 
 [Cyrus](https://github.com/cyrusimap/cyrus-imapd) from git. If you are looking for providers
 [Fastmail](https://www.fastmail.com/) is the only known option.
