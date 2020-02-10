@@ -99,6 +99,8 @@ public abstract class AbstractMailboxQueryFragment extends AbstractQueryFragment
             return ActionModeMenuConfiguration.QueryType.SPECIAL;
         } else if (mailbox.role == Role.INBOX) {
             return ActionModeMenuConfiguration.QueryType.INBOX;
+        } else if (mailbox.role == Role.ARCHIVE) {
+            return ActionModeMenuConfiguration.QueryType.ARCHIVE;
         } else if (mailbox.role == Role.FLAGGED) {
             return ActionModeMenuConfiguration.QueryType.FLAGGED;
         } else if (mailbox.role == null || mailbox.role == Role.IMPORTANT) {

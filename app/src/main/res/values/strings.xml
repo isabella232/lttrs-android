@@ -26,7 +26,10 @@
     <string name="search">Search</string>
     <string name="to_x">to %s</string>
     <string name="move_to_inbox">Move to inbox</string>
-    <string name="moved_to_inbox">Moved to inbox</string>
+    <plurals name="n_moved_to_inbox">
+        <item quantity="one">%d moved to inbox</item>
+        <item quantity="other">%d moved to inbox</item>
+    </plurals>
     <string name="remove_label_x">Remove label %s</string>
     <string name="remove_label">Remove label</string>
     <string name="search_hint">Search email</string>

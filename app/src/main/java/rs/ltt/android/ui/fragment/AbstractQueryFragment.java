@@ -249,18 +249,25 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         final MenuItem removeLabel = menu.findItem(R.id.action_remove_label);
         final MenuItem markRead = menu.findItem(R.id.action_mark_read);
         final MenuItem markUnRead = menu.findItem(R.id.action_mark_unread);
+        final MenuItem moveToInbox = menu.findItem(R.id.action_move_to_inbox);
         final MenuItem markImportant = menu.findItem(R.id.action_mark_important);
         final MenuItem markNotImportant = menu.findItem(R.id.action_mark_not_important);
         final MenuItem addFlag = menu.findItem(R.id.action_add_flag);
         final MenuItem removeFlag = menu.findItem(R.id.action_remove_flag);
 
-        if (queryType == ActionModeMenuConfiguration.QueryType.SPECIAL) {
+        if (queryType == ActionModeMenuConfiguration.QueryType.ARCHIVE)  {
             archive.setVisible(false);
             removeLabel.setVisible(false);
+        } else if (queryType == ActionModeMenuConfiguration.QueryType.SPECIAL) {
+            archive.setVisible(false);
+            removeLabel.setVisible(false);
+            moveToInbox.setVisible(false);
         } else if (queryType == ActionModeMenuConfiguration.QueryType.INBOX) {
             removeLabel.setVisible(false);
+            moveToInbox.setVisible(false);
         } else {
             archive.setVisible(false);
+            moveToInbox.setVisible(false);
         }
         markRead.setVisible(!selectionInfo.read);
         markUnRead.setVisible(selectionInfo.read);
@@ -289,6 +296,9 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
             case R.id.action_mark_unread:
                 getQueryViewModel().markUnread(threadIds);
                 return true;
+            case R.id.action_move_to_inbox:
+                requireLttrsActivity().moveToInbox(threadIds);
+                tracker.clearSelection();
             case R.id.action_mark_important:
                 getQueryViewModel().markImportant(threadIds);
                 return true;

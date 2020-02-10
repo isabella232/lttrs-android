@@ -274,10 +274,19 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
 
     @Override
     public void moveToInbox(final String threadId) {
-        final Snackbar snackbar = Snackbar.make(binding.getRoot(), R.string.moved_to_inbox, Snackbar.LENGTH_LONG);
-        snackbar.setAction(R.string.undo, v -> lttrsViewModel.archive(threadId));
+        moveToInbox(ImmutableSet.of(threadId));
+    }
+
+    public void moveToInbox(final Collection<String> threadIds) {
+        final int count = threadIds.size();
+        final Snackbar snackbar = Snackbar.make(
+                binding.getRoot(),
+                getResources().getQuantityString(R.plurals.n_moved_to_inbox, count, count),
+                Snackbar.LENGTH_LONG
+        );
+        snackbar.setAction(R.string.undo, v -> lttrsViewModel.archive(threadIds));
         snackbar.show();
-        lttrsViewModel.moveToInbox(threadId);
+        lttrsViewModel.moveToInbox(threadIds);
     }
 
     @Override

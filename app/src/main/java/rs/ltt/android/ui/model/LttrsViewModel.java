@@ -92,16 +92,8 @@ public class LttrsViewModel extends AndroidViewModel {
         this.threadRepository.cancelMoveToTrash(workInfo, threadIds);
     }
 
-    public void archive(String threadId) {
-        this.threadRepository.archive(ImmutableSet.of(threadId));
-    }
-
     public void archive(Collection<String> threadIds) {
         this.threadRepository.archive(threadIds);
-    }
-
-    public void moveToInbox(String threadId) {
-        this.threadRepository.moveToInbox(ImmutableSet.of(threadId));
     }
 
     public void moveToInbox(Collection<String> threadIds) {
