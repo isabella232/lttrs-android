@@ -20,6 +20,7 @@ import androidx.room.Relation;
 
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
@@ -75,7 +76,7 @@ public class ThreadOverviewItem {
     }
 
     public Date getReceivedAt() {
-        final Email email = Iterables.getLast(getOrderedEmails(), null);
+        final Email email = Iterables.tryFind(emails, e -> e != null && emailId.equals(e.id)).orNull();
         return email == null ? null : email.receivedAt;
     }
 
