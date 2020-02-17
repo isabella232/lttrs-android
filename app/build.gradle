@@ -4,6 +4,7 @@ apply plugin: "androidx.navigation.safeargs"
 
 android {
     compileSdkVersion 29
+    buildToolsVersion '29.0.3'
     defaultConfig {
         applicationId "rs.ltt.android"
         minSdkVersion 23
@@ -79,7 +80,7 @@ dependencies {
 
 
     //Own libraries (libraries we wrote and can commit to)
-    implementation ('rs.ltt.jmap:jmap-mua:0.2.4') {
+    implementation ('rs.ltt.jmap:jmap-mua:0.3.0') {
         changing = true
     }
 }
