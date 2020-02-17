@@ -18,6 +18,7 @@ package rs.ltt.android.entity;
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 import com.google.common.collect.ImmutableList;
@@ -29,6 +30,7 @@ import rs.ltt.jmap.common.entity.Identity;
 
 @Entity(
         tableName = "identity_email_address",
+        indices = {@Index(value = "identityId")},
         foreignKeys = @ForeignKey(entity = IdentityEntity.class,
                 parentColumns = {"id"},
                 childColumns = {"identityId"},
