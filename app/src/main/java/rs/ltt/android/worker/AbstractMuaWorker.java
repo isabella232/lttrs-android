@@ -55,7 +55,7 @@ public abstract class AbstractMuaWorker extends Worker {
     static boolean shouldRetry(ExecutionException e) {
         final Throwable cause = e.getCause();
         if (cause instanceof MethodErrorResponseException) {
-            MethodErrorResponse methodError = ((MethodErrorResponseException) cause).getMethodErrorResponse();
+            final MethodErrorResponse methodError = ((MethodErrorResponseException) cause).getMethodErrorResponse();
             return methodError instanceof StateMismatchMethodErrorResponse;
         }
         return false;
