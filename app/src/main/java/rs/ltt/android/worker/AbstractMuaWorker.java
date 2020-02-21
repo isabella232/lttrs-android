@@ -22,7 +22,11 @@ import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.concurrent.ExecutionException;
+
+import javax.net.ssl.SSLException;
 
 import rs.ltt.android.cache.DatabaseCache;
 import rs.ltt.android.database.AppDatabase;
@@ -52,13 +56,19 @@ public abstract class AbstractMuaWorker extends Worker {
         }
     }
 
-    static boolean shouldRetry(ExecutionException e) {
+    static boolean shouldRetry(final ExecutionException e) {
         final Throwable cause = e.getCause();
         if (cause instanceof MethodErrorResponseException) {
             final MethodErrorResponse methodError = ((MethodErrorResponseException) cause).getMethodErrorResponse();
             return methodError instanceof StateMismatchMethodErrorResponse;
         }
-        return false;
+        return isNetworkIssue(cause);
+    }
+
+    private static boolean isNetworkIssue(final Throwable cause) {
+        return cause instanceof SocketTimeoutException
+                || cause instanceof SocketException
+                || cause instanceof SSLException;
     }
 
     protected LttrsDatabase getDatabase() {
