@@ -56,8 +56,18 @@
             android:launchMode="singleTask"
             android:theme="@style/SetupTheme" />
 
-        <activity android:name=".ui.activity.ComposeActivity"
-            android:label="@string/compose"/>
+        <activity
+            android:name=".ui.activity.ComposeActivity"
+            android:label="@string/compose">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="mailto" />
+            </intent-filter>
+        </activity>
 
         <provider
             android:name=".provider.EmailSearchSuggestionsProvider"

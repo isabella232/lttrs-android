@@ -18,41 +18,25 @@ package rs.ltt.android.ui.model;
 import android.app.Application;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import rs.ltt.android.ui.ComposeAction;
+import java.util.Objects;
 
 public class ComposeViewModelFactory implements ViewModelProvider.Factory {
 
     private final Application application;
-    private final Long account;
-    private final boolean freshStart;
-    private final ComposeAction action;
-    private final String emailId;
+    private final ComposeViewModel.Parameter parameter;
 
     public ComposeViewModelFactory(@NonNull Application application,
-                                   @Nullable Long account,
-                                   boolean freshStart,
-                                   @NonNull ComposeAction action,
-                                   @Nullable String emailId) {
+                                   @NonNull ComposeViewModel.Parameter parameter) {
         this.application = application;
-        this.account = account;
-        this.freshStart = freshStart;
-        this.action = action;
-        this.emailId = emailId;
+        this.parameter = parameter;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return modelClass.cast(new ComposeViewModel(
-                application,
-                account,
-                freshStart,
-                action,
-                emailId
-        ));
+        return Objects.requireNonNull(modelClass.cast(new ComposeViewModel(application, parameter)));
     }
 }

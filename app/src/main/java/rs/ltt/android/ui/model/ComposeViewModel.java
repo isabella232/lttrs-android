@@ -34,6 +34,7 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -57,6 +58,7 @@ public class ComposeViewModel extends AndroidViewModel {
 
     private final ComposeRepository repository;
     private final ComposeAction composeAction;
+    private final URI uri;
     private final ListenableFuture<EditableEmail> email;
 
     private final MutableLiveData<Event<String>> errorMessage = new MutableLiveData<>();
@@ -71,23 +73,21 @@ public class ComposeViewModel extends AndroidViewModel {
 
     private boolean draftHasBeenHandled = false;
 
-    ComposeViewModel(@NonNull final Application application,
-                     final Long id,
-                     final boolean freshStart,
-                     final ComposeAction composeAction,
-                     final String emailId) {
+    ComposeViewModel(@NonNull final Application application, final Parameter parameter) {
         super(application);
-        this.composeAction = composeAction;
+        this.composeAction = parameter.composeAction;
+        this.uri = parameter.uri;
         final MainRepository mainRepository = new MainRepository(application);
-        final ListenableFuture<AccountWithCredentials> account = mainRepository.getAccount(id);
+        final ListenableFuture<AccountWithCredentials> account = mainRepository.getAccount(parameter.accountId);
         this.repository = new ComposeRepository(application, account);
         this.identities = this.repository.getIdentities();
         if (composeAction == ComposeAction.NEW) {
             this.email = null;
+            initializeWithEmail(null);
         } else {
-            this.email = this.repository.getEditableEmail(emailId);
+            this.email = this.repository.getEditableEmail(parameter.emailId);
         }
-        if (freshStart && this.email != null) {
+        if (parameter.freshStart && this.email != null) {
             initializeWithEmail();
         }
     }
@@ -204,7 +204,7 @@ public class ComposeViewModel extends AndroidViewModel {
             return null;
         }
         final EditableEmail editableEmail = getEmail();
-        final Draft originalDraft = Draft.with(this.composeAction, editableEmail);
+        final Draft originalDraft = Draft.with(this.composeAction, this.uri, editableEmail);
         if (originalDraft != null && currentDraft.unedited(originalDraft)) {
             LOGGER.info("Not storing draft. Nothing has been changed");
             draftHasBeenHandled = true;
@@ -265,7 +265,10 @@ public class ComposeViewModel extends AndroidViewModel {
     }
 
     private void initializeWithEmail(final EditableEmail email) {
-        final Draft draft = Draft.with(composeAction, email);
+        final Draft draft = Draft.with(composeAction, uri, email);
+        if (draft == null) {
+            return;
+        }
         to.postValue(EmailAddressUtil.toHeaderValue(draft.to));
         cc.postValue(EmailAddressUtil.toHeaderValue(draft.cc));
         if (draft.cc.size() > 0) {
@@ -277,6 +280,30 @@ public class ComposeViewModel extends AndroidViewModel {
 
     private Draft getCurrentDraft() {
         return Draft.of(this.to, this.cc, this.subject, this.body);
+    }
+
+    public static class Parameter {
+        public final Long accountId;
+        public final boolean freshStart;
+        public final ComposeAction composeAction;
+        public final String emailId;
+        public final URI uri;
+
+        public Parameter(Long accountId, boolean freshStart, ComposeAction composeAction, String emailId) {
+            this.accountId = accountId;
+            this.freshStart = freshStart;
+            this.composeAction = composeAction;
+            this.emailId = emailId;
+            this.uri = null;
+        }
+
+        public Parameter(URI uri, boolean freshStart) {
+            this.accountId = null;
+            this.freshStart = freshStart;
+            this.composeAction = ComposeAction.NEW;
+            this.emailId = null;
+            this.uri = uri;
+        }
     }
 
     public static class Draft {
@@ -301,6 +328,18 @@ public class ComposeViewModel extends AndroidViewModel {
             );
         }
 
+        private static Draft newEmail(final URI uri) {
+            final String schemeSpecific = uri.getSchemeSpecificPart();
+            if (schemeSpecific != null) {
+                final Collection<EmailAddress> emails = EmailAddressUtil.parse(schemeSpecific);
+                if (emails.size() != 1) {
+                    return null;
+                }
+                return new Draft(emails, Collections.emptyList(), "","");
+            }
+            return null;
+        }
+
         private static Draft edit(EditableEmail email) {
             return new Draft(
                     email.getTo(),
@@ -320,10 +359,10 @@ public class ComposeViewModel extends AndroidViewModel {
             );
         }
 
-        public static Draft with(final ComposeAction action, EditableEmail editableEmail) {
+        public static Draft with(final ComposeAction action, final URI uri, EditableEmail editableEmail) {
             switch (action) {
                 case NEW:
-                    return null;
+                    return newEmail(uri);
                 case EDIT_DRAFT:
                     return edit(editableEmail);
                 case REPLY_ALL:

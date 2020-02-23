@@ -16,6 +16,7 @@
 package rs.ltt.android.ui.activity;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -38,6 +39,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.UUID;
 
 import rs.ltt.android.R;
@@ -83,31 +86,14 @@ public class ComposeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_compose);
-        setSupportActionBar(binding.toolbar);
 
-        final ActionBar actionbar = requireActionBar();
-        actionbar.setHomeButtonEnabled(true);
-        actionbar.setDisplayHomeAsUpEnabled(true);
-
-        final Intent i = getIntent();
-        final Long account;
-        if (i != null && i.hasExtra(ACCOUNT_EXTRA)) {
-            account = i.getLongExtra(ACCOUNT_EXTRA, 0L);
-        } else {
-            account = null;
-        }
-        final ComposeAction action = ComposeAction.of(i == null ? null : i.getStringExtra(COMPOSE_ACTION_EXTRA));
-        final String emailId = i == null ? null : i.getStringExtra(EMAIL_ID_EXTRA);
-        final boolean freshStart = savedInstanceState == null || savedInstanceState.isEmpty();
+        setupActionBar();
 
         final ViewModelProvider viewModelProvider = new ViewModelProvider(
                 this,
                 new ComposeViewModelFactory(
                         getApplication(),
-                        account,
-                        freshStart,
-                        action,
-                        emailId
+                        getViewModelParameter(savedInstanceState)
                 )
         );
         composeViewModel = viewModelProvider.get(ComposeViewModel.class);
@@ -144,6 +130,37 @@ public class ComposeActivity extends AppCompatActivity {
         binding.placeholder.setOnClickListener(v -> requestFocusAndOpenKeyboard(binding.body));
 
         //TODO once we handle instance state ourselves we need to call ChipDrawableSpan.reset() on `to`
+    }
+
+    private ComposeViewModel.Parameter getViewModelParameter(final Bundle savedInstanceState) {
+        final boolean freshStart = savedInstanceState == null || savedInstanceState.isEmpty();
+        final Intent i = getIntent();
+        final URI uri = i != null ? getUri(i) : null;
+        if (uri != null && "mailto".equals(uri.getScheme())) {
+            return new ComposeViewModel.Parameter(uri, freshStart);
+        }
+        final Long account;
+        if (i != null && i.hasExtra(ACCOUNT_EXTRA)) {
+            account = i.getLongExtra(ACCOUNT_EXTRA, 0L);
+        } else {
+            account = null;
+        }
+        final ComposeAction action = ComposeAction.of(i == null ? null : i.getStringExtra(COMPOSE_ACTION_EXTRA));
+        final String emailId = i == null ? null : i.getStringExtra(EMAIL_ID_EXTRA);
+        return new ComposeViewModel.Parameter(account, freshStart, action, emailId);
+    }
+
+    private static URI getUri(@NonNull final Intent intent) {
+        final Uri data = intent.getData();
+        if (data == null) {
+            return null;
+        }
+        try {
+            return new URI(data.toString());
+        } catch (URISyntaxException e) {
+            LOGGER.warn("activity was called with invalid URI {}. {}", data.toString(), e.getMessage());
+            return null;
+        }
     }
 
     private void focusOnBodyOrSubject(final View view, final boolean hasFocus) {
@@ -211,6 +228,13 @@ public class ComposeActivity extends AppCompatActivity {
             composeViewModel.saveDraft();
         }
         super.onDestroy();
+    }
+
+    private void setupActionBar() {
+        setSupportActionBar(binding.toolbar);
+        final ActionBar actionbar = requireActionBar();
+        actionbar.setHomeButtonEnabled(true);
+        actionbar.setDisplayHomeAsUpEnabled(true);
     }
 
     private @NonNull
