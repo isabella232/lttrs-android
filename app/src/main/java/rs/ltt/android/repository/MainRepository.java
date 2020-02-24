@@ -42,6 +42,7 @@ import rs.ltt.android.database.AppDatabase;
 import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.entity.SearchSuggestionEntity;
+import rs.ltt.android.ui.activity.ComposeActivity;
 import rs.ltt.android.util.SetupCache;
 import rs.ltt.jmap.client.session.FileSessionCache;
 import rs.ltt.jmap.common.entity.Account;
