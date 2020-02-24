@@ -39,8 +39,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.UUID;
 
 import rs.ltt.android.R;
@@ -49,6 +47,7 @@ import rs.ltt.android.ui.ChipDrawableSpan;
 import rs.ltt.android.ui.ComposeAction;
 import rs.ltt.android.ui.model.ComposeViewModel;
 import rs.ltt.android.ui.model.ComposeViewModelFactory;
+import rs.ltt.jmap.mua.util.MailToUri;
 
 //TODO handle save instance state
 public class ComposeActivity extends AppCompatActivity {
@@ -135,8 +134,8 @@ public class ComposeActivity extends AppCompatActivity {
     private ComposeViewModel.Parameter getViewModelParameter(final Bundle savedInstanceState) {
         final boolean freshStart = savedInstanceState == null || savedInstanceState.isEmpty();
         final Intent i = getIntent();
-        final URI uri = i != null ? getUri(i) : null;
-        if (uri != null && "mailto".equals(uri.getScheme())) {
+        final MailToUri uri = i != null ? getUri(i) : null;
+        if (uri != null) {
             return new ComposeViewModel.Parameter(uri, freshStart);
         }
         final Long account;
@@ -150,14 +149,14 @@ public class ComposeActivity extends AppCompatActivity {
         return new ComposeViewModel.Parameter(account, freshStart, action, emailId);
     }
 
-    private static URI getUri(@NonNull final Intent intent) {
+    private static MailToUri getUri(@NonNull final Intent intent) {
         final Uri data = intent.getData();
         if (data == null) {
             return null;
         }
         try {
-            return new URI(data.toString());
-        } catch (URISyntaxException e) {
+            return MailToUri.get(data.toString());
+        } catch (IllegalArgumentException e) {
             LOGGER.warn("activity was called with invalid URI {}. {}", data.toString(), e.getMessage());
             return null;
         }

@@ -34,7 +34,6 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -51,6 +50,7 @@ import rs.ltt.android.util.Event;
 import rs.ltt.jmap.common.entity.EmailAddress;
 import rs.ltt.jmap.mua.util.EmailAddressUtil;
 import rs.ltt.jmap.mua.util.EmailUtil;
+import rs.ltt.jmap.mua.util.MailToUri;
 
 public class ComposeViewModel extends AndroidViewModel {
 
@@ -58,7 +58,7 @@ public class ComposeViewModel extends AndroidViewModel {
 
     private final ComposeRepository repository;
     private final ComposeAction composeAction;
-    private final URI uri;
+    private final MailToUri uri;
     private final ListenableFuture<EditableEmail> email;
 
     private final MutableLiveData<Event<String>> errorMessage = new MutableLiveData<>();
@@ -287,7 +287,7 @@ public class ComposeViewModel extends AndroidViewModel {
         public final boolean freshStart;
         public final ComposeAction composeAction;
         public final String emailId;
-        public final URI uri;
+        public final MailToUri uri;
 
         public Parameter(Long accountId, boolean freshStart, ComposeAction composeAction, String emailId) {
             this.accountId = accountId;
@@ -297,7 +297,7 @@ public class ComposeViewModel extends AndroidViewModel {
             this.uri = null;
         }
 
-        public Parameter(URI uri, boolean freshStart) {
+        public Parameter(MailToUri uri, boolean freshStart) {
             this.accountId = null;
             this.freshStart = freshStart;
             this.composeAction = ComposeAction.NEW;
@@ -328,16 +328,16 @@ public class ComposeViewModel extends AndroidViewModel {
             );
         }
 
-        private static Draft newEmail(final URI uri) {
-            final String schemeSpecific = uri.getSchemeSpecificPart();
-            if (schemeSpecific != null) {
-                final Collection<EmailAddress> emails = EmailAddressUtil.parse(schemeSpecific);
-                if (emails.size() != 1) {
-                    return null;
-                }
-                return new Draft(emails, Collections.emptyList(), "","");
+        private static Draft newEmail(final MailToUri uri) {
+            if (uri == null) {
+                return null;
             }
-            return null;
+            return new Draft(
+                    uri.getTo(),
+                    uri.getCc(),
+                    Strings.nullToEmpty(uri.getSubject()),
+                    Strings.nullToEmpty(uri.getBody())
+            );
         }
 
         private static Draft edit(EditableEmail email) {
@@ -359,7 +359,7 @@ public class ComposeViewModel extends AndroidViewModel {
             );
         }
 
-        public static Draft with(final ComposeAction action, final URI uri, EditableEmail editableEmail) {
+        public static Draft with(final ComposeAction action, final MailToUri uri, EditableEmail editableEmail) {
             switch (action) {
                 case NEW:
                     return newEmail(uri);
@@ -395,6 +395,7 @@ public class ComposeViewModel extends AndroidViewModel {
         public boolean unedited(final Draft draft) {
             return draft != null
                     && EmailAddressUtil.equalCollections(draft.getTo(), to)
+                    && EmailAddressUtil.equalCollections(draft.getCc(), cc)
                     && subject.equals(draft.subject)
                     && body.equals(draft.body);
         }
