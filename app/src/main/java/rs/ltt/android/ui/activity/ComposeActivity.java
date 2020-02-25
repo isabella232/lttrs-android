@@ -255,8 +255,9 @@ public class ComposeActivity extends AppCompatActivity {
     private void setupActionBar() {
         setSupportActionBar(binding.toolbar);
         final ActionBar actionbar = requireActionBar();
-        actionbar.setHomeButtonEnabled(true);
-        actionbar.setDisplayHomeAsUpEnabled(true);
+        final boolean displayUpButton = !isTaskRoot();
+        actionbar.setHomeButtonEnabled(displayUpButton);
+        actionbar.setDisplayHomeAsUpEnabled(displayUpButton);
     }
 
     private @NonNull
