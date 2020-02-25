@@ -61,7 +61,8 @@
 
         <activity
             android:name=".ui.activity.ComposeActivity"
-            android:label="@string/compose">
+            android:label="@string/compose"
+            android:parentActivityName=".ui.activity.LttrsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 

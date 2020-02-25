@@ -205,7 +205,7 @@ public class ComposeActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                onBackPressed();
+                setResultIntent();
                 break;
             case R.id.action_send:
                 if (composeViewModel.send()) {
@@ -222,14 +222,18 @@ public class ComposeActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        LOGGER.info("onBackPressed()");
+        setResultIntent();
+        super.onBackPressed();
+    }
+
+    private void setResultIntent() {
         final UUID uuid = composeViewModel == null ? null : composeViewModel.saveDraft();
         if (uuid != null) {
+            LOGGER.info("Storing draft saving worker task uuid");
             final Intent intent = new Intent();
             intent.putExtra(EDITING_TASK_ID_EXTRA, uuid);
             setResult(RESULT_OK, intent);
         }
-        super.onBackPressed();
     }
 
     private void discardDraft() {
