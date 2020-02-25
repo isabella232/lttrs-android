@@ -47,6 +47,7 @@ import rs.ltt.android.ui.ChipDrawableSpan;
 import rs.ltt.android.ui.ComposeAction;
 import rs.ltt.android.ui.model.ComposeViewModel;
 import rs.ltt.android.ui.model.ComposeViewModelFactory;
+import rs.ltt.android.util.SetupCache;
 import rs.ltt.jmap.mua.util.MailToUri;
 
 //TODO handle save instance state
@@ -84,6 +85,13 @@ public class ComposeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (!SetupCache.hasAccounts(this)) {
+            redirectToSetupActivity();
+            finish();
+            return;
+        }
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_compose);
 
         setupActionBar();
@@ -129,6 +137,17 @@ public class ComposeActivity extends AppCompatActivity {
         binding.placeholder.setOnClickListener(v -> requestFocusAndOpenKeyboard(binding.body));
 
         //TODO once we handle instance state ourselves we need to call ChipDrawableSpan.reset() on `to`
+    }
+
+    private void redirectToSetupActivity() {
+        final Intent currentIntent = getIntent();
+        final Uri data = currentIntent == null ? null : currentIntent.getData();
+        final MailToUri uri = data == null ? null : MailToUri.parse(data.toString());
+        final Intent nextIntent = new Intent(this, SetupActivity.class);
+        if (uri != null) {
+            nextIntent.putExtra(SetupActivity.EXTRA_NEXT_ACTION, data.toString());
+        }
+        startActivity(nextIntent);
     }
 
     private ComposeViewModel.Parameter getViewModelParameter(final Bundle savedInstanceState) {
@@ -204,7 +223,7 @@ public class ComposeActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         LOGGER.info("onBackPressed()");
-        final UUID uuid = composeViewModel.saveDraft();
+        final UUID uuid = composeViewModel == null ? null : composeViewModel.saveDraft();
         if (uuid != null) {
             final Intent intent = new Intent();
             intent.putExtra(EDITING_TASK_ID_EXTRA, uuid);
@@ -223,7 +242,7 @@ public class ComposeActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        if (isFinishing()) {
+        if (isFinishing() && composeViewModel != null) {
             composeViewModel.saveDraft();
         }
         super.onDestroy();

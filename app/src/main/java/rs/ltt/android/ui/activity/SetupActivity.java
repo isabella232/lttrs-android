@@ -16,6 +16,7 @@
 package rs.ltt.android.ui.activity;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,8 +31,11 @@ import rs.ltt.android.R;
 import rs.ltt.android.SetupNavigationDirections;
 import rs.ltt.android.databinding.ActivitySetupBinding;
 import rs.ltt.android.ui.model.SetupViewModel;
+import rs.ltt.jmap.mua.util.MailToUri;
 
 public class SetupActivity extends AppCompatActivity {
+
+    public static String EXTRA_NEXT_ACTION = "rs.ltt.android.extras.next-action";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,8 +55,7 @@ public class SetupActivity extends AppCompatActivity {
                 final SetupViewModel.Target target = targetEvent.consume();
                 switch (target) {
                     case LTTRS:
-                        startActivity(new Intent(SetupActivity.this, LttrsActivity.class));
-                        finish();
+                        redirectToLttrs();
                         break;
                     case ENTER_PASSWORD:
                         navController.navigate(SetupNavigationDirections.enterPassword());
@@ -71,5 +74,21 @@ public class SetupActivity extends AppCompatActivity {
                 Snackbar.make(binding.getRoot(), event.consume(), Snackbar.LENGTH_LONG).show();
             }
         });
+    }
+
+    private void redirectToLttrs() {
+        final Intent currentIntent = getIntent();
+        final String uri = currentIntent == null ? null : currentIntent.getStringExtra(EXTRA_NEXT_ACTION);
+        final MailToUri mailToUri = uri == null ? null : MailToUri.parse(uri);
+        final Intent nextIntent;
+        if (mailToUri != null) {
+            nextIntent = new Intent(this, ComposeActivity.class);
+            nextIntent.setAction(Intent.ACTION_VIEW);
+            nextIntent.setData(Uri.parse(uri));
+        } else {
+            nextIntent = new Intent(this, LttrsActivity.class);
+        }
+        startActivity(nextIntent);
+        finish();
     }
 }

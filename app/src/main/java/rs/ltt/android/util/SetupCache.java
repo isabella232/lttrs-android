@@ -23,9 +23,9 @@ public class SetupCache {
 
     private static Boolean hasAccounts = null;
 
-    public static synchronized boolean hasAccounts(final Activity a) {
+    public static synchronized boolean hasAccounts(final Activity activity) {
         if (hasAccounts == null) {
-            hasAccounts = AppDatabase.getInstance(a.getApplicationContext()).accountDao().hasAccounts();
+            hasAccounts = AppDatabase.getInstance(activity.getApplicationContext()).accountDao().hasAccounts();
         }
         return hasAccounts;
     }
