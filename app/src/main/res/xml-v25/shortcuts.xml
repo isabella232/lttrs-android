@@ -20,6 +20,10 @@
         android:shortcutShortLabel="@string/compose">
         <intent
             android:action="android.intent.action.VIEW"
+            android:targetClass="rs.ltt.android.ui.activity.LttrsActivity"
+            android:targetPackage="rs.ltt.android" />
+        <intent
+            android:action="android.intent.action.VIEW"
             android:targetClass="rs.ltt.android.ui.activity.ComposeActivity"
             android:targetPackage="rs.ltt.android" />
     </shortcut>
