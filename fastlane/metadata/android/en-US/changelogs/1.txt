@@ -1,0 +1,3 @@
+* Very rudimentary email reading capabilities (plain text only, no attachments)
+* Archiving, flagging, marking as read and unread
+* Drafting emails (no quoting)
