@@ -18,10 +18,10 @@ package rs.ltt.android.worker;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
-import androidx.core.util.Preconditions;
 import androidx.work.Data;
 import androidx.work.WorkerParameters;
 
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.slf4j.Logger;

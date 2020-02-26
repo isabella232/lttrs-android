@@ -18,7 +18,6 @@ package rs.ltt.android.repository;
 import android.app.Application;
 
 import androidx.annotation.NonNull;
-import androidx.core.util.Preconditions;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 import androidx.work.Constraints;
@@ -29,6 +28,7 @@ import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
 import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
