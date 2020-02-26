@@ -18,10 +18,10 @@ package rs.ltt.android.ui.fragment;
 
 import android.os.Bundle;
 
-import androidx.core.util.Preconditions;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.Collection;

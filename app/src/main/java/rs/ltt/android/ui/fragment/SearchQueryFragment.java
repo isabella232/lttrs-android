@@ -23,8 +23,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.core.util.Preconditions;
 import androidx.lifecycle.ViewModelProvider;
+
+import com.google.common.base.Preconditions;
 
 import java.util.Collection;
 
