@@ -88,7 +88,7 @@ public class ComposeActivity extends AppCompatActivity {
 
         if (!SetupCache.hasAccounts(this)) {
             redirectToSetupActivity();
-            finish();
+            finishAffinity();
             return;
         }
 
