@@ -32,6 +32,23 @@ If the above screenshots don’t do enough to convince you, you can watch this
 
 ### Try it
 
+You can download Ltt.rs either from
+[Google Play](https://play.google.com/store/apps/details?id=rs.ltt.android) for
+a small fee or from [F-Droid](https://f-droid.org/en/packages/rs.ltt.android).
+
+If you want to use F-Droid you can also use our F-Droid repository instead of
+the official one:
+```
+https://ltt.rs/fdroid/repo?fingerprint=9C2E57C85C279E5E1A427F6E87927FC1E2278F62D61D7FCEFDE9346E568CCF86
+```
+
+All three versions are signed with the same key so it is possible to switch between them.
+
 JMAP servers are currently rare. As of February 2020 you need to compile 
 [Cyrus](https://github.com/cyrusimap/cyrus-imapd) from git. If you are looking for providers
 [Fastmail](https://www.fastmail.com/) is the only known option.
+
+
+**A note to Fastmail users:** During setup Ltt.rs will ask you for a connection
+URL. You need to enter `https://jmap.fastmail.com/.well-know/jmap`. Automatic
+discovery currently doesn’t work for Fastmail.
