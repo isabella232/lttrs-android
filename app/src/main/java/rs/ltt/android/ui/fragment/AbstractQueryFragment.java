@@ -44,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import rs.ltt.android.LttrsNavigationDirections;
 import rs.ltt.android.R;
@@ -209,6 +210,7 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         if (item == null) {
             throw new IllegalStateException("Swipe Item not found");
         }
+        tracker.setItemsSelected(Collections.singleton(item.threadId), false);
         return onQueryItemSwipe(item);
     }
 
