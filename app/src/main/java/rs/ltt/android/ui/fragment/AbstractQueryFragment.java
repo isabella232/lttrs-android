@@ -212,7 +212,6 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         if (item == null) {
             throw new IllegalStateException("Swipe Item not found");
         }
-        tracker.setItemsSelected(Collections.singleton(item.threadId), false);
         return onQueryItemSwipe(item);
     }
 
@@ -224,6 +223,7 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         if (item == null) {
             throw new IllegalStateException("Swipe Item not found");
         }
+        tracker.deselect(item.threadId);
         onQueryItemSwiped(item);
     }
 
