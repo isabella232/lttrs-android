@@ -33,9 +33,6 @@ import org.hsluv.HUSLColorConverter;
 
 public class QuoteSpan extends CharacterStyle implements LeadingMarginSpan {
 
-
-    //private static int[] quoteColors = {0xff008577, 0xffa00743, 0xff1e5d06, 0xff6c4a06};
-
     private final int depth;
 
     private final int color;
