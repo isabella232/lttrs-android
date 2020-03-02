@@ -34,11 +34,13 @@ import androidx.paging.PagedList;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 
+import com.google.common.base.Strings;
 import com.google.common.util.concurrent.MoreExecutors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,6 +49,7 @@ import rs.ltt.android.R;
 import rs.ltt.android.databinding.FragmentThreadBinding;
 import rs.ltt.android.entity.ExpandedPosition;
 import rs.ltt.android.entity.FullEmail;
+import rs.ltt.android.entity.SubjectWithImportance;
 import rs.ltt.android.ui.ThreadModifier;
 import rs.ltt.android.ui.activity.ComposeActivity;
 import rs.ltt.android.ui.adapter.OnComposeActionTriggered;
@@ -55,6 +58,7 @@ import rs.ltt.android.ui.adapter.ThreadAdapter;
 import rs.ltt.android.ui.model.ThreadViewModel;
 import rs.ltt.android.ui.model.ThreadViewModelFactory;
 import rs.ltt.android.util.Event;
+import rs.ltt.jmap.common.entity.Keyword;
 
 public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedToggled, OnComposeActionTriggered {
 
@@ -79,7 +83,7 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
         final ThreadFragmentArgs arguments = ThreadFragmentArgs.fromBundle(bundle == null ? new Bundle() : bundle);
         final String threadId = arguments.getThread();
         final String label = arguments.getLabel();
-        final boolean triggerRead = arguments.getTriggerRead();
+        final boolean triggerRead = !Arrays.asList(arguments.getKeywords()).contains(Keyword.SEEN);
         final ViewModelProvider viewModelProvider = new ViewModelProvider(
                 getViewModelStore(),
                 new ThreadViewModelFactory(
@@ -97,6 +101,11 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
         //than one item is expanded. with variable sized items this might be annoying
 
         threadAdapter = new ThreadAdapter(threadViewModel.expandedItems);
+        threadAdapter.setSubjectWithImportance(SubjectWithImportance.of(
+                threadId,
+                Strings.emptyToNull(arguments.getSubject()),
+                arguments.getImportant()
+        ));
 
         //the default change animation causes UI glitches when expanding or collapsing item
         //for now it's better to just disable it. In the future we may write our own animator
@@ -123,10 +132,13 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
         if (event.isConsumable()) {
             final String threadId = event.consume();
             final NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
+            //TODO once draft worker copies over flags and mailboxes we might want to put them in here as well
             navController.navigate(LttrsNavigationDirections.actionToThread(
                     threadId,
                     null,
-                    true
+                    null,
+                    new String[0],
+                    false
             ));
         }
     }

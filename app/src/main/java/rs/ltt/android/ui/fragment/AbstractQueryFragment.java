@@ -195,12 +195,14 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
     }
 
     @Override
-    public void onThreadClicked(String threadId, boolean everyHasSeen) {
+    public void onThreadClicked(ThreadOverviewItem threadOverviewItem, boolean important) {
         final NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
         navController.navigate(LttrsNavigationDirections.actionToThread(
-                threadId,
+                threadOverviewItem.threadId,
                 null,
-                !everyHasSeen
+                threadOverviewItem.getSubject(),
+                threadOverviewItem.getKeywords(),
+                important
         ));
     }
 

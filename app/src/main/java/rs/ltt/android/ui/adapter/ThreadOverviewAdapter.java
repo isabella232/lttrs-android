@@ -116,7 +116,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
                     return;
                 }
                 if (onThreadClicked != null) {
-                    onThreadClicked.onThreadClicked(item.threadId, item.everyHasSeenKeyword());
+                    onThreadClicked.onThreadClicked(item, isImportant(item));
                 }
             });
             threadOverviewHolder.binding.avatar.setOnClickListener(v -> {
@@ -242,6 +242,6 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
     }
 
     public interface OnThreadClicked {
-        void onThreadClicked(String threadId, boolean everyHasSeen);
+        void onThreadClicked(ThreadOverviewItem threadOverviewItem, boolean important);
     }
 }

@@ -34,4 +34,8 @@ public class SubjectWithImportance {
         return new SubjectWithImportance(threadId, subject, important);
     }
 
+    public static SubjectWithImportance of(String threadId, String subject, boolean important) {
+        return new SubjectWithImportance(threadId, subject, important);
+    }
+
 }

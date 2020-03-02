@@ -37,8 +37,8 @@
 
     <action
         android:id="@+id/action_to_thread"
-        app:launchSingleTop="true"
-        app:destination="@+id/thread" />
+        app:destination="@+id/thread"
+        app:launchSingleTop="true" />
 
     <action
         android:id="@+id/action_search"
@@ -88,9 +88,17 @@
             app:argType="string"
             app:nullable="true" />
         <argument
-            android:name="trigger_read"
+            android:name="subject"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="keywords"
+            app:argType="string[]"
+            app:nullable="false" />
+        <argument
+            android:name="important"
             app:argType="boolean"
-            app:nullable="false"/>
+            app:nullable="false" />
     </fragment>
 
     <fragment

@@ -21,6 +21,7 @@ import androidx.room.Relation;
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
@@ -67,12 +68,12 @@ public class ThreadOverviewItem {
 
     public String getPreview() {
         final Email email = Iterables.getLast(getOrderedEmails(), null);
-        return email == null ? "(no preview)" : email.preview;
+        return email == null ? "(no preview)" : Strings.nullToEmpty(email.preview).trim();
     }
 
     public String getSubject() {
         final Email email = Iterables.getFirst(getOrderedEmails(), null);
-        return email == null ? "(no subject)" : email.subject;
+        return email == null ? "(no subject)" : Strings.nullToEmpty(email.subject).trim();
     }
 
     public Date getReceivedAt() {
@@ -210,6 +211,17 @@ public class ThreadOverviewItem {
                 Objects.equal(getMailboxIds(), item.getMailboxIds()) &&
                 Objects.equal(everyHasSeenKeyword(), item.everyHasSeenKeyword()) &&
                 Arrays.equals(getFromValues(), item.getFromValues());
+    }
+
+    public String[] getKeywords() {
+        ImmutableSet.Builder<String> keywordBuilder = new ImmutableSet.Builder<>();
+        if (everyHasSeenKeyword()) {
+            keywordBuilder.add(Keyword.SEEN);
+        }
+        if (showAsFlagged()) {
+            keywordBuilder.add(Keyword.FLAGGED);
+        }
+        return keywordBuilder.build().toArray(new String[0]);
     }
 
     @Override
