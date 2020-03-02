@@ -22,15 +22,24 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 
+import com.google.common.base.Strings;
+
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import rs.ltt.android.util.XEP0392Helper;
 
 public class AvatarDrawable extends ColorDrawable {
+
+    //pattern from @cketti (K-9 Mail)
+    private static final Pattern LETTER_PATTERN = Pattern.compile("\\p{L}\\p{M}*");
 
     private final Paint paint;
     private final Paint textPaint;
     private String letter;
 
-    public AvatarDrawable(String name, String key) {
+    AvatarDrawable(String name, String key) {
         paint = new Paint();
         paint.setColor(key == null ? 0xff757575 : XEP0392Helper.rgbFromKey(key));
         paint.setAntiAlias(true);
@@ -39,7 +48,8 @@ public class AvatarDrawable extends ColorDrawable {
         textPaint.setTextAlign(Paint.Align.CENTER);
         textPaint.setAntiAlias(true);
         textPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
-        this.letter = name == null ? null : String.valueOf(Character.toUpperCase(name.charAt(0)));
+        final Matcher matcher = LETTER_PATTERN.matcher(Strings.nullToEmpty(name));
+        this.letter = matcher.find() ? matcher.group().toUpperCase(Locale.ROOT) : null;
     }
 
     @Override
