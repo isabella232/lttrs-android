@@ -19,7 +19,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.net.Network;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -325,8 +325,8 @@ public class SetupViewModel extends AndroidViewModel {
 
     private boolean isNetworkAvailable() {
         final ConnectivityManager cm = getApplication().getSystemService(ConnectivityManager.class);
-        final NetworkInfo info = cm != null ? cm.getActiveNetworkInfo() : null;
-        return info != null && info.isConnected();
+        final Network activeNetwork = cm == null ? null : cm.getActiveNetwork();
+        return activeNetwork != null;
     }
 
     private HttpUrl getHttpSessionResource() {
