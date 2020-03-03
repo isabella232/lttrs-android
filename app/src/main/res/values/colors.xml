@@ -29,4 +29,5 @@
     <color name="yellow800">#ffF9A825</color>
     <color name="colorSurfaceWarning">#ffE57373</color> <!-- red 300 -->
     <color name="colorStatusBarSearch">#ff757575</color>
+    <color name="navigationBarDivider">#1f000000</color> <!-- black 12 -->
 </resources>

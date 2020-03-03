@@ -21,14 +21,16 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="LttrsTheme" parent="BaseTheme">
+    <style name="MainTheme" parent="BaseTheme"/>
+
+    <style name="LttrsTheme" parent="MainTheme">
         <item name="android:windowTranslucentStatus">true</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="actionModeBackground">@drawable/action_mode_background</item>
         <item name="actionModeCloseDrawable">@drawable/ic_arrow_back_white_24dp</item>
     </style>
 
-    <style name="SetupTheme" parent="BaseTheme">
+    <style name="SetupTheme" parent="MainTheme">
         <item name="android:windowLightStatusBar">@bool/window_light_status_bar</item>
         <item name="android:statusBarColor">@color/colorSurface</item>
     </style>
