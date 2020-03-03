@@ -29,8 +29,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.view.ActionMode;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.LiveData;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.paging.PagedList;
 import androidx.recyclerview.selection.SelectionPredicates;
 import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.selection.StorageStrategy;
@@ -46,6 +48,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import rs.ltt.android.LttrsNavigationDirections;
 import rs.ltt.android.R;
@@ -70,9 +73,8 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
     private static final String SELECTION_ID = "thread-items";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractQueryFragment.class);
-
-    private ThreadOverviewAdapter threadOverviewAdapter;
     protected FragmentThreadListBinding binding;
+    private ThreadOverviewAdapter threadOverviewAdapter;
     private ActionMode actionMode;
     private SelectionTracker<String> tracker;
 
@@ -84,21 +86,7 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
 
         setupAdapter(viewModel.getImportant());
         setupSelectionTracker(savedInstanceState);
-
-        viewModel.getThreadOverviewItems().observe(getViewLifecycleOwner(), threadOverviewItems -> {
-            final RecyclerView.LayoutManager layoutManager = binding.threadList.getLayoutManager();
-            final boolean atTop;
-            if (layoutManager instanceof LinearLayoutManager) {
-                atTop = ((LinearLayoutManager) layoutManager).findFirstCompletelyVisibleItemPosition() == 0;
-            } else {
-                atTop = false;
-            }
-            threadOverviewAdapter.submitList(threadOverviewItems, () -> {
-                if (atTop && binding != null) {
-                    binding.threadList.scrollToPosition(0);
-                }
-            });
-        });
+        observeThreadOverviewItems(viewModel.getThreadOverviewItems());
 
         binding.setViewModel(viewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
@@ -130,6 +118,7 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         return binding.getRoot();
     }
 
+
     private void setupAdapter(final Future<MailboxWithRoleAndName> importantMailbox) {
         this.threadOverviewAdapter = new ThreadOverviewAdapter();
         this.binding.threadList.setAdapter(threadOverviewAdapter);
@@ -158,6 +147,27 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
             }
         });
         tracker.onRestoreInstanceState(savedInstanceState);
+    }
+
+    private void observeThreadOverviewItems(LiveData<PagedList<ThreadOverviewItem>> liveData) {
+        final AtomicBoolean actionModeRefreshed = new AtomicBoolean(false);
+        liveData.observe(getViewLifecycleOwner(), threadOverviewItems -> {
+            final RecyclerView.LayoutManager layoutManager = binding.threadList.getLayoutManager();
+            final boolean atTop;
+            if (layoutManager instanceof LinearLayoutManager) {
+                atTop = ((LinearLayoutManager) layoutManager).findFirstCompletelyVisibleItemPosition() == 0;
+            } else {
+                atTop = false;
+            }
+            threadOverviewAdapter.submitList(threadOverviewItems, () -> {
+                if (atTop && binding != null) {
+                    binding.threadList.scrollToPosition(0);
+                }
+                if (actionMode != null && actionModeRefreshed.compareAndSet(false, true)) {
+                    actionMode.invalidate();
+                }
+            });
+        });
     }
 
     @Override
@@ -273,8 +283,9 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
 
     @Override
     public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-        LOGGER.debug("onPrepareActionMode()");
+        LOGGER.debug("prepare action mode for {} selected items", tracker.getSelection().size());
         final ActionModeMenuConfiguration.QueryType queryType = getQueryType();
+        getQueryViewModel().getThreadOverviewItems().getValue();
         final ActionModeMenuConfiguration.SelectionInfo selectionInfo = ActionModeMenuConfiguration.SelectionInfo.vote(
                 tracker.getSelection(),
                 threadOverviewAdapter
