@@ -62,6 +62,7 @@ import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.ui.OnLabelOpened;
 import rs.ltt.android.ui.Theme;
 import rs.ltt.android.ui.ThreadModifier;
+import rs.ltt.android.ui.WeakActionModeCallback;
 import rs.ltt.android.ui.adapter.LabelListAdapter;
 import rs.ltt.android.ui.fragment.SearchQueryFragment;
 import rs.ltt.android.ui.model.LttrsViewModel;
@@ -444,7 +445,7 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
     }
 
     public ActionMode beginActionMode(final ActionMode.Callback callback) {
-        this.actionMode = startSupportActionMode(callback);
+        this.actionMode = startSupportActionMode(new WeakActionModeCallback(callback));
         return this.actionMode;
     }
 
