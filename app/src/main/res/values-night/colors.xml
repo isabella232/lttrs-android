@@ -15,11 +15,12 @@
 
 <resources>
     <color name="colorActionModeBackground">#ff212121</color> <!-- gray 900 -->
-    <color name="colorSurface">#ff121212</color>
+    <color name="colorBackground">#ff121212</color>
+    <color name="colorSurface">#ff303030</color>
     <color name="colorOnSurface">#ffffffff</color> <!-- white 100 -->
     <color name="colorSecondaryOnSurface">#83ffffff</color> <!-- white 70 -->
     <color name="colorDivider">#1fffffff</color>
     <color name="colorSurfaceWarning">#ffB71C1C</color> <!-- red 900 -->
-    <color name="colorStatusBarSearch">#ff000000</color>
+    <color name="colorStatusBarSearch">#ff212121</color>
     <color name="navigationBarDivider">#47000000</color> <!-- black 28 -->
 </resources>

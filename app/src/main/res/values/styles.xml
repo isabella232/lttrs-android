@@ -32,7 +32,7 @@
 
     <style name="SetupTheme" parent="MainTheme">
         <item name="android:windowLightStatusBar">@bool/window_light_status_bar</item>
-        <item name="android:statusBarColor">@color/colorSurface</item>
+        <item name="android:statusBarColor">@color/colorBackground</item>
     </style>
 
     <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">

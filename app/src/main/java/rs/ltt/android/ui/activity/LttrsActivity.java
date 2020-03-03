@@ -68,7 +68,6 @@ import rs.ltt.android.ui.model.LttrsViewModel;
 import rs.ltt.android.util.MainThreadExecutor;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mua.util.KeywordLabel;
-import rs.ltt.jmap.mua.util.KeywordUtil;
 import rs.ltt.jmap.mua.util.Label;
 
 public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, ThreadModifier, SearchQueryFragment.OnTermSearched, NavController.OnDestinationChangedListener, MenuItem.OnActionExpandListener, DrawerLayout.DrawerListener {

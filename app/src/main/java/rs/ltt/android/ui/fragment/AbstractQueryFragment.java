@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.view.ActionMode;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -124,7 +125,9 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         }
 
         binding.swipeToRefresh.setColorSchemeResources(R.color.colorAccent);
-
+        binding.swipeToRefresh.setProgressBackgroundColorSchemeColor(
+                ContextCompat.getColor(requireContext(), R.color.colorSurface)
+        );
 
         //TODO: do we want to get rid of flicker on changes
         //((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
@@ -259,7 +262,7 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         final MenuItem addFlag = menu.findItem(R.id.action_add_flag);
         final MenuItem removeFlag = menu.findItem(R.id.action_remove_flag);
 
-        if (queryType == ActionModeMenuConfiguration.QueryType.ARCHIVE)  {
+        if (queryType == ActionModeMenuConfiguration.QueryType.ARCHIVE) {
             archive.setVisible(false);
             removeLabel.setVisible(false);
         } else if (queryType == ActionModeMenuConfiguration.QueryType.SPECIAL) {
