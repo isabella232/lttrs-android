@@ -390,7 +390,9 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
 
     @Override
     public boolean onMenuItemActionCollapse(MenuItem item) {
-        animateCloseSearchToolbar();
+        if (item.isActionViewExpanded()) {
+            animateCloseSearchToolbar();
+        }
         if (getCurrentDestinationId() == R.id.search) {
             final NavController navController = Navigation.findNavController(
                     this,
