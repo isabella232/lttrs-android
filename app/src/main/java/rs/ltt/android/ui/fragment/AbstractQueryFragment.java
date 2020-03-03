@@ -45,11 +45,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.concurrent.Future;
 
 import rs.ltt.android.LttrsNavigationDirections;
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.FragmentThreadListBinding;
+import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.ui.ActionModeMenuConfiguration;
 import rs.ltt.android.ui.OnLabelOpened;
@@ -70,9 +71,9 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractQueryFragment.class);
 
-    private final ThreadOverviewAdapter threadOverviewAdapter = new ThreadOverviewAdapter();
+    private ThreadOverviewAdapter threadOverviewAdapter;
     protected FragmentThreadListBinding binding;
-    private ActionMode actionMode = null;
+    private ActionMode actionMode;
     private SelectionTracker<String> tracker;
 
     @Override
@@ -80,6 +81,10 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         super.onCreateView(inflater, container, savedInstanceState);
         final AbstractQueryViewModel viewModel = getQueryViewModel();
         this.binding = DataBindingUtil.inflate(inflater, R.layout.fragment_thread_list, container, false);
+
+        setupAdapter(viewModel.getImportant());
+        setupSelectionTracker(savedInstanceState);
+
         viewModel.getThreadOverviewItems().observe(getViewLifecycleOwner(), threadOverviewItems -> {
             final RecyclerView.LayoutManager layoutManager = binding.threadList.getLayoutManager();
             final boolean atTop;
@@ -89,32 +94,12 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
                 atTop = false;
             }
             threadOverviewAdapter.submitList(threadOverviewItems, () -> {
-                if (atTop) {
+                if (atTop && binding != null) {
                     binding.threadList.scrollToPosition(0);
                 }
             });
         });
 
-        binding.threadList.setAdapter(threadOverviewAdapter);
-        tracker = new SelectionTracker.Builder<>(
-                SELECTION_ID,
-                binding.threadList,
-                new ThreadOverviewItemKeyProvider(threadOverviewAdapter),
-                new ThreadOverviewItemDetailsLookup(binding.threadList),
-                StorageStrategy.createStringStorage()
-        ).withSelectionPredicate(SelectionPredicates.createSelectAnything()).build();
-        threadOverviewAdapter.setTracker(tracker);
-        tracker.addObserver(new SelectionTracker.SelectionObserver<String>() {
-            @Override
-            public void onSelectionChanged() {
-                toggleActionMode();
-            }
-
-            public void onSelectionRestored() {
-                toggleActionMode();
-            }
-        });
-        tracker.onRestoreInstanceState(savedInstanceState);
         binding.setViewModel(viewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
         binding.compose.setOnClickListener((v) -> {
@@ -136,10 +121,6 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
 
         viewModel.getEmailModificationWorkInfo().observe(getViewLifecycleOwner(), this::emailModification);
 
-        threadOverviewAdapter.setOnFlaggedToggledListener(this);
-        threadOverviewAdapter.setOnThreadClickedListener(this);
-        threadOverviewAdapter.setImportantMailbox(viewModel.getImportant());
-
         final QueryItemTouchHelper queryItemTouchHelper = new QueryItemTouchHelper();
 
         queryItemTouchHelper.setOnQueryItemSwipeListener(this);
@@ -147,6 +128,50 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         new ItemTouchHelper(queryItemTouchHelper).attachToRecyclerView(binding.threadList);
 
         return binding.getRoot();
+    }
+
+    private void setupAdapter(final Future<MailboxWithRoleAndName> importantMailbox) {
+        this.threadOverviewAdapter = new ThreadOverviewAdapter();
+        this.binding.threadList.setAdapter(threadOverviewAdapter);
+        this.threadOverviewAdapter.setOnFlaggedToggledListener(this);
+        this.threadOverviewAdapter.setOnThreadClickedListener(this);
+        this.threadOverviewAdapter.setImportantMailbox(importantMailbox);
+    }
+
+    private void setupSelectionTracker(final Bundle savedInstanceState) {
+        tracker = new SelectionTracker.Builder<>(
+                SELECTION_ID,
+                binding.threadList,
+                new ThreadOverviewItemKeyProvider(threadOverviewAdapter),
+                new ThreadOverviewItemDetailsLookup(binding.threadList),
+                StorageStrategy.createStringStorage()
+        ).withSelectionPredicate(SelectionPredicates.createSelectAnything()).build();
+        threadOverviewAdapter.setTracker(tracker);
+        tracker.addObserver(new SelectionTracker.SelectionObserver<String>() {
+            @Override
+            public void onSelectionChanged() {
+                toggleActionMode();
+            }
+
+            public void onSelectionRestored() {
+                toggleActionMode();
+            }
+        });
+        tracker.onRestoreInstanceState(savedInstanceState);
+    }
+
+    @Override
+    public void onDestroyView() {
+        nullReferences();
+        super.onDestroyView();
+    }
+
+    private void nullReferences() {
+        this.binding.threadList.setAdapter(null);
+        this.threadOverviewAdapter.setTracker(null);
+        this.threadOverviewAdapter = null;
+        this.tracker = null;
+        this.binding = null;
     }
 
     private void toggleActionMode() {
@@ -193,7 +218,9 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
 
     @Override
     public void onSaveInstanceState(@NonNull final Bundle outState) {
-        tracker.onSaveInstanceState(outState);
+        if (tracker != null) {
+            tracker.onSaveInstanceState(outState);
+        }
         super.onSaveInstanceState(outState);
     }
 

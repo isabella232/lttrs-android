@@ -31,10 +31,10 @@ import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.Future;
 
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.ThreadOverviewItemBinding;
@@ -57,7 +57,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
     private OnFlaggedToggled onFlaggedToggled;
     private OnThreadClicked onThreadClicked;
     private SelectionTracker<String> selectionTracker;
-    private ListenableFuture<MailboxWithRoleAndName> importantMailbox;
+    private Future<MailboxWithRoleAndName> importantMailbox;
 
 
     public ThreadOverviewAdapter() {
@@ -160,7 +160,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
         }
     }
 
-    public void setImportantMailbox(ListenableFuture<MailboxWithRoleAndName> importantMailbox) {
+    public void setImportantMailbox(Future<MailboxWithRoleAndName> importantMailbox) {
         this.importantMailbox = importantMailbox;
     }
 

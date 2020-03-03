@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.Collection;
+import java.util.concurrent.Future;
 
 import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
@@ -71,7 +72,7 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
         return refreshing;
     }
 
-    public ListenableFuture<MailboxWithRoleAndName> getImportant() {
+    public Future<MailboxWithRoleAndName> getImportant() {
         return this.important;
     }
 
