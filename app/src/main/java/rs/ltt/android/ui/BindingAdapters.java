@@ -223,7 +223,7 @@ public class BindingAdapters {
     public static void setIsFlagged(final ImageView imageView, final boolean isFlagged) {
         if (isFlagged) {
             imageView.setImageResource(R.drawable.ic_star_black_no_padding_24dp);
-            ImageViewCompat.setImageTintList(imageView, ColorStateList.valueOf(ContextCompat.getColor(imageView.getContext(), R.color.yellow800)));
+            ImageViewCompat.setImageTintList(imageView, ColorStateList.valueOf(ContextCompat.getColor(imageView.getContext(), R.color.amber600)));
         } else {
             imageView.setImageResource(R.drawable.ic_star_border_no_padding_black_24dp);
             ImageViewCompat.setImageTintList(imageView, ColorStateList.valueOf(ContextCompat.getColor(imageView.getContext(), R.color.colorSecondaryOnSurface)));
@@ -266,7 +266,7 @@ public class BindingAdapters {
         }
         if (subjectWithImportance.important) {
             SpannableStringBuilder header = new SpannableStringBuilder(subjectWithImportance.subject);
-            header.append("  ");
+            header.append("\u2004\u00bb"); // 1/3 em - 1/2 em would be 2002
             header.setSpan(new ImageSpan(text.getContext(), R.drawable.ic_important_amber_22sp, DynamicDrawableSpan.ALIGN_BASELINE), header.length() - 1, header.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             text.setText(header);
         } else {
