@@ -1,0 +1,2 @@
+* Tweak colors
+* Fixed memory leaks
