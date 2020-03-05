@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright 2019 Daniel Gultsch
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -49,14 +48,14 @@
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/compose"
-            app:backgroundTint="@color/colorPrimary"
-            app:tint="@color/colorOnPrimary"
-            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
-            android:src="@drawable/ic_add_white_24dp"/>
+            android:src="@drawable/ic_edit_white_24dp"
+            android:visibility="gone"
+            app:backgroundTint="@color/colorPrimary"
+            app:tint="@color/colorOnPrimary" />
 
     </FrameLayout>
 </layout>
