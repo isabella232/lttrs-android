@@ -360,8 +360,9 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
                 requireLttrsActivity().moveToTrash(threadIds);
                 tracker.clearSelection();
                 return true;
+            default:
+                return onActionItemClicked(mode, item);
         }
-        return false;
     }
 
     abstract void removeLabel(Collection<String> threadIds);

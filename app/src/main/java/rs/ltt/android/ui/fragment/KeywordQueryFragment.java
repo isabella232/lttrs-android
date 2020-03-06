@@ -39,14 +39,15 @@ import rs.ltt.jmap.mua.util.KeywordLabel;
 public class KeywordQueryFragment extends AbstractQueryFragment {
 
 
-    private KeywordLabel keywordLabel;
     private KeywordQueryViewModel keywordQueryViewModel;
 
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final Bundle bundle = getArguments();
-        this.keywordLabel = KeywordQueryFragmentArgs.fromBundle(bundle == null ? new Bundle() : bundle).getKeyword();
+        final KeywordLabel keywordLabel = KeywordQueryFragmentArgs.fromBundle(
+                bundle == null ? new Bundle() : bundle
+        ).getKeyword();
         final ViewModelProvider viewModelProvider = new ViewModelProvider(
                 getViewModelStore(),
                 new KeywordQueryViewModelFactory(
@@ -56,7 +57,7 @@ public class KeywordQueryFragment extends AbstractQueryFragment {
                 )
         );
         this.keywordQueryViewModel = viewModelProvider.get(KeywordQueryViewModel.class);
-        onLabelOpened(this.keywordLabel);
+        onLabelOpened(keywordLabel);
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
