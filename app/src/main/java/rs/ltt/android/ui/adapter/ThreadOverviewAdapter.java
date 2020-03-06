@@ -88,55 +88,59 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
     @Override
     public void onBindViewHolder(@NonNull AbstractThreadOverviewViewHolder holder, final int position) {
         if (holder instanceof ThreadOverviewLoadingViewHolder) {
-            ((ThreadOverviewLoadingViewHolder) holder).binding.loading.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-            return;
-        }
-        if (holder instanceof ThreadOverviewViewHolder) {
-            final ThreadOverviewViewHolder threadOverviewHolder = (ThreadOverviewViewHolder) holder;
-            final ThreadOverviewItem item = getItem(position);
-            if (item == null) {
-                return;
-            }
-            final boolean selected = selectionTracker != null && selectionTracker.isSelected(item.threadId
-            );
-            final Context context = threadOverviewHolder.binding.getRoot().getContext();
-            threadOverviewHolder.binding.getRoot().setActivated(selected);
-            threadOverviewHolder.setThread(item, position);
-            threadOverviewHolder.binding.starToggle.setOnClickListener(v -> {
-                if (onFlaggedToggled != null) {
-                    final boolean target = !item.showAsFlagged();
-                    BindingAdapters.setIsFlagged(threadOverviewHolder.binding.starToggle, target);
-                    onFlaggedToggled.onFlaggedToggled(item.threadId, target);
-                }
-            });
-            Touch.expandTouchArea(threadOverviewHolder.binding.getRoot(), threadOverviewHolder.binding.starToggle, 16);
-            threadOverviewHolder.binding.foreground.setOnClickListener(v -> {
-                if (selectionTracker != null && selectionTracker.hasSelection()) {
-                    LOGGER.debug("Do not process click on thread because thread was selected");
-                    return;
-                }
-                if (onThreadClicked != null) {
-                    onThreadClicked.onThreadClicked(item, isImportant(item));
-                }
-            });
-            threadOverviewHolder.binding.avatar.setOnClickListener(v -> {
-                if (selectionTracker != null) {
-                    selectionTracker.select(item.threadId);
-                }
-            });
-            if (selected) {
-                threadOverviewHolder.binding.threadLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.selected_background));
-                //threadOverviewHolder.binding.threadLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.accent12));
-            } else {
-                final TypedValue outValue = new TypedValue();
-                context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
-                threadOverviewHolder.binding.threadLayout.setBackgroundResource(outValue.resourceId);
-            }
+            onBindViewHolder((ThreadOverviewLoadingViewHolder) holder);
+        } else if (holder instanceof ThreadOverviewViewHolder) {
+            onBindViewHolder((ThreadOverviewViewHolder) holder, position);
         }
     }
 
+    private void onBindViewHolder(final ThreadOverviewViewHolder threadOverviewHolder, final int position) {
+        final ThreadOverviewItem item = getItem(position);
+        if (item == null) {
+            return;
+        }
+        final boolean selected = selectionTracker != null && selectionTracker.isSelected(item.threadId);
+        final Context context = threadOverviewHolder.binding.getRoot().getContext();
+        threadOverviewHolder.binding.getRoot().setActivated(selected);
+        threadOverviewHolder.setThread(item, position);
+        threadOverviewHolder.binding.starToggle.setOnClickListener(v -> {
+            if (onFlaggedToggled != null) {
+                final boolean target = !item.showAsFlagged();
+                BindingAdapters.setIsFlagged(threadOverviewHolder.binding.starToggle, target);
+                onFlaggedToggled.onFlaggedToggled(item.threadId, target);
+            }
+        });
+        Touch.expandTouchArea(threadOverviewHolder.binding.getRoot(), threadOverviewHolder.binding.starToggle, 16);
+        threadOverviewHolder.binding.foreground.setOnClickListener(v -> {
+            if (selectionTracker != null && selectionTracker.hasSelection()) {
+                LOGGER.debug("Do not process click on thread because thread was selected");
+                return;
+            }
+            if (onThreadClicked != null) {
+                onThreadClicked.onThreadClicked(item, isImportant(item));
+            }
+        });
+        threadOverviewHolder.binding.avatar.setOnClickListener(v -> {
+            if (selectionTracker != null) {
+                selectionTracker.select(item.threadId);
+            }
+        });
+        if (selected) {
+            threadOverviewHolder.binding.threadLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.selected_background));
+            //threadOverviewHolder.binding.threadLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.accent12));
+        } else {
+            final TypedValue outValue = new TypedValue();
+            context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+            threadOverviewHolder.binding.threadLayout.setBackgroundResource(outValue.resourceId);
+        }
+    }
+
+    private void onBindViewHolder(final ThreadOverviewLoadingViewHolder threadOverviewLoadingViewHolder) {
+        threadOverviewLoadingViewHolder.binding.loading.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+    }
+
     private MailboxWithRoleAndName getImportantMailbox() {
-        if(this.importantMailbox != null && this.importantMailbox.isDone()) {
+        if (this.importantMailbox != null && this.importantMailbox.isDone()) {
             try {
                 return this.importantMailbox.get();
             } catch (Exception e) {

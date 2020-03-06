@@ -163,23 +163,21 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
         LOGGER.info("on activity result code={}, result={}, intent={}", requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == ComposeActivity.REQUEST_EDIT_DRAFT) {
-            if (resultCode == ComposeActivity.RESULT_OK) {
-                final UUID uuid = (UUID) data.getSerializableExtra(ComposeActivity.EDITING_TASK_ID_EXTRA);
-                final boolean threadDiscarded = data.getBooleanExtra(ComposeActivity.DISCARDED_THREAD_EXTRA, false);
-                if (uuid != null) {
-                    threadViewModel.waitForEdit(uuid);
-                } else if (threadDiscarded) {
-                    final NavController navController = Navigation.findNavController(
-                            requireActivity(),
-                            R.id.nav_host_fragment
-                    );
-                    navController.popBackStack();
-                }
-
+        if (requestCode == ComposeActivity.REQUEST_EDIT_DRAFT &&
+                resultCode == ComposeActivity.RESULT_OK) {
+            final UUID uuid = (UUID) data.getSerializableExtra(ComposeActivity.EDITING_TASK_ID_EXTRA);
+            final boolean threadDiscarded = data.getBooleanExtra(ComposeActivity.DISCARDED_THREAD_EXTRA, false);
+            if (uuid != null) {
+                threadViewModel.waitForEdit(uuid);
+            } else if (threadDiscarded) {
+                final NavController navController = Navigation.findNavController(
+                        requireActivity(),
+                        R.id.nav_host_fragment
+                );
+                navController.popBackStack();
             }
         }
     }

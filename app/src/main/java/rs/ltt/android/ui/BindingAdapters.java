@@ -310,6 +310,7 @@ public class BindingAdapters {
                     break;
                 default:
                     imageResource = R.drawable.ic_folder_black_24dp;
+                    break;
             }
         }
         imageView.setImageResource(imageResource);

@@ -34,11 +34,13 @@ public abstract class StateDao {
     public abstract List<EntityState> getEntityStates(List<EntityType> types);
 
     public ObjectsState getObjectsState() {
-        List<EntityState> entityStates = getEntityStates(Arrays.asList(EntityType.EMAIL, EntityType.MAILBOX, EntityType.THREAD));
+        final List<EntityState> entityStates = getEntityStates(
+                Arrays.asList(EntityType.EMAIL, EntityType.MAILBOX, EntityType.THREAD)
+        );
         String mailboxState = null;
         String threadState = null;
         String emailState = null;
-        for (EntityState entityState : entityStates) {
+        for (final EntityState entityState : entityStates) {
             switch (entityState.type) {
                 case MAILBOX:
                     mailboxState = entityState.state;
@@ -49,6 +51,8 @@ public abstract class StateDao {
                 case EMAIL:
                     emailState = entityState.state;
                     break;
+                default:
+                    throw new IllegalStateException("Database returned state that we can not process");
             }
         }
         return new ObjectsState(mailboxState, threadState, emailState);

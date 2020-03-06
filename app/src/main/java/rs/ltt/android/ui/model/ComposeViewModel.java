@@ -47,6 +47,7 @@ import rs.ltt.android.repository.ComposeRepository;
 import rs.ltt.android.repository.MainRepository;
 import rs.ltt.android.ui.ComposeAction;
 import rs.ltt.android.util.Event;
+import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.EmailAddress;
 import rs.ltt.jmap.mua.util.EmailAddressUtil;
 import rs.ltt.jmap.mua.util.EmailUtil;

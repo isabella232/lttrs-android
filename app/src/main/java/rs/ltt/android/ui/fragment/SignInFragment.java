@@ -28,12 +28,10 @@ import rs.ltt.android.databinding.FragmentSignInBinding;
 
 public class SignInFragment extends AbstractSetupFragment {
 
-    private FragmentSignInBinding binding;
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        this.binding = DataBindingUtil.inflate(inflater, R.layout.fragment_sign_in, container, false);
+        FragmentSignInBinding binding = DataBindingUtil.inflate(inflater, R.layout.fragment_sign_in, container, false);
         binding.setSetupViewModel(setupViewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
         return binding.getRoot();
