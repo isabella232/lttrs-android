@@ -15,6 +15,7 @@
 
 <resources>
     <color name="colorActionModeBackground">#ff212121</color> <!-- gray 900 -->
+    <color name="colorAccent">#FFFF4081</color> <!-- pink a200 -->
     <color name="colorBackground">#ff121212</color>
     <color name="colorSurface">#ff303030</color>
     <color name="colorOnSurface">#ffffffff</color> <!-- white 100 -->

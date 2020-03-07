@@ -24,7 +24,7 @@ images.each do |source_filename, settings|
     resolutions.each do |resolution, factor|
         path = "../res/drawable-#{resolution}/#{output_filename}"
         width = factor * base_size
-        if source_filename.end_with? ".svg" then
+        if source_filename.end_with? ".svg"
             execute_cmd "inkscape -f #{source_filename} -z -C -w #{width} -h #{width} -e #{path}"
         else
             execute_cmd "convert #{source_filename} -resize #{width} #{path}"
