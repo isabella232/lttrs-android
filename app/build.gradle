@@ -54,13 +54,13 @@ dependencies {
 
     def appcompat_version = "1.1.0"
     def lifecycle_version = "2.2.0"
-    def nav_version = "2.2.1"
-    def paging_version = "2.1.1"
+    def nav_version = "2.3.0-alpha05"
+    def paging_version = "2.1.2"
     def recycler_view_version = "1.1.0"
     def recycler_view_selection_version = "1.1.0-rc01"
-    def swipe_refresh_layout_version = "1.1.0-alpha03"
-    def room_version = "2.2.4"
-    def work_version = "2.3.2"
+    def swipe_refresh_layout_version = "1.1.0-rc01"
+    def room_version = "2.2.5"
+    def work_version = "2.4.0-alpha02"
 
 
     //AndroidX
@@ -88,7 +88,7 @@ dependencies {
 
 
     //Google
-    implementation 'com.google.android.material:material:1.2.0-alpha05'
+    implementation 'com.google.android.material:material:1.2.0-alpha06'
 
 
     //Third party
