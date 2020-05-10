@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="enter_a_secure_url">Introduceți o adresă securizată</string>
+    <string name="enter_a_valid_url">Introduceți o adresă validă de conectare</string>
+    <string name="enter_your_connection_url">Introduceți adresa de conectare</string>
+    <string name="information_required">Informații necesare</string>
+    <string name="wrong_password">Parolă greșită. Încercați din nou.</string>
+    <string name="enter_a_password">Introduceți o parolă</string>
+    <string name="enter_your_password">Introduceți parola</string>
+    <string name="welcome">Bine aţi venit</string>
+    <string name="enter_a_valid_email_address">Introduceți o adresă de e-mail validă</string>
+    <string name="enter_an_email_address">Introduceți o adresă de e-mail</string>
+    <string name="next">Următorul</string>
+    <string name="sign_in_instruction">cu contul dumneavoastră de e-mail.</string>
+    <string name="email_address">Adresă de e-mail</string>
+    <string name="sign_in">Autentificare</string>
+    <string name="deleted">Şters</string>
+    <plurals name="n_deleted">
+        <item quantity="one">%d șters</item>
+        <item quantity="few">%d șterse</item>
+        <item quantity="other">%d șterse</item>
+    </plurals>
+    <string name="undo">Anulează</string>
+    <plurals name="n_archived">
+        <item quantity="one">%d arhivat</item>
+        <item quantity="few">%d arhivate</item>
+        <item quantity="other">%d arhivate</item>
+    </plurals>
+    <plurals name="n_removed_from_x">
+        <item quantity="one">%d eliminat din %s</item>
+        <item quantity="few">%d eliminate din %s</item>
+        <item quantity="other">%d eliminate din %s</item>
+    </plurals>
+    <string name="mark_not_important">Marchează ca neimportant</string>
+    <string name="search_hint">Căutare e-mail</string>
+    <string name="remove_label">Elimină eticheta</string>
+    <string name="remove_label_x">Eliminare etichetă %s</string>
+    <plurals name="n_moved_to_inbox">
+        <item quantity="one">%d mutat în primite</item>
+        <item quantity="few">%d mutate în primite</item>
+        <item quantity="other">%d mutate în primite</item>
+    </plurals>
+    <string name="move_to_inbox">Mută în primite</string>
+    <string name="to_x">către %s</string>
+    <string name="search">Căutare</string>
+    <string name="remove_flag">Elimină steag</string>
+    <string name="add_flag">Adaugă steag</string>
+    <string name="mark_important">Marchează ca important</string>
+    <string name="delete">Șterge</string>
+    <string name="mark_read">Marchează ca citit</string>
+    <string name="mark_unread">Marchează ca necitit</string>
+    <string name="archive">Arhivează</string>
+    <string name="compose_cc">Cc</string>
+    <string name="draft">Ciornă</string>
+    <string name="select_sender">Selectați expeditor.</string>
+    <string name="the_address_x_is_invalid">Adresa &lt;%s&gt; este invalidă.</string>
+    <string name="add_at_least_one_recipient">Adăugați cel puțin un destinatar.</string>
+    <string name="ok">Bine</string>
+    <string name="compose_from">De la</string>
+    <string name="compose_subject">Subiect</string>
+    <string name="compose_compose_email">Compune e-mail</string>
+    <string name="compose_to">Către</string>
+    <string name="schedule_send">Programare trimitere</string>
+    <string name="discard">Renunță</string>
+    <string name="send">Trimite</string>
+    <string name="attach_file">Atașare fișier</string>
+    <string name="compose">Compune</string>
+    <string name="unable_to_fetch_session">Nu s-a putut prelua sesiunea: %s</string>
+    <string name="no_network_connection">Nu există o conexiune la rețea</string>
+    <string name="unknown_host">Nu s-a putut rezolva %s</string>
+    <string name="unable_to_verify_service_identity">Nu s-a putut verifica identitatea</string>
+    <string name="unable_to_establish_secure_connection">Nu s-a putut stabili o conexiune securizată</string>
+    <string name="timeout_reached">A expirat timpul de așteptare pentru conectarea la serviciul de e-mail</string>
+    <string name="unable_to_connect">Nu se poate face conectarea la serviciul de e-mail</string>
+    <string name="invalid_session_resource">Nu există un serviciu de e-mail valid la această adresă</string>
+    <string name="endpoint_not_found">Nu există un serviciu de e-mail la această adresă</string>
+    <string name="could_not_store_account_credentials">Nu s-au putut stoca datele de autentificare</string>
+</resources>
