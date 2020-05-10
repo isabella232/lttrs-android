@@ -41,23 +41,20 @@
     <string name="sign_in">Zaloguj się</string>
     <string name="deleted">Usunięto</string>
     <plurals name="n_deleted">
-        <item quantity="one"></item>
-        <item quantity="few"></item>
+        <item quantity="one">Usunięto %10</item>
+        <item quantity="few">Usunięto %10</item>
         <item quantity="many">Usunięto %10</item>
-        <item quantity="other">Usunięto %10</item>
     </plurals>
     <string name="undo">Cofnij</string>
     <plurals name="n_archived">
-        <item quantity="one"></item>
-        <item quantity="few"></item>
+        <item quantity="one">%d zarchiwizowano</item>
+        <item quantity="few">%d zarchiwizowano</item>
         <item quantity="many">%d zarchiwizowano</item>
-        <item quantity="other">%d zarchiwizowano</item>
     </plurals>
     <plurals name="n_removed_from_x">
-        <item quantity="one"></item>
-        <item quantity="few"></item>
+        <item quantity="one">Usunięto %s z %s</item>
+        <item quantity="few">Usunięto %s z %s</item>
         <item quantity="many">Usunięto %s z %s</item>
-        <item quantity="other">Usunięto %s z %s</item>
     </plurals>
     <string name="mark_not_important">Oznacz jako nieważne</string>
     <string name="search_hint">Szukaj e-maili</string>

@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <plurals name="unable_to_safe_accounts">
-        <item quantity="one">Kunne ikke forsikre konto</item>
-        <item quantity="other">Kunne ikke forsikre kontoer</item>
-    </plurals>
     <string name="compose_cc">Kopi</string>
     <string name="compose_compose_email">Forfatt e-post</string>
     <string name="compose">Forfatt</string>
