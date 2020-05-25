@@ -14,7 +14,7 @@ If the above screenshots don’t do enough to convince you, you can watch this
 * Account _setup and done_. Settings invite feature creep and its friend unmaintainability. There is one specific work flow. K-9 Mail or FairEmail is more suitable for others.
 * _Minimal dependencies_. Third party libraries are often of poor quality, and end up unmaintained. Only widely known, highly tested libraries from reputable vendors.
 * _First class Autocrypt_¹. Ltt.rs fits right into its strict UX guidelines.
-* _Based on jmap-mua_, a headless e-mail client, or a library that handles everything an e-mail client would, aside from data storage and UI. There is also lttrs-cli, which uses the same library.
+* _Based on [jmap-mua](https://github.com/iNPUTmice/jmap)_, a headless e-mail client, or a library that handles everything an e-mail client would, aside from data storage and UI. There is also [lttrs-cli](https://github.com/iNPUTmice/lttrs-cli), which uses the same library.
 * _Looks to Gmail for inspiration_ in cases of uncertainty.
 
 ¹: Planned feature
