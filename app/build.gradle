@@ -54,13 +54,13 @@ dependencies {
 
     def appcompat_version = "1.1.0"
     def lifecycle_version = "2.2.0"
-    def nav_version = "2.3.0-alpha05"
+    def nav_version = "2.3.0-beta01"
     def paging_version = "2.1.2"
     def recycler_view_version = "1.1.0"
     def recycler_view_selection_version = "1.1.0-rc01"
     def swipe_refresh_layout_version = "1.1.0-rc01"
     def room_version = "2.2.5"
-    def work_version = "2.4.0-alpha02"
+    def work_version = "2.4.0-beta01"
 
 
     //AndroidX
@@ -96,7 +96,7 @@ dependencies {
 
     implementation 'com.github.tony19:logback-android:2.0.0'
 
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.2'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.3'
 
 
     //Own libraries (libraries we wrote and can commit to)
