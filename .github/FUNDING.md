@@ -1,0 +1,2 @@
+github: inputmice
+liberapay: inputmice
