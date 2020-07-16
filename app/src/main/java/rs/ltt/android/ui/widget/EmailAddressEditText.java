@@ -36,20 +36,19 @@ public class EmailAddressEditText extends AppCompatEditText {
         super(context, attrs, defStyleAttr);
     }
 
-
     @Override
     protected void onSelectionChanged(final int start, final int end) {
+        super.onSelectionChanged(start, end);
         final Editable editable = getEditableText();
         final ChipDrawableSpan[] spans = editable.getSpans(0, editable.length(), ChipDrawableSpan.class);
         int beginEditableArea = 0;
         for (ChipDrawableSpan span : spans) {
             beginEditableArea = editable.getSpanEnd(span);
         }
-        int resetStartTo = Math.max(beginEditableArea, start);
-        int resetEndTo = Math.max(beginEditableArea, end);
+        final int resetStartTo = Math.max(beginEditableArea, start);
+        final int resetEndTo = Math.max(beginEditableArea, end);
         if (resetStartTo != start || resetEndTo != end) {
             setSelection(resetStartTo, resetEndTo);
         }
-
     }
 }
