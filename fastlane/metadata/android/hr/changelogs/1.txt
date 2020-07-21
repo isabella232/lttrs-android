@@ -1,0 +1,3 @@
+* Osnovne mogućnosti čitanje e-mailova (samo običan tekst, bez priloga)
+* Arhiviranje, obilježavanje, označavanje kao pročitano i nepročitano
+* Pisanje e-poruka (bez citiranja)
