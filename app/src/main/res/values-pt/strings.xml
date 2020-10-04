@@ -43,8 +43,8 @@
     </plurals>
     <string name="archive">Arquivar</string>
     <plurals name="n_deleted">
-        <item quantity="one">%s excluído</item>
-        <item quantity="other">%s excluídos</item>
+        <item quantity="one">%s apagado</item>
+        <item quantity="other">%s apagados</item>
     </plurals>
     <string name="search">Pesquisar</string>
     <string name="the_address_x_is_invalid">Algo está errado com o endereço &lt;%s&gt;</string>
