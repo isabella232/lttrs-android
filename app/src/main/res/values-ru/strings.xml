@@ -34,7 +34,7 @@
     <string name="could_not_store_account_credentials">Не удалось сохранить учетные данные</string>
     <string name="draft">Черновик</string>
     <string name="select_sender">Выберите отправителя.</string>
-    <string name="the_address_x_is_invalid">Что-то не так с адресом &lt;% s&gt;</string>
+    <string name="the_address_x_is_invalid">Что-то не так с адресом &lt;%s&gt;</string>
     <string name="endpoint_not_found">По этой ссылке не найдены сервисы эл. почты</string>
     <string name="invalid_session_resource">По этой ссылке не найдены рабочих сервисов эл. почты</string>
     <string name="enter_a_secure_url">Введите защищённый URL</string>
