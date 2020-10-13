@@ -18,20 +18,25 @@ package rs.ltt.android.util;
 import android.app.Activity;
 
 import rs.ltt.android.database.AppDatabase;
+import rs.ltt.android.entity.AccountWithCredentials;
 
 public class SetupCache {
 
-    private static Boolean hasAccounts = null;
+    private static Long mostRecentlySelectedAccountId = null;
 
     public static synchronized boolean hasAccounts(final Activity activity) {
-        if (hasAccounts == null) {
-            hasAccounts = AppDatabase.getInstance(activity.getApplicationContext()).accountDao().hasAccounts();
+        return getMostRecentlySelectedAccountId(activity) != null;
+    }
+
+    public static synchronized Long getMostRecentlySelectedAccountId(final Activity activity) {
+        if (mostRecentlySelectedAccountId == null) {
+            mostRecentlySelectedAccountId = AppDatabase.getInstance(activity.getApplicationContext()).accountDao().getMostRecentlySelectedAccountId();
         }
-        return hasAccounts;
+        return mostRecentlySelectedAccountId;
     }
 
     public static synchronized void invalidate() {
-        hasAccounts = null;
+        mostRecentlySelectedAccountId = null;
     }
 
 }

@@ -77,9 +77,7 @@ public class ComposeViewModel extends AndroidViewModel {
         super(application);
         this.composeAction = parameter.composeAction;
         this.uri = parameter.uri;
-        final MainRepository mainRepository = new MainRepository(application);
-        final ListenableFuture<AccountWithCredentials> account = mainRepository.getAccount(parameter.accountId);
-        this.repository = new ComposeRepository(application, account);
+        this.repository = new ComposeRepository(application, parameter.accountId);
         this.identities = this.repository.getIdentities();
         if (composeAction == ComposeAction.NEW) {
             this.email = null;

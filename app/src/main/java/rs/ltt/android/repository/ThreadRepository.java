@@ -38,43 +38,43 @@ import rs.ltt.android.entity.ThreadHeader;
 
 public class ThreadRepository extends LttrsRepository {
 
-    public ThreadRepository(Application application, ListenableFuture<AccountWithCredentials> account) {
-        super(application, account);
+    public ThreadRepository(final Application application, final long accountId) {
+        super(application, accountId);
     }
 
     public LiveData<PagedList<FullEmail>> getEmails(String threadId) {
-        return Transformations.switchMap(databaseLiveData, database -> new LivePagedListBuilder<>(database.threadAndEmailDao().getEmails(threadId), 30).build());
+        return new LivePagedListBuilder<>(database.threadAndEmailDao().getEmails(threadId), 30).build();
     }
 
     public LiveData<ThreadHeader> getThreadHeader(String threadId) {
-        return Transformations.switchMap(databaseLiveData, database -> database.threadAndEmailDao().getThreadHeader(threadId));
+        return database.threadAndEmailDao().getThreadHeader(threadId);
     }
 
     public LiveData<List<MailboxWithRoleAndName>> getMailboxes(String threadId) {
-        return Transformations.switchMap(databaseLiveData, database ->database.mailboxDao().getMailboxesForThreadLiveData(threadId));
+        return database.mailboxDao().getMailboxesForThreadLiveData(threadId);
     }
 
 
     public LiveData<List<MailboxOverwriteEntity>> getMailboxOverwrites(String threadId) {
-        return Transformations.switchMap(databaseLiveData, database ->database.overwriteDao().getMailboxOverwrites(threadId));
+        return database.overwriteDao().getMailboxOverwrites(threadId);
     }
 
     public ListenableFuture<List<ExpandedPosition>> getExpandedPositions(String threadId) {
-        ListenableFuture<KeywordOverwriteEntity> overwriteFuture = Futures.transformAsync(this.database, database -> database.overwriteDao().getKeywordOverwrite(threadId), MoreExecutors.directExecutor());
-        return Futures.transformAsync(overwriteFuture, input -> {
-            if (input != null) {
-                if (input.value) {
-                    return requireDatabase().threadAndEmailDao().getMaxPosition(threadId);
+        ListenableFuture<KeywordOverwriteEntity> overwriteFuture = database.overwriteDao().getKeywordOverwrite(threadId);
+        return Futures.transformAsync(overwriteFuture, overwrite -> {
+            if (overwrite != null) {
+                if (overwrite.value) {
+                    return database.threadAndEmailDao().getMaxPosition(threadId);
                 } else {
-                    return requireDatabase().threadAndEmailDao().getAllPositions(threadId);
+                    return database.threadAndEmailDao().getAllPositions(threadId);
                 }
             } else {
-                ListenableFuture<List<ExpandedPosition>> unseen = requireDatabase().threadAndEmailDao().getUnseenPositions(threadId);
-                return Futures.transformAsync(unseen, input1 -> {
-                    if (input1 == null || input1.size() == 0) {
-                        return requireDatabase().threadAndEmailDao().getMaxPosition(threadId);
+                ListenableFuture<List<ExpandedPosition>> unseenFuture = database.threadAndEmailDao().getUnseenPositions(threadId);
+                return Futures.transformAsync(unseenFuture, unseen -> {
+                    if (unseen == null || unseen.size() == 0) {
+                        return database.threadAndEmailDao().getMaxPosition(threadId);
                     } else {
-                        return Futures.immediateFuture(input1);
+                        return Futures.immediateFuture(unseen);
                     }
                 }, MoreExecutors.directExecutor());
             }

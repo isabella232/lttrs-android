@@ -45,14 +45,14 @@ public abstract class AccountDao {
     @Query("select account.id as id, username,password,sessionResource,accountId from credentials join account on credentialsId = credentials.id order by lastSelectedAt desc limit 1")
     public abstract ListenableFuture<AccountWithCredentials> getMostRecentlySelectedAccountFuture();
 
+    @Query("select id from account order by lastSelectedAt desc limit 1")
+    public abstract Long getMostRecentlySelectedAccountId();
+
     @Insert
     abstract Long insert(CredentialsEntity entity);
 
     @Insert
     abstract Long insert(AccountEntity entity);
-
-    @Query("select exists (select 1 from account)")
-    public abstract LiveData<Boolean> hasAccountsLiveData();
 
     @Query("select exists (select 1 from account)")
     public abstract boolean hasAccounts();
@@ -73,7 +73,7 @@ public abstract class AccountDao {
         for (Map.Entry<String, Account> entry : accounts.entrySet()) {
             final String accountId = entry.getKey();
             final String name = entry.getValue().getName();
-            Long id = insert(new AccountEntity(
+            final Long id = insert(new AccountEntity(
                     credentialId,
                     accountId,
                     name,

@@ -58,41 +58,36 @@ public class QueryRepository extends LttrsRepository {
     private MutableLiveData<Set<String>> runningPagingRequestsLiveData = new MutableLiveData<>(runningPagingRequests);
 
 
-    public QueryRepository(Application application, ListenableFuture<AccountWithCredentials> account) {
-        super(application, account);
+    public QueryRepository(final Application application, final long accountId) {
+        super(application, accountId);
     }
 
     public LiveData<PagedList<ThreadOverviewItem>> getThreadOverviewItems(final EmailQuery query) {
-        return Transformations.switchMap(databaseLiveData, new Function<LttrsDatabase, LiveData<PagedList<ThreadOverviewItem>>>() {
-            @Override
-            public LiveData<PagedList<ThreadOverviewItem>> apply(LttrsDatabase database) {
-                return new LivePagedListBuilder<>(database.queryDao().getThreadOverviewItems(query.toQueryString()), 30)
-                        .setBoundaryCallback(new PagedList.BoundaryCallback<ThreadOverviewItem>() {
-                            @Override
-                            public void onZeroItemsLoaded() {
-                                Log.d("lttrs", "onZeroItemsLoaded");
-                                requestNextPage(query, null); //conceptually in terms of loading indicators this is more of a page request
-                                super.onZeroItemsLoaded();
-                            }
+        return new LivePagedListBuilder<>(database.queryDao().getThreadOverviewItems(query.toQueryString()), 30)
+                .setBoundaryCallback(new PagedList.BoundaryCallback<ThreadOverviewItem>() {
+                    @Override
+                    public void onZeroItemsLoaded() {
+                        Log.d("lttrs", "onZeroItemsLoaded");
+                        requestNextPage(query, null); //conceptually in terms of loading indicators this is more of a page request
+                        super.onZeroItemsLoaded();
+                    }
 
-                            @Override
-                            public void onItemAtEndLoaded(@NonNull ThreadOverviewItem itemAtEnd) {
-                                Log.d("lttrs", "onItemAtEndLoaded(" + itemAtEnd.emailId + ")");
-                                requestNextPage(query, itemAtEnd.emailId);
-                                super.onItemAtEndLoaded(itemAtEnd);
-                            }
-                        })
-                        .build();
-            }
-        });
+                    @Override
+                    public void onItemAtEndLoaded(@NonNull ThreadOverviewItem itemAtEnd) {
+                        Log.d("lttrs", "onItemAtEndLoaded(" + itemAtEnd.emailId + ")");
+                        requestNextPage(query, itemAtEnd.emailId);
+                        super.onItemAtEndLoaded(itemAtEnd);
+                    }
+                })
+                .build();
     }
 
     public ListenableFuture<MailboxWithRoleAndName> getInbox() {
-        return Futures.transformAsync(database, database -> database.mailboxDao().getMailboxFuture(Role.INBOX), MoreExecutors.directExecutor());
+        return database.mailboxDao().getMailboxFuture(Role.INBOX);
     }
 
     public ListenableFuture<MailboxWithRoleAndName> getImportant() {
-        return Futures.transformAsync(database, database -> database.mailboxDao().getMailboxFuture(Role.IMPORTANT), MoreExecutors.directExecutor());
+        return database.mailboxDao().getMailboxFuture(Role.IMPORTANT);
     }
 
     public LiveData<Boolean> isRunningQueryFor(final EmailQuery query) {
@@ -128,7 +123,8 @@ public class QueryRepository extends LttrsRepository {
             try {
                 Status status = statusFuture.get();
             } catch (Exception e) {
-                Log.d("lttrs", "unable to refresh", e);
+                final Throwable cause = e.getCause();
+                Log.d("lttrs", "unable to refresh", cause);
             }
         }, MoreExecutors.directExecutor());
     }
@@ -184,13 +180,13 @@ public class QueryRepository extends LttrsRepository {
 
     public LiveData<MailboxOverviewItem> getMailboxOverviewItem(final String mailboxId) {
         if (mailboxId == null) {
-            return Transformations.switchMap(databaseLiveData, database -> database.mailboxDao().getMailboxOverviewItemLiveData(Role.INBOX));
+            return database.mailboxDao().getMailboxOverviewItemLiveData(Role.INBOX);
         } else {
-            return Transformations.switchMap(databaseLiveData, database -> database.mailboxDao().getMailboxOverviewItemLiveData(mailboxId));
+            return database.mailboxDao().getMailboxOverviewItemLiveData(mailboxId);
         }
     }
 
     public LiveData<String[]> getTrashAndJunk() {
-        return Transformations.switchMap(databaseLiveData, database -> database.mailboxDao().getMailboxesLiveData(Role.TRASH, Role.JUNK));
+        return database.mailboxDao().getMailboxesLiveData(Role.TRASH, Role.JUNK);
     }
 }

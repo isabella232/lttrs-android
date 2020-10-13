@@ -39,8 +39,8 @@ public class MailboxQueryViewModel extends AbstractQueryViewModel {
 
     private final LiveData<EmailQuery> emailQueryLiveData;
 
-    MailboxQueryViewModel(final Application application, ListenableFuture<AccountWithCredentials> account, final String mailboxId) {
-        super(application, account);
+    MailboxQueryViewModel(final Application application, final long accountId, final String mailboxId) {
+        super(application, accountId);
         this.mailbox = this.queryRepository.getMailboxOverviewItem(mailboxId);
         this.emailQueryLiveData = Transformations.map(mailbox, input -> {
             if (input == null) {

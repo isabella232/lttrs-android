@@ -39,8 +39,8 @@ public class SearchQueryViewModel extends AbstractQueryViewModel {
     private final LiveData<EmailQuery> searchQueryLiveData;
     private final ListenableFuture<MailboxWithRoleAndName> inbox;
 
-    SearchQueryViewModel(final Application application, final ListenableFuture<AccountWithCredentials> account, final String searchTerm) {
-        super(application, account);
+    SearchQueryViewModel(final Application application, final long accountId, final String searchTerm) {
+        super(application, accountId);
         this.searchTerm = searchTerm;
         this.inbox = queryRepository.getInbox();
         this.searchQueryLiveData = Transformations.map(queryRepository.getTrashAndJunk(), trashAndJunk -> EmailQuery.of(

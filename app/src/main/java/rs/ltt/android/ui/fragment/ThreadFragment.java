@@ -88,7 +88,7 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
                 getViewModelStore(),
                 new ThreadViewModelFactory(
                         requireActivity().getApplication(),
-                        getLttrsViewModel().getAccount(),
+                        getLttrsViewModel().getAccountId(),
                         threadId,
                         label,
                         triggerRead
@@ -257,7 +257,7 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
     public void onEditDraft(String emailId) {
         ComposeActivity.editDraft(
                 this,
-                requireAccount().id,
+                getLttrsViewModel().getAccountId(),
                 emailId
         );
     }
@@ -266,7 +266,7 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
     public void onReplyAll(String emailId) {
         ComposeActivity.replyAll(
                 this,
-                requireAccount().id,
+                getLttrsViewModel().getAccountId(),
                 emailId
         );
     }

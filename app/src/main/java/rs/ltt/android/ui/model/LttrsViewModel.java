@@ -44,26 +44,24 @@ public class LttrsViewModel extends AndroidViewModel {
 
     private final LiveData<List<Label>> navigatableLabels;
     private final MainRepository mainRepository;
-    private final ListenableFuture<AccountWithCredentials> account;
+    private final long accountId;
     private final ThreadRepository threadRepository;
-    private final LiveData<Boolean> hasAccounts;
     private String currentSearchTerm;
 
-    public LttrsViewModel(@NonNull Application application) {
+    public LttrsViewModel(@NonNull Application application, final long accountId) {
         super(application);
         LOGGER.debug("creating instance of LttrsViewModel");
         this.mainRepository = new MainRepository(application);
-        this.account = this.mainRepository.getAccount(null);
-        this.threadRepository = new ThreadRepository(application, this.account);
+        this.accountId = accountId;
+        this.threadRepository = new ThreadRepository(application, accountId);
         this.navigatableLabels = Transformations.map(
                 this.threadRepository.getMailboxes(),
                 LabelUtil::fillUpAndSort
         );
-        this.hasAccounts = this.mainRepository.hasAccounts();
     }
 
-    public ListenableFuture<AccountWithCredentials> getAccount() {
-        return this.account;
+    public long getAccountId() {
+        return this.accountId;
     }
 
     public String getCurrentSearchTerm() {
@@ -113,10 +111,6 @@ public class LttrsViewModel extends AndroidViewModel {
 
     public void addKeyword(final Collection<String> threadIds, final String keyword) {
         this.threadRepository.addKeyword(threadIds, keyword);
-    }
-
-    public LiveData<Boolean> getHasAccounts() {
-        return this.hasAccounts;
     }
 
 }

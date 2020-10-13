@@ -23,6 +23,7 @@ import androidx.lifecycle.Transformations;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -64,21 +65,22 @@ public class MainRepository {
         IO_EXECUTOR.execute(() -> appDatabase.searchSuggestionDao().insert(SearchSuggestionEntity.of(term)));
     }
 
-    public ListenableFuture<Void> insertAccountsRefreshMailboxes(final String username,
+    public ListenableFuture<Long[]> insertAccountsRefreshMailboxes(final String username,
                                                                  final String password,
                                                                  final HttpUrl sessionResource,
                                                                  final String primaryAccountId,
                                                                  final Map<String, Account> accounts) {
-        final SettableFuture<Void> settableFuture = SettableFuture.create();
+        final SettableFuture<Long[]> settableFuture = SettableFuture.create();
         IO_EXECUTOR.execute(() -> {
             try {
-                List<AccountWithCredentials> credentials = appDatabase.accountDao().insert(
+                final List<AccountWithCredentials> credentials = appDatabase.accountDao().insert(
                         username,
                         password,
                         sessionResource,
                         primaryAccountId,
                         accounts
                 );
+                final Long[] ids = Lists.transform(credentials, c -> c.id).toArray(new Long[0]);
                 SetupCache.invalidate();
                 final Collection<ListenableFuture<Status>> mailboxRefreshes = Collections2.transform(
                         credentials,
@@ -89,24 +91,12 @@ public class MainRepository {
                                 return retrieveMailboxes(account);
                             }
                         });
-                settableFuture.setFuture(Futures.whenAllComplete(mailboxRefreshes).call(() -> null, MoreExecutors.directExecutor()));
+                settableFuture.setFuture(Futures.whenAllComplete(mailboxRefreshes).call(() -> ids, MoreExecutors.directExecutor()));
             } catch (Exception e) {
                 settableFuture.setException(e);
             }
         });
         return settableFuture;
-    }
-
-    public LiveData<Boolean> hasAccounts() {
-        return Transformations.distinctUntilChanged(appDatabase.accountDao().hasAccountsLiveData());
-    }
-
-    public ListenableFuture<AccountWithCredentials> getAccount(@Nullable final Long id) {
-        if (id == null) {
-            return appDatabase.accountDao().getMostRecentlySelectedAccountFuture();
-        } else {
-            return appDatabase.accountDao().getAccountFuture(id);
-        }
     }
 
     private ListenableFuture<Status> retrieveMailboxes(final AccountWithCredentials account) {

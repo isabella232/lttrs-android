@@ -18,7 +18,6 @@ package rs.ltt.android.ui.activity;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -44,6 +43,7 @@ import androidx.navigation.Navigation;
 import androidx.work.WorkInfo;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -66,6 +66,7 @@ import rs.ltt.android.ui.WeakActionModeCallback;
 import rs.ltt.android.ui.adapter.LabelListAdapter;
 import rs.ltt.android.ui.fragment.SearchQueryFragment;
 import rs.ltt.android.ui.model.LttrsViewModel;
+import rs.ltt.android.ui.model.LttrsViewModelFactory;
 import rs.ltt.android.util.MainThreadExecutor;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mua.util.KeywordLabel;
@@ -74,6 +75,8 @@ import rs.ltt.jmap.mua.util.Label;
 public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, ThreadModifier, SearchQueryFragment.OnTermSearched, NavController.OnDestinationChangedListener, MenuItem.OnActionExpandListener, DrawerLayout.DrawerListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LttrsActivity.class);
+
+    public static final String EXTRA_ACCOUNT_ID = "account";
 
     private static final int NUM_TOOLBAR_ICON = 1;
     private static final List<Integer> MAIN_DESTINATIONS = Arrays.asList(
@@ -89,16 +92,27 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
     private ActionMode actionMode;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_lttrs);
 
+        final Intent intent = getIntent();
+        final long accountId;
+        if (intent != null && intent.hasExtra(EXTRA_ACCOUNT_ID)) {
+            accountId = intent.getLongExtra(EXTRA_ACCOUNT_ID, -1);
+        } else {
+            throw new IllegalStateException("LttrsActivity needs to be launched with account id");
+        }
+
+
         final ViewModelProvider viewModelProvider = new ViewModelProvider(
-                this,
-                getDefaultViewModelProviderFactory()
+                getViewModelStore(),
+                new LttrsViewModelFactory(
+                        getApplication(),
+                        accountId
+                )
         );
         lttrsViewModel = viewModelProvider.get(LttrsViewModel.class);
-        lttrsViewModel.getHasAccounts().observe(this, this::onHasAccountsChanged);
         setSupportActionBar(binding.toolbar);
 
         final NavController navController = Navigation.findNavController(
@@ -135,13 +149,6 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
         lttrsViewModel.getNavigatableLabels().observe(this, labelListAdapter::submitList);
     }
 
-    private void onHasAccountsChanged(Boolean hasAccounts) {
-        if (!hasAccounts) {
-            startActivity(new Intent(LttrsActivity.this, SetupActivity.class));
-            finish();
-        }
-    }
-
     @Override
     public boolean onCreateOptionsMenu(@NonNull Menu menu) {
         final int currentDestination = getCurrentDestinationId();
@@ -154,9 +161,11 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
         mSearchItem.setVisible(showSearch);
 
         if (showSearch) {
-            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
             mSearchView = (SearchView) mSearchItem.getActionView();
-            mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+            final SearchManager searchManager = getSystemService(SearchManager.class);
+            if (searchManager != null) {
+                mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+            }
             if (currentDestination == R.id.search) {
                 setSearchToolbarColors();
                 mSearchItem.expandActionView();
@@ -237,8 +246,7 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
     public void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
-
+            final String query = Strings.nullToEmpty(intent.getStringExtra(SearchManager.QUERY));
             if (mSearchView != null) {
                 mSearchView.setQuery(query, false);
                 mSearchView.clearFocus(); //this does not work on all phones / android versions; therefor we have this followed by a requestFocus() on the list

@@ -45,23 +45,23 @@ import rs.ltt.jmap.common.entity.Role;
 
 public class ComposeRepository extends LttrsRepository {
 
-    public ComposeRepository(Application application, ListenableFuture<AccountWithCredentials> accountFuture) {
-        super(application, accountFuture);
+    public ComposeRepository(final Application application, final long accountId) {
+        super(application, accountId);
     }
 
     public LiveData<List<IdentityWithNameAndEmail>> getIdentities() {
-        return Transformations.switchMap(this.databaseLiveData, database -> database.identityDao().getIdentitiesLiveData());
+        return database.identityDao().getIdentitiesLiveData();
     }
 
     public ListenableFuture<EditableEmail> getEditableEmail(final String id) {
-        return Futures.transformAsync(this.database, database -> database.threadAndEmailDao().getEditableEmail(id), MoreExecutors.directExecutor());
+        return database.threadAndEmailDao().getEditableEmail(id);
     }
 
     public void sendEmail(IdentifiableIdentity identity, ComposeViewModel.Draft draft, final Collection<String> inReplyTo) {
         final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(SendEmailWorker.class)
                 .setConstraints(CONNECTED_CONSTRAINT)
                 .setInputData(SendEmailWorker.data(
-                        requireAccount().id,
+                        accountId,
                         identity.getId(),
                         inReplyTo,
                         draft.getTo(),
@@ -78,7 +78,7 @@ public class ComposeRepository extends LttrsRepository {
         final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(SubmitEmailWorker.class)
                 .setConstraints(CONNECTED_CONSTRAINT)
                 .setInputData(SubmitEmailWorker.data(
-                        requireAccount().id,
+                        accountId,
                         identity.getId(),
                         editableEmail.id
                 ))
@@ -94,7 +94,7 @@ public class ComposeRepository extends LttrsRepository {
         final OneTimeWorkRequest saveDraftRequest = new OneTimeWorkRequest.Builder(SaveDraftWorker.class)
                 .setConstraints(CONNECTED_CONSTRAINT)
                 .setInputData(SendEmailWorker.data(
-                        requireAccount().id,
+                        accountId,
                         identity.getId(),
                         inReplyTo,
                         draft.getTo(),
@@ -108,7 +108,7 @@ public class ComposeRepository extends LttrsRepository {
         if (discard != null) {
             final OneTimeWorkRequest discardPreviousDraft = new OneTimeWorkRequest.Builder(DiscardDraftWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
-                    .setInputData(DiscardDraftWorker.data(requireAccount().id, discard.id))
+                    .setInputData(DiscardDraftWorker.data(accountId, discard.id))
                     .build();
             continuation = continuation.then(discardPreviousDraft);
         }
@@ -119,7 +119,7 @@ public class ComposeRepository extends LttrsRepository {
     public boolean discard(EditableEmail editableEmail) {
         final OneTimeWorkRequest discardDraft = new OneTimeWorkRequest.Builder(DiscardDraftWorker.class)
                 .setConstraints(CONNECTED_CONSTRAINT)
-                .setInputData(DiscardDraftWorker.data(requireAccount().id, editableEmail.id))
+                .setInputData(DiscardDraftWorker.data(accountId, editableEmail.id))
                 .build();
         final WorkManager workManager = WorkManager.getInstance(application);
         final boolean isOnlyEmailInThread = editableEmail.isOnlyEmailInThread();

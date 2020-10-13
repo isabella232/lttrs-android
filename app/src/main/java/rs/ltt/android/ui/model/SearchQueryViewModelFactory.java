@@ -28,18 +28,18 @@ import rs.ltt.android.entity.AccountWithCredentials;
 public class SearchQueryViewModelFactory implements ViewModelProvider.Factory {
 
     private final Application application;
-    private final ListenableFuture<AccountWithCredentials> account;
+    private final long accountId;
     private final String query;
 
-    public SearchQueryViewModelFactory(Application application, ListenableFuture<AccountWithCredentials> account, String query) {
+    public SearchQueryViewModelFactory(Application application, final long accountId, String query) {
         this.application = application;
-        this.account = account;
+        this.accountId = accountId;
         this.query = query;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return modelClass.cast(new SearchQueryViewModel(application, account, query));
+        return modelClass.cast(new SearchQueryViewModel(application, accountId, query));
     }
 }

@@ -44,7 +44,7 @@ public abstract class AbstractMailboxQueryFragment extends AbstractQueryFragment
                 getViewModelStore(),
                 new MailboxQueryViewModelFactory(
                         requireActivity().getApplication(),
-                        getLttrsViewModel().getAccount(),
+                        getLttrsViewModel().getAccountId(),
                         getMailboxId()
                 )
         );

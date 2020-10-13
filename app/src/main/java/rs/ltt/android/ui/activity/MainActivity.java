@@ -35,8 +35,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         final long start = SystemClock.elapsedRealtime();
-        if (SetupCache.hasAccounts(this)) {
-            startActivity(new Intent(this, LttrsActivity.class));
+        final Long accountId = SetupCache.getMostRecentlySelectedAccountId(this);
+        if (accountId != null) {
+            final Intent intent = new Intent(this, LttrsActivity.class);
+            intent.putExtra(LttrsActivity.EXTRA_ACCOUNT_ID, accountId);
+            startActivity(intent);
         } else {
             startActivity(new Intent(this, SetupActivity.class));
         }

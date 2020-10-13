@@ -52,7 +52,7 @@ public class KeywordQueryFragment extends AbstractQueryFragment {
                 getViewModelStore(),
                 new KeywordQueryViewModelFactory(
                         requireActivity().getApplication(),
-                        getLttrsViewModel().getAccount(),
+                        getLttrsViewModel().getAccountId(),
                         keywordLabel.getKeyword()
                 )
         );

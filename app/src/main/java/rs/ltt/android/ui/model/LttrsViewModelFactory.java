@@ -21,33 +21,22 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.common.util.concurrent.ListenableFuture;
+import java.util.Objects;
 
-import rs.ltt.android.entity.AccountWithCredentials;
-
-public class ThreadViewModelFactory implements ViewModelProvider.Factory {
+public class LttrsViewModelFactory implements ViewModelProvider.Factory {
 
     private final Application application;
     private final long accountId;
-    private final String threadId;
-    private final String label;
-    private final boolean triggerRead;
 
-    public ThreadViewModelFactory(final Application application,
-                                  final long accountId,
-                                  final String threadId,
-                                  final String label,
-                                  boolean triggerRead) {
+    public LttrsViewModelFactory(@NonNull final Application application,
+                                 @NonNull final long accountId) {
         this.application = application;
         this.accountId = accountId;
-        this.threadId = threadId;
-        this.label = label;
-        this.triggerRead = triggerRead;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return modelClass.cast(new ThreadViewModel(application, accountId, threadId, label, triggerRead));
+        return Objects.requireNonNull(modelClass.cast(new LttrsViewModel(application, accountId)));
     }
 }

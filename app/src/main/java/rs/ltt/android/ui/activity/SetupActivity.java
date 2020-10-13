@@ -55,7 +55,11 @@ public class SetupActivity extends AppCompatActivity {
                 final SetupViewModel.Target target = targetEvent.consume();
                 switch (target) {
                     case LTTRS:
-                        redirectToLttrs();
+                        final Long[] ids = setupViewModel.getRecentlyAddedIds();
+                        if (ids == null || ids.length < 1) {
+                            throw new IllegalStateException("No recently added account ids for redirection event");
+                        }
+                        redirectToLttrs(ids[0]);
                         break;
                     case ENTER_PASSWORD:
                         navController.navigate(SetupNavigationDirections.enterPassword());
@@ -76,7 +80,7 @@ public class SetupActivity extends AppCompatActivity {
         });
     }
 
-    private void redirectToLttrs() {
+    private void redirectToLttrs(final Long accountId) {
         final Intent currentIntent = getIntent();
         final String uri = currentIntent == null ? null : currentIntent.getStringExtra(EXTRA_NEXT_ACTION);
         final MailToUri mailToUri = uri == null ? null : MailToUri.parse(uri);
@@ -87,6 +91,7 @@ public class SetupActivity extends AppCompatActivity {
             nextIntent.setData(Uri.parse(uri));
         } else {
             nextIntent = new Intent(this, LttrsActivity.class);
+            nextIntent.putExtra(LttrsActivity.EXTRA_ACCOUNT_ID, accountId);
         }
         startActivity(nextIntent);
         finish();

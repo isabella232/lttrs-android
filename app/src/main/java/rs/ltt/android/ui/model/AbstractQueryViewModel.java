@@ -48,12 +48,12 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
     private LiveData<Boolean> runningPagingRequest;
     private ListenableFuture<MailboxWithRoleAndName> important;
 
-    AbstractQueryViewModel(@NonNull Application application, ListenableFuture<AccountWithCredentials> account) {
+    AbstractQueryViewModel(@NonNull Application application, final long accountId) {
         super(application);
 
         final WorkManager workManager = WorkManager.getInstance(application);
 
-        this.queryRepository = new QueryRepository(application, account);
+        this.queryRepository = new QueryRepository(application, accountId);
         this.important = this.queryRepository.getImportant();
         this.emailModificationWorkInfo = Transformations.map(workManager.getWorkInfosByTagLiveData(AbstractMuaWorker.TAG_EMAIL_MODIFICATION), WorkInfoUtil::allDone);
     }

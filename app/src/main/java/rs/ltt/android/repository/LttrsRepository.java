@@ -48,6 +48,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import rs.ltt.android.cache.DatabaseCache;
+import rs.ltt.android.database.AppDatabase;
 import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.entity.KeywordOverwriteEntity;
@@ -76,80 +77,44 @@ import rs.ltt.jmap.mua.util.KeywordUtil;
 
 public class LttrsRepository {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LttrsRepository.class);
-
     static final Executor IO_EXECUTOR = Executors.newSingleThreadExecutor();
-
-    private static final long INITIAL_DELAY_DURATION = 4;
-    private static final TimeUnit INITIAL_DELAY_TIME_UNIT = TimeUnit.SECONDS;
     static final Constraints CONNECTED_CONSTRAINT = new Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build();
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(LttrsRepository.class);
+    private static final long INITIAL_DELAY_DURATION = 4;
+    private static final TimeUnit INITIAL_DELAY_TIME_UNIT = TimeUnit.SECONDS;
     protected final Application application;
-    protected final ListenableFuture<AccountWithCredentials> account;
-    protected final ListenableFuture<LttrsDatabase> database;
+    protected final long accountId;
+    protected final LttrsDatabase database;
     protected final ListenableFuture<Mua> mua;
-    final LiveData<LttrsDatabase> databaseLiveData;
 
-
-    LttrsRepository(final Application application,
-                    final ListenableFuture<AccountWithCredentials> accountFuture) {
+    LttrsRepository(final Application application, final long accountId) {
         this.application = application;
-        this.account = accountFuture;
+        this.accountId = accountId;
         LOGGER.debug("creating instance of {}", getClass().getSimpleName());
-        this.database = Futures.transform(accountFuture, new Function<AccountWithCredentials, LttrsDatabase>() {
-            @NullableDecl
-            @Override
-            public LttrsDatabase apply(@NullableDecl AccountWithCredentials account) {
-                Preconditions.checkNotNull(account);
-                return LttrsDatabase.getInstance(application, account.id);
-            }
-        }, IO_EXECUTOR);
-        this.databaseLiveData = new FutureLiveData<>(this.database);
-        this.mua = Futures.transform(this.database, new Function<LttrsDatabase, Mua>() {
-            @NullableDecl
-            @Override
-            public Mua apply(@NullableDecl LttrsDatabase database) {
-                final AccountWithCredentials account = requireAccount();
-                return Mua.builder()
-                        .username(account.username)
-                        .password(account.password)
-                        .accountId(account.accountId)
-                        .sessionResource(account.sessionResource)
-                        .cache(new DatabaseCache(database))
-                        .sessionCache(new FileSessionCache(application.getCacheDir()))
-                        .queryPageSize(20L)
-                        .build();
-            }
-        }, MoreExecutors.directExecutor());
+        this.database = LttrsDatabase.getInstance(application, accountId);
+        this.mua = Futures.transform(getAccount(), account -> Mua.builder()
+                .username(account.username)
+                .password(account.password)
+                .accountId(account.accountId)
+                .sessionResource(account.sessionResource)
+                .cache(new DatabaseCache(database))
+                .sessionCache(new FileSessionCache(application.getCacheDir()))
+                .queryPageSize(20L)
+                .build(), MoreExecutors.directExecutor());
     }
 
-    @NonNull
-    LttrsDatabase requireDatabase() {
-        try {
-            return database.get();
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.warn("Unable to acquire Lttrs database", e);
-            throw new IllegalStateException(e);
-        }
-    }
-
-    protected AccountWithCredentials requireAccount() {
-        try {
-            return this.account.get();
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.warn("Unable to acquire account credentials");
-            throw new IllegalStateException(e);
-        }
+    public ListenableFuture<AccountWithCredentials> getAccount() {
+        return AppDatabase.getInstance(application).accountDao().getAccountFuture(accountId);
     }
 
     public LiveData<List<MailboxOverviewItem>> getMailboxes() {
-        return Transformations.switchMap(this.databaseLiveData, database -> database.mailboxDao().getMailboxes());
+        return database.mailboxDao().getMailboxes();
     }
 
     private void insert(final Collection<KeywordOverwriteEntity> keywordOverwriteEntities) {
-        requireDatabase().overwriteDao().insertKeywordOverwrites(keywordOverwriteEntities);
+        database.overwriteDao().insertKeywordOverwrites(keywordOverwriteEntities);
     }
 
     protected void insertQueryItemOverwrite(final String threadId, final Role role) {
@@ -157,7 +122,7 @@ public class LttrsRepository {
     }
 
     protected void insertQueryItemOverwrite(final Collection<String> threadIds, final Role role) {
-        MailboxOverviewItem mailbox = requireDatabase().mailboxDao().getMailboxOverviewItem(role);
+        MailboxOverviewItem mailbox = database.mailboxDao().getMailboxOverviewItem(role);
         if (mailbox != null) {
             insertQueryItemOverwrite(threadIds, mailbox);
         }
@@ -183,7 +148,7 @@ public class LttrsRepository {
                 EmailQuery.of(
                         EmailFilterCondition.builder()
                                 .inMailboxOtherThan(
-                                        requireDatabase().mailboxDao().getMailboxes(Role.TRASH, Role.JUNK)
+                                        database.mailboxDao().getMailboxes(Role.TRASH, Role.JUNK)
                                 )
                                 .hasKeyword(keyword)
                                 .build(),
@@ -196,9 +161,9 @@ public class LttrsRepository {
                                           final EmailQuery emailQuery,
                                           final QueryItemOverwriteEntity.Type type) {
         final String queryString = emailQuery.toQueryString();
-        final QueryEntity queryEntity = requireDatabase().queryDao().get(queryString);
+        final QueryEntity queryEntity = database.queryDao().get(queryString);
         if (queryEntity != null) {
-            requireDatabase().overwriteDao().insertQueryOverwrites(
+            database.overwriteDao().insertQueryOverwrites(
                     Collections2.transform(
                             threadIds,
                             threadId -> new QueryItemOverwriteEntity(queryEntity.id, threadId, type)
@@ -208,7 +173,7 @@ public class LttrsRepository {
     }
 
     private void deleteQueryItemOverwrite(final Collection<String> threadIds, final Role role) {
-        MailboxOverviewItem mailbox = requireDatabase().mailboxDao().getMailboxOverviewItem(role);
+        MailboxOverviewItem mailbox = database.mailboxDao().getMailboxOverviewItem(role);
         if (mailbox != null) {
             deleteQueryItemOverwrite(threadIds, mailbox);
         }
@@ -238,9 +203,9 @@ public class LttrsRepository {
 
     private void deleteQueryItemOverwrite(final Collection<String> threadIds, final EmailQuery emailQuery, QueryItemOverwriteEntity.Type type) {
         final String queryString = emailQuery.toQueryString();
-        QueryEntity queryEntity = requireDatabase().queryDao().get(queryString);
+        QueryEntity queryEntity = database.queryDao().get(queryString);
         if (queryEntity != null) {
-            requireDatabase().overwriteDao().deleteQueryOverwrites(
+            database.overwriteDao().deleteQueryOverwrites(
                     Collections2.transform(
                             threadIds,
                             threadId -> new QueryItemOverwriteEntity(queryEntity.id, threadId, type)
@@ -257,10 +222,10 @@ public class LttrsRepository {
             }
             insertQueryItemOverwrite(threadIds, mailbox);
             final WorkManager workManager = WorkManager.getInstance(application);
-            for(final String threadId : threadIds) {
+            for (final String threadId : threadIds) {
                 final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(RemoveFromMailboxWorker.class)
                         .setConstraints(CONNECTED_CONSTRAINT)
-                        .setInputData(RemoveFromMailboxWorker.data(requireAccount().id, threadId, mailbox))
+                        .setInputData(RemoveFromMailboxWorker.data(accountId, threadId, mailbox))
                         .setInitialDelay(INITIAL_DELAY_DURATION, INITIAL_DELAY_TIME_UNIT)
                         .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                         .build();
@@ -281,10 +246,10 @@ public class LttrsRepository {
             }
             deleteQueryItemOverwrite(threadIds, mailbox);
             final WorkManager workManager = WorkManager.getInstance(application);
-            for(final String threadId : threadIds) {
+            for (final String threadId : threadIds) {
                 final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(CopyToMailboxWorker.class)
                         .setConstraints(CONNECTED_CONSTRAINT)
-                        .setInputData(CopyToMailboxWorker.data(requireAccount().id, threadId, mailbox))
+                        .setInputData(CopyToMailboxWorker.data(accountId, threadId, mailbox))
                         .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                         .build();
                 workManager.enqueueUniqueWork(
@@ -300,13 +265,13 @@ public class LttrsRepository {
         IO_EXECUTOR.execute(() -> {
             insertQueryItemOverwrite(threadIds, Role.INBOX);
             deleteQueryItemOverwrite(threadIds, Role.ARCHIVE);
-            requireDatabase().overwriteDao().insertMailboxOverwrites(MailboxOverwriteEntity.of(threadIds, Role.INBOX, false));
-            requireDatabase().overwriteDao().insertMailboxOverwrites(MailboxOverwriteEntity.of(threadIds, Role.ARCHIVE, true));
+            database.overwriteDao().insertMailboxOverwrites(MailboxOverwriteEntity.of(threadIds, Role.INBOX, false));
+            database.overwriteDao().insertMailboxOverwrites(MailboxOverwriteEntity.of(threadIds, Role.ARCHIVE, true));
             final WorkManager workManager = WorkManager.getInstance(application);
-            for(final String threadId : threadIds) {
+            for (final String threadId : threadIds) {
                 final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ArchiveWorker.class)
                         .setConstraints(CONNECTED_CONSTRAINT)
-                        .setInputData(ArchiveWorker.data(requireAccount().id, threadId))
+                        .setInputData(ArchiveWorker.data(accountId, threadId))
                         .setInitialDelay(INITIAL_DELAY_DURATION, INITIAL_DELAY_TIME_UNIT)
                         .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                         .build();
@@ -326,20 +291,20 @@ public class LttrsRepository {
             insertQueryItemOverwrite(threadIds, Role.TRASH);
             deleteQueryItemOverwrite(threadIds, Role.INBOX);
 
-            requireDatabase().overwriteDao().insertMailboxOverwrites(
+            database.overwriteDao().insertMailboxOverwrites(
                     MailboxOverwriteEntity.of(threadIds, Role.INBOX, true)
             );
-            requireDatabase().overwriteDao().insertMailboxOverwrites(
+            database.overwriteDao().insertMailboxOverwrites(
                     MailboxOverwriteEntity.of(threadIds, Role.ARCHIVE, false)
             );
-            requireDatabase().overwriteDao().insertMailboxOverwrites(
+            database.overwriteDao().insertMailboxOverwrites(
                     MailboxOverwriteEntity.of(threadIds, Role.TRASH, false)
             );
             final WorkManager workManager = WorkManager.getInstance(application);
-            for(final String threadId : threadIds) {
+            for (final String threadId : threadIds) {
                 final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MoveToInboxWorker.class)
                         .setConstraints(CONNECTED_CONSTRAINT)
-                        .setInputData(MoveToInboxWorker.data(requireAccount().id, threadId))
+                        .setInputData(MoveToInboxWorker.data(accountId, threadId))
                         .setInitialDelay(INITIAL_DELAY_DURATION, INITIAL_DELAY_TIME_UNIT)
                         .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                         .build();
@@ -355,7 +320,6 @@ public class LttrsRepository {
     public ListenableFuture<LiveData<WorkInfo>> moveToTrash(final Collection<String> threadIds) {
         final SettableFuture<LiveData<WorkInfo>> future = SettableFuture.create();
         IO_EXECUTOR.execute(() -> {
-            final LttrsDatabase database = requireDatabase();
             for (MailboxWithRoleAndName mailbox : database.mailboxDao().getMailboxesForThreads(threadIds)) {
                 if (mailbox.role != Role.TRASH) {
                     insertQueryItemOverwrite(threadIds, mailbox);
@@ -372,7 +336,7 @@ public class LttrsRepository {
             );
             final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MoveToTrashWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
-                    .setInputData(MoveToTrashWorker.data(requireAccount().id, threadIds))
+                    .setInputData(MoveToTrashWorker.data(accountId, threadIds))
                     .setInitialDelay(INITIAL_DELAY_DURATION, TimeUnit.SECONDS)
                     .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                     .build();
@@ -387,7 +351,7 @@ public class LttrsRepository {
         Preconditions.checkNotNull(workInfo, "Unable to cancel moveToTrash operation.");
         WorkManager.getInstance(application).cancelWorkById(workInfo.getId());
         IO_EXECUTOR.execute(() -> {
-            requireDatabase().overwriteDao().revertMoveToTrashOverwrites(threadIds);
+            database.overwriteDao().revertMoveToTrashOverwrites(threadIds);
         });
     }
 
@@ -396,15 +360,15 @@ public class LttrsRepository {
     }
 
     private void markImportantNow(final Collection<String> threadIds) {
-        requireDatabase().overwriteDao().insertMailboxOverwrites(
+        database.overwriteDao().insertMailboxOverwrites(
                 MailboxOverwriteEntity.of(threadIds, Role.IMPORTANT, true)
         );
         deleteQueryItemOverwrite(threadIds, Role.IMPORTANT);
         final WorkManager workManager = WorkManager.getInstance(application);
-        for(final String threadId : threadIds) {
+        for (final String threadId : threadIds) {
             final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MarkImportantWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
-                    .setInputData(MarkImportantWorker.data(requireAccount().id, threadId))
+                    .setInputData(MarkImportantWorker.data(accountId, threadId))
                     .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                     .build();
             workManager.enqueueUniqueWork(
@@ -418,7 +382,7 @@ public class LttrsRepository {
     public void markNotImportant(final Collection<String> threadIds) {
         IO_EXECUTOR.execute(() -> {
             final MailboxWithRoleAndName mailbox = Preconditions.checkNotNull(
-                    requireDatabase().mailboxDao().getMailbox(Role.IMPORTANT),
+                    database.mailboxDao().getMailbox(Role.IMPORTANT),
                     "No mailbox with role=IMPORTANT found in cache"
             );
             markNotImportant(threadIds, mailbox);
@@ -428,14 +392,14 @@ public class LttrsRepository {
     private void markNotImportant(final Collection<String> threadIds, final IdentifiableMailboxWithRole mailbox) {
         Preconditions.checkArgument(mailbox.getRole() == Role.IMPORTANT);
         insertQueryItemOverwrite(threadIds, mailbox);
-        requireDatabase().overwriteDao().insertMailboxOverwrites(
+        database.overwriteDao().insertMailboxOverwrites(
                 MailboxOverwriteEntity.of(threadIds, Role.IMPORTANT, false)
         );
         final WorkManager workManager = WorkManager.getInstance(application);
-        for(final String threadId : threadIds) {
+        for (final String threadId : threadIds) {
             final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(RemoveFromMailboxWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
-                    .setInputData(RemoveFromMailboxWorker.data(requireAccount().id, threadId, mailbox))
+                    .setInputData(RemoveFromMailboxWorker.data(accountId, threadId, mailbox))
                     .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                     .setInitialDelay(INITIAL_DELAY_DURATION, INITIAL_DELAY_TIME_UNIT)
                     .build();
@@ -475,10 +439,10 @@ public class LttrsRepository {
                 insertQueryItemOverwrite(threadIds, keyword);
             }
             final WorkManager workManager = WorkManager.getInstance(application);
-            for(final String threadId : threadIds) {
+            for (final String threadId : threadIds) {
                 final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ModifyKeywordWorker.class)
                         .setConstraints(CONNECTED_CONSTRAINT)
-                        .setInputData(ModifyKeywordWorker.data(requireAccount().id, threadId, keyword, targetState))
+                        .setInputData(ModifyKeywordWorker.data(accountId, threadId, keyword, targetState))
                         .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                         .setInitialDelay(targetState ? 0 : INITIAL_DELAY_DURATION, INITIAL_DELAY_TIME_UNIT)
                         .build();

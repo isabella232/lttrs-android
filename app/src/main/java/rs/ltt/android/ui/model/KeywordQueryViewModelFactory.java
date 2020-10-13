@@ -28,18 +28,18 @@ import rs.ltt.android.entity.AccountWithCredentials;
 public class KeywordQueryViewModelFactory implements ViewModelProvider.Factory {
 
     private final Application application;
-    private final ListenableFuture<AccountWithCredentials> account;
+    private final long accountId;
     private final String keyword;
 
-    public KeywordQueryViewModelFactory(@NonNull Application application, ListenableFuture<AccountWithCredentials> account, @NonNull String keyword) {
+    public KeywordQueryViewModelFactory(@NonNull Application application, final long accountId, @NonNull String keyword) {
         this.application = application;
-        this.account = account;
+        this.accountId = accountId;
         this.keyword = keyword;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return modelClass.cast(new KeywordQueryViewModel(application, account, keyword));
+        return modelClass.cast(new KeywordQueryViewModel(application, accountId, keyword));
     }
 }

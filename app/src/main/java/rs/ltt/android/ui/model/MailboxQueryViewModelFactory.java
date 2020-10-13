@@ -28,18 +28,18 @@ import rs.ltt.android.entity.AccountWithCredentials;
 public class MailboxQueryViewModelFactory implements ViewModelProvider.Factory {
 
     private final Application application;
-    private final ListenableFuture<AccountWithCredentials> account;
+    private final long accountId;
     private final String id;
 
-    public MailboxQueryViewModelFactory(Application application, ListenableFuture<AccountWithCredentials> account, String id) {
+    public MailboxQueryViewModelFactory(Application application, final long accountId, String id) {
         this.application = application;
-        this.account = account;
+        this.accountId = accountId;
         this.id = id;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return modelClass.cast(new MailboxQueryViewModel(application, account, id));
+        return modelClass.cast(new MailboxQueryViewModel(application, accountId, id));
     }
 }

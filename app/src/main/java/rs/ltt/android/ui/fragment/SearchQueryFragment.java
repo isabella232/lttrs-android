@@ -49,7 +49,7 @@ public class SearchQueryFragment extends AbstractQueryFragment {
                 getViewModelStore(),
                 new SearchQueryViewModelFactory(
                         requireActivity().getApplication(),
-                        getLttrsViewModel().getAccount(),
+                        getLttrsViewModel().getAccountId(),
                         term
                 )
         );

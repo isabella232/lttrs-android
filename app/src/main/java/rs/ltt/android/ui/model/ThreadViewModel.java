@@ -71,11 +71,15 @@ public class ThreadViewModel extends AndroidViewModel {
     private LiveData<MenuConfiguration> menuConfiguration;
 
 
-    ThreadViewModel(@NonNull Application application, ListenableFuture<AccountWithCredentials> account, String threadId, String label, boolean triggerRead) {
+    ThreadViewModel(@NonNull final Application application,
+                    final long accountId,
+                    final String threadId,
+                    final String label,
+                    final boolean triggerRead) {
         super(application);
         this.threadId = threadId;
         this.label = label;
-        this.threadRepository = new ThreadRepository(application, account);
+        this.threadRepository = new ThreadRepository(application, accountId);
         final LiveData<ThreadHeader> header = this.threadRepository.getThreadHeader(threadId);
         this.emails = this.threadRepository.getEmails(threadId);
         this.mailboxes = this.threadRepository.getMailboxes(threadId);

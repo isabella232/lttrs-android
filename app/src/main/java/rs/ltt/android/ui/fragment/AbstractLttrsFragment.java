@@ -43,18 +43,4 @@ abstract class AbstractLttrsFragment extends Fragment {
         }
         throw new IllegalStateException("Fragment is not attached to LttrsActivity");
     }
-
-    AccountWithCredentials requireAccount() {
-        final LttrsViewModel lttrsViewModel = getLttrsViewModel();
-        ListenableFuture<AccountWithCredentials> future = lttrsViewModel.getAccount();
-        if (future.isDone()) {
-            try {
-                return future.get();
-            } catch (Exception e) {
-                throw new IllegalStateException("Account information not yet available");
-            }
-        } else {
-            throw new IllegalStateException("Account information not yet available");
-        }
-    }
 }
