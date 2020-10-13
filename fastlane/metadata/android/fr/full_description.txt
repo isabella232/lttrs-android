@@ -1,0 +1,10 @@
+Ltt.rs (se prononce \"Letters\") est une preuve de concept de client e-mail (JMAP). Il fait appel à une utilisation intensive d'Android Jetpack, afin d'être plus facile à maintenir que d'autres clients e-mail Android.
+
+Caractéristiques et considérations de conception :
+
+* Mise en cache importante, sans être entièrement utilisable hors-ligne. Ltt.rs s'appuie sur les excellentes capacités de mise en cache de JMAP. Néanmoins, marquer un fil de discussion comme lu fait un aller-retour vers le serveur pour mettre à jour des informations telles que le nombre de lectures. L'action en elle-même ne sera pas perdue même si exécutée hors-ligne.
+* Configurer le compte et terminé. Trop de paramètres impliquent une labyrinthe de fonctionnalités et rend la maintenance de l'application plus compliquée.
+* Nombre de dépendances minime. Seules les bibliothèques les plus connues, les plus testées de fournisseurs réputés. Les bibliothèques tierces sont souvent de piètre qualité et finissent abandonnées.
+* Autocrypt de haute qualité (fonctionnalité prévue). Ltt.rs s'inscrit parfaitement dans ses strictes directives UX.
+* Basé sur jmap-mua, un client e-mail headless, ou une bibliothèque qui gère tout ce qu'un client e-mail gérerait, outre le stockage de données et l'interface utilisateur. Il existe également lttrs-cli, utilisant la même biblioth!que.
+* S'inspire de Gmail en cas de doutes.

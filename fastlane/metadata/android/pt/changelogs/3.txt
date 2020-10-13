@@ -1,0 +1,2 @@
+* Ajuste nas cores
+* Vazamentos de memória corrigidos
