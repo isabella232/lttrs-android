@@ -57,7 +57,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
     private OnFlaggedToggled onFlaggedToggled;
     private OnThreadClicked onThreadClicked;
     private SelectionTracker<String> selectionTracker;
-    private Future<MailboxWithRoleAndName> importantMailbox;
+    private Future<MailboxWithRoleAndName> importantMailbox; //TODO this needs to be a LiveData and needs to trigger a refresh when changed
 
 
     public ThreadOverviewAdapter() {
