@@ -63,6 +63,10 @@ public class ComposeActivity extends AppCompatActivity {
     private ActivityComposeBinding binding;
     private ComposeViewModel composeViewModel;
 
+    public static void compose(final Fragment fragment, Long account) {
+        launch(fragment, account, null, ComposeAction.NEW);
+    }
+
     public static void editDraft(final Fragment fragment, Long account, final String emailId) {
         launch(fragment, account, emailId, ComposeAction.EDIT_DRAFT);
     }
@@ -75,10 +79,13 @@ public class ComposeActivity extends AppCompatActivity {
                                final Long account,
                                final String emailId,
                                final ComposeAction action) {
+        LOGGER.info("launching ComposeActivity for account {}", account);
         final Intent intent = new Intent(fragment.getContext(), ComposeActivity.class);
         intent.putExtra(ACCOUNT_EXTRA, account);
         intent.putExtra(COMPOSE_ACTION_EXTRA, action.toString());
-        intent.putExtra(EMAIL_ID_EXTRA, emailId);
+        if (emailId != null) {
+            intent.putExtra(EMAIL_ID_EXTRA, emailId);
+        }
         fragment.startActivityForResult(intent, REQUEST_EDIT_DRAFT);
     }
 
@@ -86,7 +93,7 @@ public class ComposeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (LttrsApplication.get(this).hasAccounts()) {
+        if (LttrsApplication.get(this).noAccountsConfigured()) {
             redirectToSetupActivity();
             finishAffinity();
             return;

@@ -36,15 +36,15 @@ public class LttrsApplication extends Application implements Configuration.Provi
 
     private final static Object CACHE_LOCK = new Object();
 
-    public boolean hasAccounts() {
-        return getMostRecentlySelectedAccountId() != null;
+    public boolean noAccountsConfigured() {
+        return getMostRecentlySelectedAccountId() == null;
     }
 
     public Long getMostRecentlySelectedAccountId() {
         synchronized (CACHE_LOCK) {
             if (this.mostRecentlySelectedAccountId == null) {
                 final Long id = AppDatabase.getInstance(this).accountDao().getMostRecentlySelectedAccountId();
-                LOGGER.debug("read most recently selected account id from database: {}", id);
+                LOGGER.info("read most recently selected account id from database: {}", id);
                 this.mostRecentlySelectedAccountId = id;
             }
             return mostRecentlySelectedAccountId;

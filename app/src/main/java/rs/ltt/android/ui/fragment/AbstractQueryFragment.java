@@ -90,9 +90,7 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
 
         binding.setViewModel(viewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
-        binding.compose.setOnClickListener((v) -> {
-            startActivity(new Intent(requireActivity(), ComposeActivity.class));
-        });
+        binding.compose.setOnClickListener((v) -> ComposeActivity.compose(this, getLttrsViewModel().getAccountId()));
         if (showComposeButton() && actionMode == null) {
             binding.compose.show();
         }

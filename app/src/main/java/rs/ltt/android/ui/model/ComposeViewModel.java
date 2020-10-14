@@ -40,11 +40,9 @@ import java.util.List;
 import java.util.UUID;
 
 import rs.ltt.android.R;
-import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.entity.EditableEmail;
 import rs.ltt.android.entity.IdentityWithNameAndEmail;
 import rs.ltt.android.repository.ComposeRepository;
-import rs.ltt.android.repository.MainRepository;
 import rs.ltt.android.ui.ComposeAction;
 import rs.ltt.android.util.Event;
 import rs.ltt.jmap.common.entity.EmailAddress;
@@ -256,7 +254,7 @@ public class ComposeViewModel extends AndroidViewModel {
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(@NonNull Throwable throwable) {
 
             }
         }, MoreExecutors.directExecutor());
