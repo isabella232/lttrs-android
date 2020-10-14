@@ -25,7 +25,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import rs.ltt.android.util.SetupCache;
+import rs.ltt.android.LttrsApplication;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         final long start = SystemClock.elapsedRealtime();
-        final Long accountId = SetupCache.getMostRecentlySelectedAccountId(this);
+        final Long accountId = LttrsApplication.get(this).getMostRecentlySelectedAccountId();
         if (accountId != null) {
             final Intent intent = new Intent(this, LttrsActivity.class);
             intent.putExtra(LttrsActivity.EXTRA_ACCOUNT_ID, accountId);

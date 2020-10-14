@@ -15,6 +15,7 @@
 
 package rs.ltt.android;
 
+import android.app.Activity;
 import android.app.Application;
 
 import androidx.annotation.NonNull;
@@ -25,9 +26,47 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Executors;
 
+import rs.ltt.android.database.AppDatabase;
+
 public class LttrsApplication extends Application implements Configuration.Provider {
 
     private final Logger LOGGER = LoggerFactory.getLogger(LttrsApplication.class);
+
+    private Long mostRecentlySelectedAccountId = null;
+
+    private final static Object CACHE_LOCK = new Object();
+
+    public boolean hasAccounts() {
+        return getMostRecentlySelectedAccountId() != null;
+    }
+
+    public Long getMostRecentlySelectedAccountId() {
+        synchronized (CACHE_LOCK) {
+            if (this.mostRecentlySelectedAccountId == null) {
+                final Long id = AppDatabase.getInstance(this).accountDao().getMostRecentlySelectedAccountId();
+                LOGGER.debug("read most recently selected account id from database: {}", id);
+                this.mostRecentlySelectedAccountId = id;
+            }
+            return mostRecentlySelectedAccountId;
+        }
+    }
+
+    public void invalidateMostRecentlySelectedAccountId() {
+        synchronized (CACHE_LOCK) {
+            this.mostRecentlySelectedAccountId = null;
+        }
+    }
+
+    public static LttrsApplication get(final Application application) {
+        if (application instanceof LttrsApplication) {
+            return (LttrsApplication) application;
+        }
+        throw new IllegalStateException("Application is not a " + LttrsApplication.class.getSimpleName());
+    }
+
+    public static LttrsApplication get(final Activity activity) {
+        return get(activity.getApplication());
+    }
 
     @NonNull
     @Override

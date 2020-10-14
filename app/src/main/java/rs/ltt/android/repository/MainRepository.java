@@ -17,10 +17,6 @@ package rs.ltt.android.repository;
 
 import android.app.Application;
 
-import androidx.annotation.Nullable;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Transformations;
-
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
@@ -38,12 +34,12 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import okhttp3.HttpUrl;
+import rs.ltt.android.LttrsApplication;
 import rs.ltt.android.cache.DatabaseCache;
 import rs.ltt.android.database.AppDatabase;
 import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.entity.SearchSuggestionEntity;
-import rs.ltt.android.util.SetupCache;
 import rs.ltt.jmap.client.session.FileSessionCache;
 import rs.ltt.jmap.common.entity.Account;
 import rs.ltt.jmap.mua.Mua;
@@ -56,7 +52,7 @@ public class MainRepository {
     private final AppDatabase appDatabase;
     private final Application application;
 
-    public MainRepository(Application application) {
+    public MainRepository(final Application application) {
         this.application = application;
         this.appDatabase = AppDatabase.getInstance(application);
     }
@@ -81,7 +77,7 @@ public class MainRepository {
                         accounts
                 );
                 final Long[] ids = Lists.transform(credentials, c -> c.id).toArray(new Long[0]);
-                SetupCache.invalidate();
+                LttrsApplication.get(application).invalidateMostRecentlySelectedAccountId();
                 final Collection<ListenableFuture<Status>> mailboxRefreshes = Collections2.transform(
                         credentials,
                         new Function<AccountWithCredentials, ListenableFuture<Status>>() {

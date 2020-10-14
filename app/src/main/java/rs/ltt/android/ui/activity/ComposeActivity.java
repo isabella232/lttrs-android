@@ -41,13 +41,13 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
+import rs.ltt.android.LttrsApplication;
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.ActivityComposeBinding;
 import rs.ltt.android.ui.ChipDrawableSpan;
 import rs.ltt.android.ui.ComposeAction;
 import rs.ltt.android.ui.model.ComposeViewModel;
 import rs.ltt.android.ui.model.ComposeViewModelFactory;
-import rs.ltt.android.util.SetupCache;
 import rs.ltt.jmap.mua.util.MailToUri;
 
 //TODO handle save instance state
@@ -86,7 +86,7 @@ public class ComposeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (!SetupCache.hasAccounts(this)) {
+        if (LttrsApplication.get(this).hasAccounts()) {
             redirectToSetupActivity();
             finishAffinity();
             return;
