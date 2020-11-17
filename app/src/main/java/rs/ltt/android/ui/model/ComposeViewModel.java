@@ -249,13 +249,13 @@ public class ComposeViewModel extends AndroidViewModel {
     private void initializeWithEmail() {
         Futures.addCallback(this.email, new FutureCallback<EditableEmail>() {
             @Override
-            public void onSuccess(@NullableDecl EditableEmail result) {
+            public void onSuccess(@NullableDecl final EditableEmail result) {
                 initializeWithEmail(result);
             }
 
             @Override
-            public void onFailure(@NonNull Throwable throwable) {
-
+            public void onFailure(@NonNull final Throwable throwable) {
+                //TODO print warning and exit view?
             }
         }, MoreExecutors.directExecutor());
     }

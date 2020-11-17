@@ -20,10 +20,10 @@ import androidx.room.Relation;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class FullEmail {
     public String id;
     public String preview;
     public String threadId;
-    public Date receivedAt;
+    public Instant receivedAt;
 
     @Relation(entity = EmailKeywordEntity.class, parentColumn = "id", entityColumn = "emailId", projection = {"keyword"})
     public Set<String> keywords;

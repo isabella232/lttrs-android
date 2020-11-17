@@ -19,7 +19,8 @@ import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 
 import rs.ltt.jmap.common.entity.Email;
 
@@ -37,11 +38,11 @@ public class EmailEntity {
 
     public Long size;
 
-    public Date receivedAt;
+    public Instant receivedAt;
 
     public String subject;
 
-    public Date sentAt;
+    public OffsetDateTime sentAt;
 
     public Boolean hasAttachment;
 

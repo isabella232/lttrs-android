@@ -17,6 +17,11 @@ package rs.ltt.android.database;
 
 import androidx.room.TypeConverter;
 
+import org.joda.time.format.DateTimeFormat;
+
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 import okhttp3.HttpUrl;
@@ -85,13 +90,23 @@ public class Converters {
 
 
     @TypeConverter
-    public static Date toDate(long timestamp) {
-        return new Date(timestamp);
+    public static Instant toInstant(long timestamp) {
+        return Instant.ofEpochMilli(timestamp);
     }
 
     @TypeConverter
-    public static long toTimestamp(Date date) {
-        return date.getTime();
+    public static long toTimestamp(Instant instant) {
+        return instant.getEpochSecond() * 1000;
+    }
+
+    @TypeConverter
+    public static OffsetDateTime toOffsetDateTime(final String dateTime) {
+        return dateTime == null ? null : OffsetDateTime.parse(dateTime);
+    }
+
+    @TypeConverter
+    public static String toString(final OffsetDateTime dateTime) {
+        return dateTime == null ? null : DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(dateTime);
     }
 
     @TypeConverter

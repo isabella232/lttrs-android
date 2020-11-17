@@ -54,8 +54,8 @@ public class QueryRepository extends LttrsRepository {
     private final Set<String> runningQueries = new HashSet<>();
     private final Set<String> runningPagingRequests = new HashSet<>();
 
-    private MutableLiveData<Set<String>> runningQueriesLiveData = new MutableLiveData<>(runningQueries);
-    private MutableLiveData<Set<String>> runningPagingRequestsLiveData = new MutableLiveData<>(runningPagingRequests);
+    private final MutableLiveData<Set<String>> runningQueriesLiveData = new MutableLiveData<>(runningQueries);
+    private final MutableLiveData<Set<String>> runningPagingRequestsLiveData = new MutableLiveData<>(runningPagingRequests);
 
 
     public QueryRepository(final Application application, final long accountId) {
@@ -63,6 +63,7 @@ public class QueryRepository extends LttrsRepository {
     }
 
     public LiveData<PagedList<ThreadOverviewItem>> getThreadOverviewItems(final EmailQuery query) {
+        LOGGER.debug("building live paged list");
         return new LivePagedListBuilder<>(database.queryDao().getThreadOverviewItems(query.toQueryString()), 30)
                 .setBoundaryCallback(new PagedList.BoundaryCallback<ThreadOverviewItem>() {
                     @Override

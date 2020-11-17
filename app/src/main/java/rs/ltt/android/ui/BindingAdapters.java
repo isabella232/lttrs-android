@@ -45,10 +45,13 @@ import com.google.common.collect.Lists;
 
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
-import java.util.Calendar;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -63,38 +66,32 @@ import rs.ltt.jmap.mua.util.EmailBodyUtil;
 
 public class BindingAdapters {
 
-    private static final long SIX_HOURS = 1000L * 60 * 60 * 6;
-    private static final long THREE_MONTH = 1000L * 60 * 60 * 24 * 30 * 3;
+    private static final Duration SIX_HOURS = Duration.ofHours(6);
+    private static final Duration THREE_MONTH = Duration.ofDays(90);
 
-    private static boolean sameYear(Calendar today, Calendar specifiedDateDate) {
-        return today.get(Calendar.YEAR) == specifiedDateDate.get(Calendar.YEAR);
+    private static boolean sameYear(final Instant a, final Instant b) {
+        final ZoneId local = ZoneId.systemDefault();
+        return LocalDateTime.ofInstant(a, local).getYear() == LocalDateTime.ofInstant(b, local).getYear();
     }
 
-    private static boolean sameDay(Calendar today, Calendar specifiedDate) {
-        return today.get(Calendar.DAY_OF_MONTH) == specifiedDate.get(Calendar.DAY_OF_MONTH)
-                && today.get(Calendar.MONTH) == specifiedDate.get(Calendar.MONTH)
-                && today.get(Calendar.YEAR) == specifiedDate.get(Calendar.YEAR);
+    private static boolean sameDay(final Instant a, final Instant b) {
+        return a.truncatedTo(ChronoUnit.DAYS).equals(b.truncatedTo(ChronoUnit.DAYS));
     }
 
     @BindingAdapter("date")
-    public static void setInteger(TextView textView, Date receivedAt) {
-        if (receivedAt == null || receivedAt.getTime() <= 0) {
+    public static void setInteger(TextView textView, Instant receivedAt) {
+        if (receivedAt == null || receivedAt.getEpochSecond() <= 0) {
             textView.setVisibility(View.GONE);
         } else {
-            Context context = textView.getContext();
-            Calendar specifiedDate = Calendar.getInstance();
-            specifiedDate.setTime(receivedAt);
-            Calendar today = Calendar.getInstance();
+            final Context context = textView.getContext();
+            final Instant now = Instant.now();
             textView.setVisibility(View.VISIBLE);
-
-            long diff = today.getTimeInMillis() - specifiedDate.getTimeInMillis();
-
-            if (sameDay(today, specifiedDate) || diff < SIX_HOURS) {
-                textView.setText(DateUtils.formatDateTime(context, receivedAt.getTime(), DateUtils.FORMAT_SHOW_TIME));
-            } else if (sameYear(today, specifiedDate) || diff < THREE_MONTH) {
-                textView.setText(DateUtils.formatDateTime(context, receivedAt.getTime(), DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_YEAR | DateUtils.FORMAT_ABBREV_ALL));
+            if (sameDay(receivedAt, now) || now.minus(SIX_HOURS).isBefore(receivedAt)) {
+                textView.setText(DateUtils.formatDateTime(context, receivedAt.getEpochSecond() * 1000, DateUtils.FORMAT_SHOW_TIME));
+            } else if (sameYear(receivedAt, now) || now.minus(THREE_MONTH).isBefore(receivedAt)) {
+                textView.setText(DateUtils.formatDateTime(context, receivedAt.getEpochSecond() * 1000, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_YEAR | DateUtils.FORMAT_ABBREV_ALL));
             } else {
-                textView.setText(DateUtils.formatDateTime(context, receivedAt.getTime(), DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_MONTH_DAY | DateUtils.FORMAT_ABBREV_ALL));
+                textView.setText(DateUtils.formatDateTime(context, receivedAt.getEpochSecond() * 1000, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_MONTH_DAY | DateUtils.FORMAT_ABBREV_ALL));
             }
         }
     }

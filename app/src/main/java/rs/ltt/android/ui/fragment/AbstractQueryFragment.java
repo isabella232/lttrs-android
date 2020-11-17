@@ -157,7 +157,9 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
             } else {
                 atTop = false;
             }
+            LOGGER.debug("submitting list");
             threadOverviewAdapter.submitList(threadOverviewItems, () -> {
+                LOGGER.debug("list submitted");
                 if (atTop && binding != null) {
                     binding.threadList.scrollToPosition(0);
                 }

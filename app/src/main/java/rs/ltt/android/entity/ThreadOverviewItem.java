@@ -27,10 +27,10 @@ import com.google.common.collect.Maps;
 
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +75,7 @@ public class ThreadOverviewItem {
         return email == null ? "(no subject)" : Strings.nullToEmpty(email.subject).trim();
     }
 
-    public Date getReceivedAt() {
+    public Instant getReceivedAt() {
         final Email email = Iterables.tryFind(emails, e -> e != null && emailId.equals(e.id)).orNull();
         return email == null ? null : email.receivedAt;
     }
@@ -234,7 +234,7 @@ public class ThreadOverviewItem {
         public String preview;
         public String threadId;
         public String subject;
-        public Date receivedAt;
+        public Instant receivedAt;
 
         @Relation(entity = EmailKeywordEntity.class, parentColumn = "id", entityColumn = "emailId", projection = {"keyword"})
         public Set<String> keywords;
