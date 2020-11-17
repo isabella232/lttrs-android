@@ -15,8 +15,6 @@
 
 package rs.ltt.android.entity;
 
-import android.util.Log;
-
 import androidx.room.Relation;
 
 import java.util.List;
@@ -37,10 +35,7 @@ public class ThreadHeader {
     public Set<KeywordOverwriteEntity> keywordOverwriteEntities;
 
     public boolean showAsFlagged() {
-
-        Log.d("lttrs","showAsFlagged(). num overwrites: "+keywordOverwriteEntities.size());
-
-        KeywordOverwriteEntity flaggedOverwrite = KeywordOverwriteEntity.getKeywordOverwrite(keywordOverwriteEntities, Keyword.FLAGGED);
+        final KeywordOverwriteEntity flaggedOverwrite = KeywordOverwriteEntity.getKeywordOverwrite(keywordOverwriteEntities, Keyword.FLAGGED);
         return flaggedOverwrite != null ? flaggedOverwrite.value : KeywordUtil.anyHas(emailsWithKeywords, Keyword.FLAGGED);
     }
 

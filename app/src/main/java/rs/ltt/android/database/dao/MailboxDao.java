@@ -15,8 +15,6 @@
 
 package rs.ltt.android.database.dao;
 
-import android.util.Log;
-
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
@@ -24,6 +22,9 @@ import androidx.room.Query;
 import androidx.room.Transaction;
 
 import com.google.common.util.concurrent.ListenableFuture;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,6 +41,8 @@ import rs.ltt.jmap.mua.cache.Update;
 
 @Dao
 public abstract class MailboxDao extends AbstractEntityDao {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MailboxDao.class);
 
     @Insert
     protected abstract void insert(MailboxEntity mailboxEntity);
@@ -110,7 +113,7 @@ public abstract class MailboxDao extends AbstractEntityDao {
     @Transaction
     public void set(List<MailboxEntity> mailboxEntities, String state) {
         if (state != null && state.equals(getState(EntityType.MAILBOX))) {
-            Log.d("lttrs","nothing to do. mailboxes with this state have already been set");
+            LOGGER.debug("nothing to do. mailboxes with this state have already been set");
             return;
         }
         deleteAll();
@@ -124,7 +127,7 @@ public abstract class MailboxDao extends AbstractEntityDao {
     public void update(final Update<Mailbox> update, final String[] updatedProperties) {
         final String newState = update.getNewTypedState().getState();
         if (newState != null && newState.equals(getState(EntityType.MAILBOX))) {
-            Log.d("lttrs","nothing to do. mailboxes already at newest state");
+            LOGGER.debug("nothing to do. mailboxes already at newest state");
             return;
         }
         for (Mailbox mailbox : update.getCreated()) {

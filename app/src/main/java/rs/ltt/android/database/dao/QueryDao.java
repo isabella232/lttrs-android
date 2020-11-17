@@ -15,13 +15,14 @@
 
 package rs.ltt.android.database.dao;
 
-import android.util.Log;
-
 import androidx.paging.DataSource;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Transaction;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -43,6 +44,8 @@ import static androidx.room.OnConflictStrategy.REPLACE;
 
 @Dao
 public abstract class QueryDao extends AbstractEntityDao {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueryDao.class);
 
     @Insert(onConflict = REPLACE)
     abstract long insert(QueryEntity entity);
@@ -146,34 +149,34 @@ public abstract class QueryDao extends AbstractEntityDao {
         final String newState = queryUpdate.getNewTypedState().getState();
         final String oldState = queryUpdate.getOldTypedState().getState();
         if (newState.equals(getQueryState(queryString))) {
-            Log.d("lttrs", "nothing to do. query already at newest state");
+            LOGGER.debug("nothing to do. query already at newest state");
             return;
         }
         throwOnCacheConflict(EntityType.EMAIL, emailState);
         final QueryEntity queryEntity = getQueryEntity(queryString);
 
-        int count = deleteAllExecuted(queryEntity.id);
-        Log.d("lttrs", "deleted " + count + " query overwrites");
+        final int count = deleteAllExecuted(queryEntity.id);
+        LOGGER.debug("deleted {} query overwrites", count);
 
         for (String emailId : queryUpdate.getRemoved()) {
-            Log.d("lttrs", "deleting emailId=" + emailId + " from queryId=" + queryEntity.id);
+            LOGGER.debug("deleting emailId=" + emailId + " from queryId=" + queryEntity.id);
             decrementAllPositionsFrom(queryEntity.id, emailId);
             deleteQueryItem(queryEntity.id, emailId);
         }
         for (AddedItem<QueryResultItem> addedItem : queryUpdate.getAdded()) {
-            Log.d("lttrs", "adding item " + addedItem);
-            Log.d("lttrs", "increment all positions where queryId=" + queryEntity.id + " and position=" + addedItem.getIndex());
+            LOGGER.debug("adding item {}", addedItem);
+            LOGGER.debug("increment all positions where queryId={} and position={}", queryEntity.id, addedItem.getIndex());
 
             if (incrementAllPositionsFrom(queryEntity.id, addedItem.getIndex()) == 0 && getItemCount(queryEntity.id) != addedItem.getIndex()) {
-                Log.d("lttrs", "ignoring query item change at position = " + addedItem.getIndex());
+                LOGGER.debug("ignoring query item change at position = {}", addedItem.getIndex());
                 continue;
             }
-            Log.d("lttrs", "insert queryItemEntity on position " + addedItem.getIndex() + " and id=" + queryEntity.id);
+            LOGGER.debug("insert queryItemEntity on position {} and id={}", addedItem.getIndex(), queryEntity.id);
             insert(QueryItemEntity.of(queryEntity.id, addedItem.getIndex(), addedItem.getItem()));
         }
 
         if (updateQueryState(queryEntity.id, newState, oldState) != 1) {
-            throw new CacheConflictException("Unable to update query from oldState=" + oldState + " to newState=" + newState);
+            throw new CacheConflictException("Unable to update query from oldState={}" + oldState + " to newState=" + newState);
         }
     }
 }

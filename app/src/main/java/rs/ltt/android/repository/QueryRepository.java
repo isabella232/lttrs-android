@@ -16,10 +16,8 @@
 package rs.ltt.android.repository;
 
 import android.app.Application;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
@@ -37,8 +35,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-import rs.ltt.android.database.LttrsDatabase;
-import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.ThreadOverviewItem;
@@ -49,7 +45,6 @@ import rs.ltt.jmap.mua.Status;
 public class QueryRepository extends LttrsRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryRepository.class);
-
 
     private final Set<String> runningQueries = new HashSet<>();
     private final Set<String> runningPagingRequests = new HashSet<>();
@@ -68,14 +63,14 @@ public class QueryRepository extends LttrsRepository {
                 .setBoundaryCallback(new PagedList.BoundaryCallback<ThreadOverviewItem>() {
                     @Override
                     public void onZeroItemsLoaded() {
-                        Log.d("lttrs", "onZeroItemsLoaded");
+                        LOGGER.debug("onZeroItemsLoaded");
                         requestNextPage(query, null); //conceptually in terms of loading indicators this is more of a page request
                         super.onZeroItemsLoaded();
                     }
 
                     @Override
                     public void onItemAtEndLoaded(@NonNull ThreadOverviewItem itemAtEnd) {
-                        Log.d("lttrs", "onItemAtEndLoaded(" + itemAtEnd.emailId + ")");
+                        LOGGER.debug("onItemAtEndLoaded({})", itemAtEnd.emailId);
                         requestNextPage(query, itemAtEnd.emailId);
                         super.onItemAtEndLoaded(itemAtEnd);
                     }
@@ -103,14 +98,14 @@ public class QueryRepository extends LttrsRepository {
         final String queryString = emailQuery.toQueryString();
         synchronized (this) {
             if (!runningQueries.add(queryString)) {
-                Log.d("lttrs", "skipping refresh since already running");
+                LOGGER.debug("skipping refresh since already running");
                 return;
             }
             if (runningPagingRequests.contains(queryString)) {
                 //even though this refresh call is only implicit through the pageRequest we want to display something nice for the user
                 runningQueries.add(queryString);
                 runningQueriesLiveData.postValue(runningQueries);
-                Log.d("lttrs", "skipping refresh since we are running a page request");
+                LOGGER.debug("skipping refresh since we are running a page request");
                 return;
             }
 
@@ -125,7 +120,7 @@ public class QueryRepository extends LttrsRepository {
                 Status status = statusFuture.get();
             } catch (Exception e) {
                 final Throwable cause = e.getCause();
-                Log.d("lttrs", "unable to refresh", cause);
+                LOGGER.debug("unable to refresh", cause);
             }
         }, MoreExecutors.directExecutor());
     }
@@ -147,7 +142,7 @@ public class QueryRepository extends LttrsRepository {
         final String queryString = emailQuery.toQueryString();
         synchronized (this) {
             if (!runningPagingRequests.add(queryString)) {
-                Log.d("lttrs", "skipping paging request since already running");
+                LOGGER.debug("skipping paging request since already running");
                 return;
             }
             runningPagingRequestsLiveData.postValue(runningPagingRequests);
@@ -169,12 +164,12 @@ public class QueryRepository extends LttrsRepository {
                 runningQueriesLiveData.postValue(runningQueries);
             }
             try {
-                Log.d("lttrs", "requestNextPageResult=" + hadResults.get());
+                LOGGER.debug("requestNextPageResult=" + hadResults.get());
             } catch (ExecutionException e) {
                 Throwable cause = e.getCause();
-                Log.d("lttrs", "error retrieving the next page", cause);
+                LOGGER.debug("error retrieving the next page", cause);
             } catch (Exception e) {
-                Log.d("lttrs", "error paging ", e);
+                LOGGER.debug("error paging ", e);
             }
         }, MoreExecutors.directExecutor());
     }

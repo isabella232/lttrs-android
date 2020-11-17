@@ -15,8 +15,6 @@
 
 package rs.ltt.android.database.dao;
 
-import android.util.Log;
-
 import androidx.lifecycle.LiveData;
 import androidx.paging.DataSource;
 import androidx.room.Dao;
@@ -80,7 +78,7 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
 
     private void set(Thread[] threads, String state) {
         if (state != null && state.equals(getState(EntityType.THREAD))) {
-            Log.d("lttrs","nothing to do. threads with this state have already been set");
+            LOGGER.debug("nothing to do. threads with this state have already been set");
             return;
         }
         deleteAllThread();
@@ -111,7 +109,7 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
     public void update(Update<Thread> update) {
         final String newState = update.getNewTypedState().getState();
         if (newState != null && newState.equals(getState(EntityType.THREAD))) {
-            Log.d("lttrs","nothing to do. threads already at newest state");
+            LOGGER.debug("nothing to do. threads already at newest state");
             return;
         }
         Thread[] created = update.getCreated();
@@ -123,7 +121,7 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
                 deleteAllThreadItem(thread.getId());
                 insert(ThreadItemEntity.of(thread));
             } else {
-                Log.d("lttrs","skipping update to thread "+thread.getId());
+                LOGGER.debug("skipping update to thread "+thread.getId());
             }
         }
         for(String id : update.getDestroyed()) {
@@ -222,7 +220,7 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
 
     private void set(final Email[] emails, final String state) {
         if (state != null && state.equals(getState(EntityType.EMAIL))) {
-            Log.d("lttrs", "nothing to do. emails with this state have already been set");
+            LOGGER.debug( "nothing to do. emails with this state have already been set");
             return;
         }
         deleteAllEmail();
@@ -280,7 +278,7 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
     public void updateEmails(Update<Email> update, String[] updatedProperties) {
         final String newState = update.getNewTypedState().getState();
         if (newState != null && newState.equals(getState(EntityType.EMAIL))) {
-            Log.d("lttrs", "nothing to do. emails already at newest state");
+            LOGGER.debug( "nothing to do. emails already at newest state");
             return;
         }
         final Email[] created = update.getCreated();

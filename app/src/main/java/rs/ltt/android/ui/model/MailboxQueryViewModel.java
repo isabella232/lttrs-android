@@ -17,15 +17,16 @@ package rs.ltt.android.ui.model;
 
 
 import android.app.Application;
-import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.ListenableFuture;
 
-import rs.ltt.android.entity.AccountWithCredentials;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
@@ -33,6 +34,8 @@ import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 
 public class MailboxQueryViewModel extends AbstractQueryViewModel {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MailboxQueryViewModel.class);
 
 
     private final LiveData<MailboxOverviewItem> mailbox;
@@ -57,7 +60,7 @@ public class MailboxQueryViewModel extends AbstractQueryViewModel {
         if (mailbox == null) {
             throw new IllegalStateException("No mailbox associated with MailboxQueryViewModel");
         }
-        Log.d("lttrs", "remove " + item.emailId + " from " + mailbox.name);
+        LOGGER.debug("remove {} from {}", item.emailId, mailbox.name);
 
         queryRepository.removeFromMailbox(ImmutableSet.of(item.threadId), mailbox);
     }
