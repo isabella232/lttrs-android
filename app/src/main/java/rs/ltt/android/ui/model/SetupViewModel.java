@@ -17,7 +17,6 @@ package rs.ltt.android.ui.model;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.Network;
 
@@ -47,6 +46,7 @@ import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 
 import okhttp3.HttpUrl;
+import rs.ltt.android.BuildConfig;
 import rs.ltt.android.R;
 import rs.ltt.android.repository.MainRepository;
 import rs.ltt.android.util.Event;
@@ -225,46 +225,52 @@ public class SetupViewModel extends AndroidViewModel {
     }
 
     public boolean enterSessionResource() {
+        final HttpUrl httpUrl;
         try {
-            final HttpUrl httpUrl = HttpUrl.get(Strings.nullToEmpty(sessionResource.getValue()));
-            LOGGER.debug("User entered connection url {}", httpUrl.toString());
-            if (httpUrl.scheme().equals("http")) {
-                this.sessionResourceError.postValue(getApplication().getString(R.string.enter_a_secure_url));
-                return true;
-            }
-            this.loading.postValue(true);
-            this.sessionResource.postValue(httpUrl.toString());
-            this.sessionResourceError.postValue(null);
-            Futures.addCallback(getSession(), new FutureCallback<Session>() {
-                @Override
-                public void onSuccess(@NullableDecl Session session) {
-                    Preconditions.checkNotNull(session);
-                    processAccounts(session);
-                }
-
-                @Override
-                public void onFailure(@NonNull Throwable cause) {
-                    loading.postValue(false);
-                    if (cause instanceof UnauthorizedException) {
-                        passwordError.postValue(null);
-                        redirection.postValue(new Event<>(Target.ENTER_PASSWORD));
-                    } else if (isEndpointProblem(cause)) {
-                        sessionResourceError.postValue(causeToString(cause));
-                    } else if (cause instanceof UnknownHostException) {
-                        if (isNetworkAvailable()) {
-                            sessionResourceError.postValue(getApplication().getString(R.string.unknown_host, httpUrl.host()));
-                        } else {
-                            sessionResourceError.postValue(getApplication().getString(R.string.no_network_connection));
-                        }
-                    } else {
-                        reportUnableToFetchSession(cause);
-                    }
-                }
-            }, MoreExecutors.directExecutor());
-        } catch (IllegalArgumentException e) {
+            httpUrl = HttpUrl.get(Strings.nullToEmpty(sessionResource.getValue()));
+        } catch (final IllegalArgumentException e) {
             this.sessionResourceError.postValue(getApplication().getString(R.string.enter_a_valid_url));
+            return true;
         }
+        LOGGER.debug("User entered connection url {}", httpUrl.toString());
+        if (!secure(httpUrl)) {
+            this.sessionResourceError.postValue(getApplication().getString(R.string.enter_a_secure_url));
+            return true;
+        }
+        this.loading.postValue(true);
+        this.sessionResource.postValue(httpUrl.toString());
+        this.sessionResourceError.postValue(null);
+        Futures.addCallback(getSession(), new FutureCallback<Session>() {
+            @Override
+            public void onSuccess(@NullableDecl Session session) {
+                Preconditions.checkNotNull(session);
+                processAccounts(session);
+            }
+
+            @Override
+            public void onFailure(@NonNull Throwable cause) {
+                loading.postValue(false);
+                if (cause instanceof UnauthorizedException) {
+                    passwordError.postValue(null);
+                    redirection.postValue(new Event<>(Target.ENTER_PASSWORD));
+                } else if (isEndpointProblem(cause)) {
+                    sessionResourceError.postValue(causeToString(cause));
+                } else if (cause instanceof UnknownHostException) {
+                    if (isNetworkAvailable()) {
+                        sessionResourceError.postValue(getApplication().getString(R.string.unknown_host, httpUrl.host()));
+                    } else {
+                        sessionResourceError.postValue(getApplication().getString(R.string.no_network_connection));
+                    }
+                } else {
+                    reportUnableToFetchSession(cause);
+                }
+            }
+        }, MoreExecutors.directExecutor());
         return true;
+    }
+
+    private static boolean secure(final HttpUrl url) {
+        return url.scheme().equals("https") || (BuildConfig.DEBUG && url.host().equals("localhost"));
     }
 
     private ListenableFuture<Session> getSession() {
