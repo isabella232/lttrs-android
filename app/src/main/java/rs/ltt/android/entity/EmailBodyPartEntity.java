@@ -21,6 +21,7 @@ import androidx.room.ForeignKey;
 
 import com.google.common.collect.ImmutableList;
 
+import java.util.Collections;
 import java.util.List;
 
 import rs.ltt.jmap.common.entity.Email;
@@ -53,15 +54,19 @@ public class EmailBodyPartEntity {
 
     public static List<EmailBodyPartEntity> of(Email email) {
         final ImmutableList.Builder<EmailBodyPartEntity> builder = new ImmutableList.Builder<>();
-        final List<EmailBodyPart> textBody = email.getTextBody();
+        final List<EmailBodyPart> textBody = nullToEmpty(email.getTextBody());
         for (int i = 0; i < textBody.size(); ++i) {
             builder.add(of(email.getId(), EmailBodyPartType.TEXT_BODY, i, textBody.get(i)));
         }
-        final List<EmailBodyPart> attachment = email.getAttachments();
+        final List<EmailBodyPart> attachment = nullToEmpty(email.getAttachments());
         for (int i = 0; i < attachment.size(); ++i) {
             builder.add(of(email.getId(), EmailBodyPartType.ATTACHMENT, i, attachment.get(i)));
         }
         return builder.build();
+    }
+
+    private static <T> List<T> nullToEmpty(final List<T> value) {
+        return value == null ? Collections.emptyList() : value;
     }
 
     private static EmailBodyPartEntity of(String emailId, EmailBodyPartType type, long position, EmailBodyPart emailBodyPart) {

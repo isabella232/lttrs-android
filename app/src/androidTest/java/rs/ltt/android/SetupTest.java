@@ -16,7 +16,7 @@ import okhttp3.mockwebserver.MockWebServer;
 import rs.ltt.android.ui.activity.LttrsActivity;
 import rs.ltt.android.ui.activity.SetupActivity;
 import rs.ltt.jmap.mock.server.JmapDispatcher;
-import rs.ltt.jmap.mock.server.StubMailServer;
+import rs.ltt.jmap.mock.server.MockMailServer;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
@@ -38,7 +38,7 @@ public class SetupTest {
 
     @Before
     public void startServer() throws IOException {
-        mockWebServer.setDispatcher(new StubMailServer());
+        mockWebServer.setDispatcher(new MockMailServer(128));
         mockWebServer.start();
         Intents.init();
     }
