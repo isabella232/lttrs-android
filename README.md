@@ -38,8 +38,7 @@ JMAP servers are currently rare. As of November 2020 you need
 [Cyrus](https://github.com/cyrusimap/cyrus-imapd) 3.2.x.
 [Fastmail](https://www.fastmail.com/) is the only known provider.
 
-Experiments had been also run as of November 2020 on top of the [Apache James Server](https://james.apache.org/). 
-See [JAMES-2884](https://issues.apache.org/jira/browse/JAMES-2884) for more information.
+There is ongoing work on the [Apache Jame](https://james.apache.org/) Server. Follow [JAMES-2884](https://issues.apache.org/jira/browse/JAMES-2884) for more information.
 
 ### Fastmail users
 During setup, Ltt.rs will ask you for a connection URL.
