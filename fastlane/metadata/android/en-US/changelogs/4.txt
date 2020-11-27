@@ -1,0 +1,1 @@
+* Fix Ltt.rs not updating after longer periods of inactivity
