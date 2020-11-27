@@ -99,6 +99,7 @@
                     android:text="@string/next" />
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/url_input_layout"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

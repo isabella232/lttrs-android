@@ -135,6 +135,21 @@ public class DatabaseCache implements Cache {
     }
 
     @Override
+    public void invalidateEmails() {
+        database.stateDao().deleteState(EntityType.EMAIL);
+    }
+
+    @Override
+    public void invalidateThreads() {
+        database.stateDao().deleteState(EntityType.THREAD);
+    }
+
+    @Override
+    public void invalidateMailboxes() {
+        database.stateDao().deleteState(EntityType.MAILBOX);
+    }
+
+    @Override
     public void setIdentities(final TypedState<Identity> identityTypedState,
                               final Identity[] identities) {
         database.identityDao().set(identities, identityTypedState.getState());
@@ -144,6 +159,11 @@ public class DatabaseCache implements Cache {
     public void updateIdentities(final Update<Identity> update) throws CacheWriteException {
         LOGGER.debug("updating identities {}", update);
         database.identityDao().update(update);
+    }
+
+    @Override
+    public void invalidateIdentities() {
+        database.stateDao().deleteState(EntityType.IDENTITY);
     }
 
     @Override

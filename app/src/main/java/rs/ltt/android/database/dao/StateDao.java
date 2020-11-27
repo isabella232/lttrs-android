@@ -16,6 +16,7 @@
 package rs.ltt.android.database.dao;
 
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Query;
 import androidx.room.Transaction;
 
@@ -66,6 +67,9 @@ public abstract class StateDao {
 
     @Query("update `query` set valid=0 where queryString=:queryString")
     public abstract void invalidateQueryState(String queryString);
+
+    @Query("delete from entity_state where type=:entityType")
+    public abstract void deleteState(EntityType entityType);
 
     @Transaction
     public QueryStateWrapper getQueryStateWrapper(String queryString) {
