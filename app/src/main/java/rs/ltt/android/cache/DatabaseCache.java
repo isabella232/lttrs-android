@@ -29,6 +29,7 @@ import rs.ltt.android.entity.EntityType;
 import rs.ltt.android.entity.MailboxEntity;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
+import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRoleAndName;
 import rs.ltt.jmap.common.entity.Identity;
 import rs.ltt.jmap.common.entity.Mailbox;
 import rs.ltt.jmap.common.entity.Thread;
@@ -101,7 +102,14 @@ public class DatabaseCache implements Cache {
 
     @Override
     public Collection<? extends IdentifiableMailboxWithRole> getSpecialMailboxes() throws NotSynchronizedException {
+        //TODO ensure that mailbox state exists?
         return database.mailboxDao().getSpecialMailboxes();
+    }
+
+    @Override
+    public IdentifiableMailboxWithRoleAndName getMailboxByNameAndParent(String name, String parentId) throws NotSynchronizedException {
+        //TODO ensure that mailbox state exists?
+        return database.mailboxDao().getMailboxByNameAndParent(name, parentId);
     }
 
     @Override

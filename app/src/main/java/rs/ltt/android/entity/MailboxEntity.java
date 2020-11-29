@@ -21,11 +21,12 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
+import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRoleAndName;
 import rs.ltt.jmap.common.entity.Mailbox;
 import rs.ltt.jmap.common.entity.Role;
 
 @Entity(tableName = "mailbox")
-public class MailboxEntity implements IdentifiableMailboxWithRole {
+public class MailboxEntity implements IdentifiableMailboxWithRoleAndName {
 
     @NonNull
     @PrimaryKey
@@ -78,5 +79,10 @@ public class MailboxEntity implements IdentifiableMailboxWithRole {
         entity.myRights = MailboxRightsEmbed.of(mailbox.getMyRights());
         entity.isSubscribed = mailbox.getIsSubscribed();
         return entity;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 }
