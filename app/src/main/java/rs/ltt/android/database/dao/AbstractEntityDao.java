@@ -22,7 +22,7 @@ import androidx.room.Query;
 import rs.ltt.android.entity.EntityStateEntity;
 import rs.ltt.android.entity.EntityType;
 import rs.ltt.jmap.common.entity.TypedState;
-import rs.ltt.jmap.mua.cache.CacheConflictException;
+import rs.ltt.jmap.mua.cache.exception.CacheConflictException;
 
 public abstract class AbstractEntityDao {
 
@@ -35,7 +35,7 @@ public abstract class AbstractEntityDao {
     @Query("update entity_state set state=:newState where type=:type and state=:oldState")
     protected abstract int updateState(EntityType type, String oldState, String newState);
 
-    void throwOnCacheConflict(EntityType type, TypedState expectedTypedState) {
+    void throwOnCacheConflict(EntityType type, TypedState<?> expectedTypedState) {
         final String expectedState = expectedTypedState.getState();
         final String currentState = getState(type);
         if (expectedState == null || !expectedState.equals(currentState)) {
@@ -43,7 +43,7 @@ public abstract class AbstractEntityDao {
         }
     }
 
-    void throwOnUpdateConflict(final EntityType type, final TypedState oldTypedState, final TypedState newTypedState) {
+    void throwOnUpdateConflict(final EntityType type, final TypedState<?> oldTypedState, final TypedState<?> newTypedState) {
         final String oldState = oldTypedState.getState();
         final String newState = newTypedState.getState();
         if (updateState(type, oldState, newState) != 1) {

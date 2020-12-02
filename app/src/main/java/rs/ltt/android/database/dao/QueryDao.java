@@ -34,9 +34,9 @@ import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.jmap.common.entity.AddedItem;
 import rs.ltt.jmap.common.entity.Email;
 import rs.ltt.jmap.common.entity.TypedState;
-import rs.ltt.jmap.mua.cache.CacheConflictException;
-import rs.ltt.jmap.mua.cache.CorruptCacheException;
 import rs.ltt.jmap.mua.cache.QueryUpdate;
+import rs.ltt.jmap.mua.cache.exception.CacheConflictException;
+import rs.ltt.jmap.mua.cache.exception.CorruptCacheException;
 import rs.ltt.jmap.mua.util.QueryResult;
 import rs.ltt.jmap.mua.util.QueryResultItem;
 

@@ -101,13 +101,11 @@ dependencies {
 
     implementation 'com.github.tony19:logback-android:2.0.0'
 
-    implementation("com.squareup.okhttp3:okhttp:4.9.0")
-
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.5'
 
 
     //Own libraries (libraries we wrote and can commit to)
-    implementation ('rs.ltt.jmap:jmap-mua:0.5.1') {
+    implementation ('rs.ltt.jmap:jmap-mua:0.5.2') {
         changing = true
     }
 
@@ -117,5 +115,6 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
     androidTestImplementation "androidx.test.espresso:espresso-intents:3.3.0"
+    androidTestImplementation "androidx.test.espresso:espresso-contrib:3.3.0"
     androidTestImplementation 'rs.ltt.jmap:jmap-mock-server:0.5.1'
 }

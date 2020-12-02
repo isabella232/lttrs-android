@@ -62,7 +62,10 @@ public abstract class MailboxDao extends AbstractEntityDao {
     @Query("select * from mailbox where role is not null")
     public abstract List<MailboxEntity> getSpecialMailboxes();
 
-    @Query("select * from mailbox where name = :name and parentId = :parentId")
+    @Query("select * from mailbox where name =:name and parentId is null")
+    public abstract MailboxEntity getMailboxByNameWhereParentIdIsNull(String name);
+
+    @Query("select * from mailbox where name =:name and parentId =:parentId")
     public abstract MailboxEntity getMailboxByNameAndParent(String name, String parentId);
 
     @Query("select id,parentId,name,sortOrder,unreadThreads,totalThreads,role from mailbox")

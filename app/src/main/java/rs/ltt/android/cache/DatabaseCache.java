@@ -35,15 +35,15 @@ import rs.ltt.jmap.common.entity.Mailbox;
 import rs.ltt.jmap.common.entity.Thread;
 import rs.ltt.jmap.common.entity.TypedState;
 import rs.ltt.jmap.mua.cache.Cache;
-import rs.ltt.jmap.mua.cache.CacheConflictException;
-import rs.ltt.jmap.mua.cache.CacheReadException;
-import rs.ltt.jmap.mua.cache.CacheWriteException;
 import rs.ltt.jmap.mua.cache.Missing;
-import rs.ltt.jmap.mua.cache.NotSynchronizedException;
 import rs.ltt.jmap.mua.cache.ObjectsState;
 import rs.ltt.jmap.mua.cache.QueryStateWrapper;
 import rs.ltt.jmap.mua.cache.QueryUpdate;
 import rs.ltt.jmap.mua.cache.Update;
+import rs.ltt.jmap.mua.cache.exception.CacheConflictException;
+import rs.ltt.jmap.mua.cache.exception.CacheReadException;
+import rs.ltt.jmap.mua.cache.exception.CacheWriteException;
+import rs.ltt.jmap.mua.cache.exception.NotSynchronizedException;
 import rs.ltt.jmap.mua.util.QueryResult;
 import rs.ltt.jmap.mua.util.QueryResultItem;
 
@@ -108,8 +108,11 @@ public class DatabaseCache implements Cache {
 
     @Override
     public IdentifiableMailboxWithRoleAndName getMailboxByNameAndParent(String name, String parentId) throws NotSynchronizedException {
-        //TODO ensure that mailbox state exists?
-        return database.mailboxDao().getMailboxByNameAndParent(name, parentId);
+        if (parentId == null) {
+            return database.mailboxDao().getMailboxByNameWhereParentIdIsNull(name);
+        } else {
+            return database.mailboxDao().getMailboxByNameAndParent(name, parentId);
+        }
     }
 
     @Override
