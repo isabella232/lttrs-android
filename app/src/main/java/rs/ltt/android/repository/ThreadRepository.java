@@ -18,7 +18,6 @@ package rs.ltt.android.repository;
 import android.app.Application;
 
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Transformations;
 import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
 
@@ -28,7 +27,6 @@ import com.google.common.util.concurrent.MoreExecutors;
 
 import java.util.List;
 
-import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.entity.ExpandedPosition;
 import rs.ltt.android.entity.FullEmail;
 import rs.ltt.android.entity.KeywordOverwriteEntity;

@@ -16,7 +16,6 @@
 package rs.ltt.android.database.dao;
 
 import androidx.room.Dao;
-import androidx.room.Delete;
 import androidx.room.Query;
 import androidx.room.Transaction;
 

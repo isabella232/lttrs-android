@@ -24,6 +24,7 @@ import androidx.work.WorkerParameters;
 
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 import javax.net.ssl.SSLException;
@@ -85,5 +86,9 @@ public abstract class AbstractMuaWorker extends Worker {
                 .cache(new DatabaseCache(getDatabase()))
                 .sessionCache(new FileSessionCache(getApplicationContext().getCacheDir()))
                 .build();
+    }
+
+    public static String uniqueName(Long accountId) {
+        return String.format(Locale.ENGLISH, "account-%d", accountId);
     }
 }

@@ -18,17 +18,12 @@ package rs.ltt.android;
 import android.app.Activity;
 import android.app.Application;
 
-import androidx.annotation.NonNull;
-import androidx.work.Configuration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.Executors;
-
 import rs.ltt.android.database.AppDatabase;
 
-public class LttrsApplication extends Application implements Configuration.Provider {
+public class LttrsApplication extends Application {
 
     private final Logger LOGGER = LoggerFactory.getLogger(LttrsApplication.class);
 
@@ -66,19 +61,5 @@ public class LttrsApplication extends Application implements Configuration.Provi
 
     public static LttrsApplication get(final Activity activity) {
         return get(activity.getApplication());
-    }
-
-    @NonNull
-    @Override
-    public Configuration getWorkManagerConfiguration() {
-        //jmap-mua methods regularly use ifInState parameters that require use to have an up to date
-        //local cache. However at the same time this prevents us from launching two modifications at
-        //the same time as the second call would fail with a state miss match.
-        //Therefor all our email modifications (thus far the only thing happening in WorkManager)
-        //are single threaded.
-        LOGGER.info("Create single threaded WorkManager configuration");
-        return new Configuration.Builder()
-                .setExecutor(Executors.newSingleThreadExecutor())
-                .build();
     }
 }

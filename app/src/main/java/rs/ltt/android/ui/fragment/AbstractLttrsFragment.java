@@ -20,9 +20,6 @@ import android.app.Activity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
-import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.ui.activity.LttrsActivity;
 import rs.ltt.android.ui.model.LttrsViewModel;
 

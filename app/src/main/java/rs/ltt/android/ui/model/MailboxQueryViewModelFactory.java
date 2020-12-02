@@ -21,10 +21,6 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
-import rs.ltt.android.entity.AccountWithCredentials;
-
 public class MailboxQueryViewModelFactory implements ViewModelProvider.Factory {
 
     private final Application application;

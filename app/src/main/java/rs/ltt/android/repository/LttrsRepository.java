@@ -19,7 +19,6 @@ import android.app.Application;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Transformations;
 import androidx.work.Constraints;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.NetworkType;
@@ -27,7 +26,6 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
@@ -36,13 +34,11 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -57,7 +53,6 @@ import rs.ltt.android.entity.MailboxOverwriteEntity;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.QueryEntity;
 import rs.ltt.android.entity.QueryItemOverwriteEntity;
-import rs.ltt.android.util.FutureLiveData;
 import rs.ltt.android.worker.AbstractMuaWorker;
 import rs.ltt.android.worker.ArchiveWorker;
 import rs.ltt.android.worker.CopyToMailboxWorker;
@@ -82,8 +77,6 @@ public class LttrsRepository {
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build();
     private static final Logger LOGGER = LoggerFactory.getLogger(LttrsRepository.class);
-    private static final long INITIAL_DELAY_DURATION = 4;
-    private static final TimeUnit INITIAL_DELAY_TIME_UNIT = TimeUnit.SECONDS;
     protected final Application application;
     protected final long accountId;
     protected final LttrsDatabase database;
@@ -226,12 +219,11 @@ public class LttrsRepository {
                 final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(RemoveFromMailboxWorker.class)
                         .setConstraints(CONNECTED_CONSTRAINT)
                         .setInputData(RemoveFromMailboxWorker.data(accountId, threadId, mailbox))
-                        .setInitialDelay(INITIAL_DELAY_DURATION, INITIAL_DELAY_TIME_UNIT)
                         .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                         .build();
                 workManager.enqueueUniqueWork(
-                        RemoveFromMailboxWorker.uniqueName(threadId, mailbox),
-                        ExistingWorkPolicy.REPLACE,
+                        RemoveFromMailboxWorker.uniqueName(accountId),
+                        ExistingWorkPolicy.APPEND,
                         workRequest
                 );
             }
@@ -253,8 +245,8 @@ public class LttrsRepository {
                         .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                         .build();
                 workManager.enqueueUniqueWork(
-                        CopyToMailboxWorker.uniqueName(threadId, mailbox),
-                        ExistingWorkPolicy.REPLACE,
+                        CopyToMailboxWorker.uniqueName(accountId),
+                        ExistingWorkPolicy.APPEND,
                         workRequest
                 );
             }
@@ -272,13 +264,12 @@ public class LttrsRepository {
                 final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(ArchiveWorker.class)
                         .setConstraints(CONNECTED_CONSTRAINT)
                         .setInputData(ArchiveWorker.data(accountId, threadId))
-                        .setInitialDelay(INITIAL_DELAY_DURATION, INITIAL_DELAY_TIME_UNIT)
                         .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                         .build();
 
                 workManager.enqueueUniqueWork(
-                        ArchiveWorker.uniqueName(threadId),
-                        ExistingWorkPolicy.REPLACE,
+                        ArchiveWorker.uniqueName(accountId),
+                        ExistingWorkPolicy.APPEND,
                         workRequest
                 );
             }
@@ -305,12 +296,11 @@ public class LttrsRepository {
                 final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MoveToInboxWorker.class)
                         .setConstraints(CONNECTED_CONSTRAINT)
                         .setInputData(MoveToInboxWorker.data(accountId, threadId))
-                        .setInitialDelay(INITIAL_DELAY_DURATION, INITIAL_DELAY_TIME_UNIT)
                         .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                         .build();
                 workManager.enqueueUniqueWork(
-                        MoveToInboxWorker.uniqueName(threadId),
-                        ExistingWorkPolicy.REPLACE,
+                        MoveToInboxWorker.uniqueName(accountId),
+                        ExistingWorkPolicy.APPEND,
                         workRequest
                 );
             }
@@ -337,7 +327,7 @@ public class LttrsRepository {
             final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MoveToTrashWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(MoveToTrashWorker.data(accountId, threadIds))
-                    .setInitialDelay(INITIAL_DELAY_DURATION, TimeUnit.SECONDS)
+                    .setInitialDelay(5, TimeUnit.SECONDS)
                     .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                     .build();
             final WorkManager workManager = WorkManager.getInstance(application);
@@ -372,8 +362,8 @@ public class LttrsRepository {
                     .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
                     .build();
             workManager.enqueueUniqueWork(
-                    MarkImportantWorker.uniqueName(threadId),
-                    ExistingWorkPolicy.REPLACE,
+                    MarkImportantWorker.uniqueName(accountId),
+                    ExistingWorkPolicy.APPEND,
                     workRequest
             );
         }
@@ -401,11 +391,10 @@ public class LttrsRepository {
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(RemoveFromMailboxWorker.data(accountId, threadId, mailbox))
                     .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
-                    .setInitialDelay(INITIAL_DELAY_DURATION, INITIAL_DELAY_TIME_UNIT)
                     .build();
             workManager.enqueueUniqueWork(
-                    MarkImportantWorker.uniqueName(threadId),
-                    ExistingWorkPolicy.REPLACE,
+                    MarkImportantWorker.uniqueName(accountId),
+                    ExistingWorkPolicy.APPEND,
                     workRequest
             );
         }
@@ -444,11 +433,10 @@ public class LttrsRepository {
                         .setConstraints(CONNECTED_CONSTRAINT)
                         .setInputData(ModifyKeywordWorker.data(accountId, threadId, keyword, targetState))
                         .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
-                        .setInitialDelay(targetState ? 0 : INITIAL_DELAY_DURATION, INITIAL_DELAY_TIME_UNIT)
                         .build();
                 workManager.enqueueUniqueWork(
-                        ModifyKeywordWorker.uniqueName(threadId, keyword),
-                        ExistingWorkPolicy.REPLACE,
+                        ModifyKeywordWorker.uniqueName(accountId),
+                        ExistingWorkPolicy.APPEND,
                         workRequest
                 );
             }

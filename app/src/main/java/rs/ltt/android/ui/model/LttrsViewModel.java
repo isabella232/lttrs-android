@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 import java.util.List;
 
-import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.repository.MainRepository;
 import rs.ltt.android.repository.ThreadRepository;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;

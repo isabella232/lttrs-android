@@ -62,8 +62,4 @@ public class CopyToMailboxWorker extends AbstractMailboxModificationWorker {
         LOGGER.info("Modifying {} emails in thread {}", emails.size(), threadId);
         return getMua().copyToMailbox(emails, mailbox);
     }
-
-    public static String uniqueName(String threadId, IdentifiableMailboxWithRole mailbox) {
-        return RemoveFromMailboxWorker.uniqueName(threadId, mailbox);
-    }
 }

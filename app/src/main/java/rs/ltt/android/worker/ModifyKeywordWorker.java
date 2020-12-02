@@ -52,10 +52,6 @@ public class ModifyKeywordWorker extends AbstractMuaWorker {
         this.target = data.getBoolean(TARGET_STATE_KEY, false);
     }
 
-    public static String uniqueName(String threadId, String keyword) {
-        return "toggle-keyword-" + keyword + "-" + threadId;
-    }
-
     public static Data data(final Long account, final String threadId, final String keyword, final boolean targetState) {
         return new Data.Builder()
                 .putLong(ACCOUNT_KEY, account)

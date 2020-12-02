@@ -79,11 +79,6 @@
             android:authorities="rs.ltt.android.provider.EmailSearchSuggestionsProvider"
             android:exported="false" />
 
-        <provider
-            android:name="androidx.work.impl.WorkManagerInitializer"
-            android:authorities="${applicationId}.workmanager-init"
-            tools:node="remove" />
-
     </application>
 
 </manifest>

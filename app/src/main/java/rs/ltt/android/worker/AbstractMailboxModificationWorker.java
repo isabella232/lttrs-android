@@ -74,10 +74,6 @@ public abstract class AbstractMailboxModificationWorker extends AbstractMuaWorke
 
     protected abstract ListenableFuture<Boolean> modify(List<EmailWithMailboxes> emails);
 
-    public static String uniqueName(String threadId) {
-        return "mailbox-modification-" + threadId;
-    }
-
     public static Data data(Long account, String threadId) {
         return new Data.Builder()
                 .putLong(ACCOUNT_KEY, account)

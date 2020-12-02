@@ -17,12 +17,9 @@ package rs.ltt.android.database;
 
 import androidx.room.TypeConverter;
 
-import org.joda.time.format.DateTimeFormat;
-
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 import okhttp3.HttpUrl;
 import rs.ltt.android.entity.EmailAddressType;

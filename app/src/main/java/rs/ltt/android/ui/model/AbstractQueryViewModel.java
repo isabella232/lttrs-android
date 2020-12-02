@@ -30,7 +30,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collection;
 import java.util.concurrent.Future;
 
-import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.repository.QueryRepository;

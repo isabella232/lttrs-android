@@ -43,8 +43,4 @@ public class MarkImportantWorker extends AbstractMailboxModificationWorker {
         LOGGER.info("Modifying {} emails in thread {}", emails.size(), threadId);
         return getMua().copyToImportant(emails);
     }
-
-    public static String uniqueName(String threadId) {
-        return "important-toggle-" + threadId;
-    }
 }

@@ -57,8 +57,4 @@ public class RemoveFromMailboxWorker extends AbstractMailboxModificationWorker {
         LOGGER.info("Modifying {} emails in thread {}", emails.size(), threadId);
         return getMua().removeFromMailbox(emails, this.mailboxId);
     }
-
-    public static String uniqueName(String threadId, IdentifiableMailboxWithRole mailbox) {
-        return String.format("toggle-mailbox-%s-%s", mailbox.getId(), threadId);
-    }
 }
