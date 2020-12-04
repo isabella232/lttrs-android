@@ -58,12 +58,10 @@ import rs.ltt.android.R;
 import rs.ltt.android.databinding.ActivityLttrsBinding;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
-import rs.ltt.android.ui.OnLabelOpened;
 import rs.ltt.android.ui.Theme;
 import rs.ltt.android.ui.ThreadModifier;
 import rs.ltt.android.ui.WeakActionModeCallback;
 import rs.ltt.android.ui.adapter.LabelListAdapter;
-import rs.ltt.android.ui.fragment.SearchQueryFragment;
 import rs.ltt.android.ui.model.LttrsViewModel;
 import rs.ltt.android.ui.model.LttrsViewModelFactory;
 import rs.ltt.android.util.Event;
@@ -71,9 +69,8 @@ import rs.ltt.android.util.MainThreadExecutor;
 import rs.ltt.android.worker.Failure;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mua.util.KeywordLabel;
-import rs.ltt.jmap.mua.util.Label;
 
-public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, ThreadModifier, SearchQueryFragment.OnTermSearched, NavController.OnDestinationChangedListener, MenuItem.OnActionExpandListener, DrawerLayout.DrawerListener {
+public class LttrsActivity extends AppCompatActivity implements ThreadModifier, NavController.OnDestinationChangedListener, MenuItem.OnActionExpandListener, DrawerLayout.DrawerListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LttrsActivity.class);
 
@@ -147,8 +144,10 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
             binding.appBarLayout.setExpanded(true, false);
         });
         binding.mailboxList.setAdapter(labelListAdapter);
-        lttrsViewModel.getNavigatableLabels().observe(this, labelListAdapter::submitList);
+        lttrsViewModel.getNavigableLabels().observe(this, labelListAdapter::submitList);
         lttrsViewModel.getFailureEvent().observe(this, this::onFailureEvent);
+        lttrsViewModel.getSelectedLabel().observe(this, labelListAdapter::setSelectedLabel);
+        lttrsViewModel.getActivityTitle().observe(this, this::setTitle);
     }
 
     private void onFailureEvent(Event<Failure> failureEvent) {
@@ -395,12 +394,6 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
     }
 
     @Override
-    public void onLabelOpened(Label label) {
-        setTitle(label.getName());
-        labelListAdapter.setSelectedLabel(label);
-    }
-
-    @Override
     public void onBackPressed() {
         if (binding != null && binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             binding.drawerLayout.closeDrawer(GravityCompat.START);
@@ -471,12 +464,6 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
     private void setSearchToolbarColors() {
         binding.toolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.colorSurface));
         binding.drawerLayout.setStatusBarBackgroundColor(ContextCompat.getColor(this, R.color.colorStatusBarSearch));
-    }
-
-    @Override
-    public void onTermSearched(final String term) {
-        lttrsViewModel.setCurrentSearchTerm(term);
-        labelListAdapter.setSelectedLabel(null);
     }
 
     public ActionMode beginActionMode(final ActionMode.Callback callback) {

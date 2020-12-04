@@ -16,7 +16,6 @@
 package rs.ltt.android.ui.fragment;
 
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -55,7 +54,6 @@ import rs.ltt.android.databinding.FragmentThreadListBinding;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.ui.ActionModeMenuConfiguration;
-import rs.ltt.android.ui.OnLabelOpened;
 import rs.ltt.android.ui.QueryItemTouchHelper;
 import rs.ltt.android.ui.activity.ComposeActivity;
 import rs.ltt.android.ui.adapter.OnFlaggedToggled;
@@ -208,11 +206,9 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         }
     }
 
-    void onLabelOpened(Label label) {
-        final Activity activity = getActivity();
-        if (activity instanceof OnLabelOpened) {
-            ((OnLabelOpened) activity).onLabelOpened(label);
-        }
+    void onLabelOpened(final Label label) {
+        getLttrsViewModel().setSelectedLabel(label);
+        getLttrsViewModel().setActivityTitle(label.getName());
     }
 
     @Override

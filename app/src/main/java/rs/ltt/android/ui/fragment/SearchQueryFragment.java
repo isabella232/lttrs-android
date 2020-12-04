@@ -69,10 +69,8 @@ public class SearchQueryFragment extends AbstractQueryFragment {
             if (searchTerm == null) {
                 return;
             }
-            final Activity activity = getActivity();
-            if (activity instanceof OnTermSearched) {
-                ((OnTermSearched) activity).onTermSearched(searchTerm);
-            }
+            getLttrsViewModel().setSelectedLabel(null);
+            getLttrsViewModel().setCurrentSearchTerm(searchTerm);
         });
     }
 
@@ -101,9 +99,4 @@ public class SearchQueryFragment extends AbstractQueryFragment {
     protected ActionModeMenuConfiguration.QueryType getQueryType() {
         return ActionModeMenuConfiguration.QueryType.SPECIAL;
     }
-
-    public interface OnTermSearched {
-        void onTermSearched(String term);
-    }
-
 }

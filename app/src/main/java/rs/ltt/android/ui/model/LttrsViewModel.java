@@ -20,6 +20,7 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.work.WorkInfo;
 
@@ -45,7 +46,9 @@ public class LttrsViewModel extends AndroidViewModel {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LttrsViewModel.class);
 
-    private final LiveData<List<Label>> navigatableLabels;
+    private final LiveData<List<Label>> navigableLabels;
+    private final MutableLiveData<Label> selectedLabel = new MutableLiveData<>();
+    private final MutableLiveData<String> activityTitle = new MutableLiveData<>();
     private final MainRepository mainRepository;
     private final long accountId;
     private final LttrsRepository lttrsRepository;
@@ -57,7 +60,7 @@ public class LttrsViewModel extends AndroidViewModel {
         this.mainRepository = new MainRepository(application);
         this.accountId = accountId;
         this.lttrsRepository = new LttrsRepository(application, accountId);
-        this.navigatableLabels = Transformations.map(
+        this.navigableLabels = Transformations.map(
                 this.lttrsRepository.getMailboxes(),
                 LabelUtil::fillUpAndSort
         );
@@ -79,8 +82,24 @@ public class LttrsViewModel extends AndroidViewModel {
         this.currentSearchTerm = currentSearchTerm;
     }
 
-    public LiveData<List<Label>> getNavigatableLabels() {
-        return this.navigatableLabels;
+    public void setActivityTitle(final String title) {
+        this.activityTitle.postValue(title);
+    }
+
+    public LiveData<String> getActivityTitle() {
+        return this.activityTitle;
+    }
+
+    public void setSelectedLabel(final Label label) {
+        this.selectedLabel.postValue(label);
+    }
+
+    public LiveData<Label> getSelectedLabel() {
+        return this.selectedLabel;
+    }
+
+    public LiveData<List<Label>> getNavigableLabels() {
+        return this.navigableLabels;
     }
 
 
@@ -147,5 +166,4 @@ public class LttrsViewModel extends AndroidViewModel {
     public void removeFlag(final Collection<String> threadIds) {
         this.removeKeyword(threadIds, Keyword.FLAGGED);
     }
-
 }
