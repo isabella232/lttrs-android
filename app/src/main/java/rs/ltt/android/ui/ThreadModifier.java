@@ -15,15 +15,33 @@
 
 package rs.ltt.android.ui;
 
+import java.util.Collection;
+
 import rs.ltt.android.entity.MailboxWithRoleAndName;
 
 public interface ThreadModifier {
 
-    void archive(String threadId);
+    void archive(Collection<String> threadIds);
 
-    void moveToInbox(String threadId);
+    void moveToInbox(Collection<String> threadIds);
 
-    void moveToTrash(String threadId);
+    void moveToTrash(Collection<String> threadIds);
 
-    void removeFromMailbox(String threadId, MailboxWithRoleAndName mailbox);
+    void removeFromMailbox(Collection<String> threadIds, MailboxWithRoleAndName mailbox);
+
+    void markRead(Collection<String> threadIds);
+
+    void markUnread(Collection<String> threadIds);
+
+    void markImportant(Collection<String> threadIds);
+
+    void markNotImportant(Collection<String> threadIds);
+
+    void toggleFlagged(String threadId, boolean target);
+
+    void addFlag(Collection<String> threadIds);
+
+    void removeFlag(Collection<String> threadIds);
+
+    void removeFromKeyword(Collection<String> threadIds, String keyword);
 }

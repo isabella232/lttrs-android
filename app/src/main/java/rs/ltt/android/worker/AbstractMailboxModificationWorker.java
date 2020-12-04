@@ -27,25 +27,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import rs.ltt.android.database.LttrsDatabase;
 import rs.ltt.android.entity.EmailWithMailboxes;
-import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRoleAndName;
-import rs.ltt.jmap.common.entity.Role;
-import rs.ltt.jmap.mua.service.exception.PreexistingMailboxException;
 
 public abstract class AbstractMailboxModificationWorker extends AbstractMuaWorker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMailboxModificationWorker.class);
 
     private static final String THREAD_ID_KEY = "threadId";
-
-    public static final String EXCEPTION = "exception";
-    public static final String PREEXISTING_MAILBOX_ID = "preexisting_mailbox_id";
-    public static final String TARGET_ROLE = "role";
 
     protected final String threadId;
 
@@ -73,26 +65,11 @@ public abstract class AbstractMailboxModificationWorker extends AbstractMuaWorke
                 return Result.retry();
             } else {
                 database.overwriteDao().revertMailboxOverwrites(threadId);
-                return Result.failure(exceptionToData(e.getCause()));
+                return Result.failure(Failure.of(e.getCause()));
             }
         } catch (InterruptedException e) {
             return Result.retry();
         }
-    }
-
-    private static Data exceptionToData(final Throwable cause) {
-        final Data.Builder dataBuilder =  new Data.Builder();
-        if (cause == null) {
-            return dataBuilder.build();
-        }
-        dataBuilder.putString(EXCEPTION, cause.getClass().getName());
-        if (cause instanceof PreexistingMailboxException) {
-            final IdentifiableMailboxWithRoleAndName preexistingMailbox = ((PreexistingMailboxException) cause).getPreexistingMailbox();
-            final Role targetRole = ((PreexistingMailboxException) cause).getTargetRole();
-            dataBuilder.putString(PREEXISTING_MAILBOX_ID, preexistingMailbox.getId());
-            dataBuilder.putString(TARGET_ROLE, targetRole.toString());
-        }
-        return dataBuilder.build();
     }
 
     protected abstract ListenableFuture<Boolean> modify(List<EmailWithMailboxes> emails);

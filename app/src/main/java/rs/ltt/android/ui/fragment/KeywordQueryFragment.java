@@ -88,7 +88,7 @@ public class KeywordQueryFragment extends AbstractQueryFragment {
             removeKeyword(threadId);
             return;
         }
-        keywordQueryViewModel.toggleFlagged(threadId, target);
+        getThreadModifier().toggleFlagged(threadId, target);
     }
 
     private void removeKeyword(final String threadId) {
@@ -102,7 +102,7 @@ public class KeywordQueryFragment extends AbstractQueryFragment {
 
     @Override
     void removeLabel(Collection<String> threadIds) {
-        requireLttrsActivity().removeFromKeyword(threadIds, keywordQueryViewModel.getKeyword());
+        getThreadModifier().removeFromKeyword(threadIds, keywordQueryViewModel.getKeyword());
 
     }
 

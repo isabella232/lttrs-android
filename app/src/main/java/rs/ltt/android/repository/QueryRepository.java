@@ -42,7 +42,7 @@ import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 import rs.ltt.jmap.mua.Status;
 
-public class QueryRepository extends LttrsRepository {
+public class QueryRepository extends AbstractMuaRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryRepository.class);
 
@@ -58,7 +58,6 @@ public class QueryRepository extends LttrsRepository {
     }
 
     public LiveData<PagedList<ThreadOverviewItem>> getThreadOverviewItems(final EmailQuery query) {
-        LOGGER.debug("building live paged list");
         return new LivePagedListBuilder<>(database.queryDao().getThreadOverviewItems(query.toQueryString()), 30)
                 .setBoundaryCallback(new PagedList.BoundaryCallback<ThreadOverviewItem>() {
                     @Override

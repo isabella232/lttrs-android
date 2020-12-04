@@ -15,7 +15,6 @@
 
 package rs.ltt.android.ui.fragment;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -35,8 +34,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,8 +53,8 @@ import rs.ltt.android.R;
 import rs.ltt.android.databinding.FragmentThreadBinding;
 import rs.ltt.android.entity.ExpandedPosition;
 import rs.ltt.android.entity.FullEmail;
+import rs.ltt.android.entity.Seen;
 import rs.ltt.android.entity.SubjectWithImportance;
-import rs.ltt.android.ui.ThreadModifier;
 import rs.ltt.android.ui.activity.ComposeActivity;
 import rs.ltt.android.ui.adapter.OnComposeActionTriggered;
 import rs.ltt.android.ui.adapter.OnFlaggedToggled;
@@ -83,19 +87,19 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
         final ThreadFragmentArgs arguments = ThreadFragmentArgs.fromBundle(bundle == null ? new Bundle() : bundle);
         final String threadId = arguments.getThread();
         final String label = arguments.getLabel();
-        final boolean triggerRead = !Arrays.asList(arguments.getKeywords()).contains(Keyword.SEEN);
         final ViewModelProvider viewModelProvider = new ViewModelProvider(
                 getViewModelStore(),
                 new ThreadViewModelFactory(
                         requireActivity().getApplication(),
                         getLttrsViewModel().getAccountId(),
                         threadId,
-                        label,
-                        triggerRead
+                        label
                 )
         );
         threadViewModel = viewModelProvider.get(ThreadViewModel.class);
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_thread, container, false);
+
+        threadViewModel.seenEvent.observe(getViewLifecycleOwner(), this::onSeenEvent);
 
         //do we want a custom layout manager that does *NOT* remember scroll position when more
         //than one item is expanded. with variable sized items this might be annoying
@@ -128,6 +132,17 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
         return binding.getRoot();
     }
 
+    private void onSeenEvent(Event<Seen> seenEvent) {
+        if (seenEvent.isConsumable()) {
+            final Seen seen = seenEvent.consume();
+            if (seen.isUnread()) {
+                getThreadModifier().markRead(
+                        ImmutableList.of(threadViewModel.getThreadId())
+                );
+            }
+        }
+    }
+
     private void onThreadViewRedirect(final Event<String> event) {
         if (event.isConsumable()) {
             final String threadId = event.consume();
@@ -137,7 +152,6 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
                     threadId,
                     null,
                     null,
-                    new String[0],
                     false
             ));
         }
@@ -206,34 +220,46 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
 
         switch (menuItem.getItemId()) {
             case R.id.action_mark_unread:
-                threadViewModel.markUnread();
+                getThreadModifier().markUnread(
+                        ImmutableList.of(threadViewModel.getThreadId())
+                );
                 navController.popBackStack();
                 return true;
             case R.id.action_archive:
-                getThreadModifier().archive(threadViewModel.getThreadId());
+                getThreadModifier().archive(
+                        ImmutableList.of(threadViewModel.getThreadId())
+                );
                 navController.popBackStack();
                 return true;
             case R.id.action_remove_label:
                 getThreadModifier().removeFromMailbox(
-                        threadViewModel.getThreadId(),
+                        ImmutableList.of(threadViewModel.getThreadId()),
                         threadViewModel.getMailbox()
                 );
                 navController.popBackStack();
                 return true;
             case R.id.action_move_to_inbox:
-                getThreadModifier().moveToInbox(threadViewModel.getThreadId());
+                getThreadModifier().moveToInbox(
+                        ImmutableList.of(threadViewModel.getThreadId())
+                );
                 navController.popBackStack();
                 return true;
             case R.id.action_move_to_trash:
-                getThreadModifier().moveToTrash(threadViewModel.getThreadId());
+                getThreadModifier().moveToTrash(
+                        ImmutableList.of(threadViewModel.getThreadId())
+                );
                 navController.popBackStack();
                 return true;
             case R.id.action_mark_important:
-                threadViewModel.markImportant();
+                getThreadModifier().markImportant(
+                        ImmutableList.of(threadViewModel.getThreadId())
+                );
                 return true;
             case R.id.action_mark_not_important:
                 //TODO if label == important (coming from important view); pop back stack
-                threadViewModel.markNotImportant();
+                getThreadModifier().markNotImportant(
+                        ImmutableList.of(threadViewModel.getThreadId())
+                );
                 return true;
             default:
                 return super.onOptionsItemSelected(menuItem);
@@ -242,16 +268,9 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
 
     @Override
     public void onFlaggedToggled(String threadId, boolean target) {
-        threadViewModel.toggleFlagged(threadId, target);
+        getThreadModifier().toggleFlagged(threadId, target);
     }
 
-    private ThreadModifier getThreadModifier() {
-        final Activity activity = requireActivity();
-        if (activity instanceof ThreadModifier) {
-            return (ThreadModifier) activity;
-        }
-        throw new IllegalStateException("Activity does not implement ThreadModifier");
-    }
 
     @Override
     public void onEditDraft(String emailId) {

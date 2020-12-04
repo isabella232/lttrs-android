@@ -29,10 +29,15 @@ import androidx.work.Data;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,9 +50,10 @@ import rs.ltt.android.entity.ExpandedPosition;
 import rs.ltt.android.entity.FullEmail;
 import rs.ltt.android.entity.MailboxOverwriteEntity;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
+import rs.ltt.android.entity.Seen;
 import rs.ltt.android.entity.SubjectWithImportance;
 import rs.ltt.android.entity.ThreadHeader;
-import rs.ltt.android.repository.ThreadRepository;
+import rs.ltt.android.repository.ThreadViewRepository;
 import rs.ltt.android.util.CombinedListsLiveData;
 import rs.ltt.android.util.Event;
 import rs.ltt.jmap.common.entity.Role;
@@ -58,10 +64,11 @@ public class ThreadViewModel extends AndroidViewModel {
 
     public final AtomicBoolean jumpedToFirstUnread = new AtomicBoolean(false);
     public final ListenableFuture<List<ExpandedPosition>> expandedPositions;
+    public final MutableLiveData<Event<Seen>> seenEvent = new MutableLiveData<>();
     public final HashSet<String> expandedItems = new HashSet<>();
     private final String threadId;
     private final String label;
-    private final ThreadRepository threadRepository;
+    private final ThreadViewRepository threadViewRepository;
     private final MutableLiveData<Event<String>> threadViewRedirect = new MutableLiveData<>();
     private LiveData<PagedList<FullEmail>> emails;
     private MediatorLiveData<SubjectWithImportance> subjectWithImportance;
@@ -73,23 +80,31 @@ public class ThreadViewModel extends AndroidViewModel {
     ThreadViewModel(@NonNull final Application application,
                     final long accountId,
                     final String threadId,
-                    final String label,
-                    final boolean triggerRead) {
+                    final String label) {
         super(application);
         this.threadId = threadId;
         this.label = label;
-        this.threadRepository = new ThreadRepository(application, accountId);
-        final LiveData<ThreadHeader> header = this.threadRepository.getThreadHeader(threadId);
-        this.emails = this.threadRepository.getEmails(threadId);
-        this.mailboxes = this.threadRepository.getMailboxes(threadId);
-        this.expandedPositions = this.threadRepository.getExpandedPositions(threadId);
-        this.expandedPositions.addListener(() -> {
-            if (triggerRead) {
-                threadRepository.markRead(ImmutableSet.of(threadId));
+        this.threadViewRepository = new ThreadViewRepository(application, accountId);
+        final LiveData<ThreadHeader> header = this.threadViewRepository.getThreadHeader(threadId);
+        this.emails = this.threadViewRepository.getEmails(threadId);
+        this.mailboxes = this.threadViewRepository.getMailboxes(threadId);
+        final ListenableFuture<Seen> seen = this.threadViewRepository.getSeen(threadId);
+        this.expandedPositions = Futures.transform(seen, Seen::getExpandedPositions, MoreExecutors.directExecutor());
+        Futures.addCallback(seen, new FutureCallback<Seen>() {
+            @Override
+            public void onSuccess(@NullableDecl Seen seen) {
+                if (seen != null) {
+                    seenEvent.postValue(new Event<>(seen));
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Throwable t) {
+
             }
         }, MoreExecutors.directExecutor());
 
-        LiveData<List<MailboxOverwriteEntity>> overwriteEntityLiveData = this.threadRepository.getMailboxOverwrites(threadId);
+        LiveData<List<MailboxOverwriteEntity>> overwriteEntityLiveData = this.threadViewRepository.getMailboxOverwrites(threadId);
 
         CombinedListsLiveData<MailboxOverwriteEntity, MailboxWithRoleAndName> combined = new CombinedListsLiveData<>(overwriteEntityLiveData, mailboxes);
 
@@ -153,24 +168,12 @@ public class ThreadViewModel extends AndroidViewModel {
         return menuConfiguration;
     }
 
-    public void toggleFlagged(final String threadId, final boolean target) {
-        threadRepository.toggleFlagged(ImmutableSet.of(threadId), target);
-    }
-
-    public void markUnread() {
-        threadRepository.markUnRead(ImmutableSet.of(threadId));
-    }
-
     public String getLabel() {
         return this.label;
     }
 
     public String getThreadId() {
         return this.threadId;
-    }
-
-    public void archive() {
-        this.threadRepository.archive(ImmutableSet.of(this.threadId));
     }
 
     public MailboxWithRoleAndName getMailbox() {
@@ -180,14 +183,6 @@ public class ThreadViewModel extends AndroidViewModel {
             throw new IllegalStateException("No mailbox found with the label " + this.label);
         }
         return mailbox;
-    }
-
-    public void markImportant() {
-        this.threadRepository.markImportant(ImmutableSet.of(this.threadId));
-    }
-
-    public void markNotImportant() {
-        this.threadRepository.markNotImportant(ImmutableSet.of(this.threadId));
     }
 
     public void waitForEdit(UUID uuid) {

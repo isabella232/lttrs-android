@@ -63,6 +63,8 @@ import rs.ltt.android.ui.adapter.ThreadOverviewAdapter;
 import rs.ltt.android.ui.adapter.ThreadOverviewItemDetailsLookup;
 import rs.ltt.android.ui.adapter.ThreadOverviewItemKeyProvider;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
+import rs.ltt.android.util.Event;
+import rs.ltt.android.worker.Failure;
 import rs.ltt.jmap.mua.util.Label;
 
 
@@ -113,6 +115,10 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         new ItemTouchHelper(queryItemTouchHelper).attachToRecyclerView(binding.threadList);
 
         return binding.getRoot();
+    }
+
+    private void failureEvent(Event<Failure> failureEvent) {
+        LOGGER.info("failure event {}", failureEvent.consume().getException());
     }
 
 
@@ -211,7 +217,7 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
 
     @Override
     public void onFlaggedToggled(String threadId, boolean target) {
-        getQueryViewModel().toggleFlagged(threadId, target);
+        getThreadModifier().toggleFlagged(threadId, target);
     }
 
 
@@ -220,7 +226,7 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
     }
 
     protected void archive(Collection<String> threadIds) {
-        requireLttrsActivity().archive(threadIds);
+        getThreadModifier().archive(threadIds);
     }
 
     protected abstract AbstractQueryViewModel getQueryViewModel();
@@ -240,7 +246,6 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
                 threadOverviewItem.threadId,
                 null,
                 threadOverviewItem.getSubject(),
-                threadOverviewItem.getKeywords(),
                 important
         ));
     }
@@ -335,28 +340,28 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
                 tracker.clearSelection();
                 return true;
             case R.id.action_mark_read:
-                getQueryViewModel().markRead(threadIds);
+                getThreadModifier().markRead(threadIds);
                 return true;
             case R.id.action_mark_unread:
-                getQueryViewModel().markUnread(threadIds);
+                getThreadModifier().markUnread(threadIds);
                 return true;
             case R.id.action_move_to_inbox:
-                requireLttrsActivity().moveToInbox(threadIds);
+                getThreadModifier().moveToInbox(threadIds);
                 tracker.clearSelection();
             case R.id.action_mark_important:
-                getQueryViewModel().markImportant(threadIds);
+                getThreadModifier().markImportant(threadIds);
                 return true;
             case R.id.action_mark_not_important:
-                getQueryViewModel().markNotImportant(threadIds);
+                getThreadModifier().markNotImportant(threadIds);
                 return true;
             case R.id.action_add_flag:
-                getQueryViewModel().addFlag(threadIds);
+                getThreadModifier().addFlag(threadIds);
                 return true;
             case R.id.action_remove_flag:
-                getQueryViewModel().removeFlag(threadIds);
+                getThreadModifier().removeFlag(threadIds);
                 return true;
             case R.id.action_move_to_trash:
-                requireLttrsActivity().moveToTrash(threadIds);
+                getThreadModifier().moveToTrash(threadIds);
                 tracker.clearSelection();
                 return true;
             default:

@@ -44,7 +44,6 @@ import androidx.work.WorkInfo;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.slf4j.Logger;
@@ -67,7 +66,9 @@ import rs.ltt.android.ui.adapter.LabelListAdapter;
 import rs.ltt.android.ui.fragment.SearchQueryFragment;
 import rs.ltt.android.ui.model.LttrsViewModel;
 import rs.ltt.android.ui.model.LttrsViewModelFactory;
+import rs.ltt.android.util.Event;
 import rs.ltt.android.util.MainThreadExecutor;
+import rs.ltt.android.worker.Failure;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mua.util.KeywordLabel;
 import rs.ltt.jmap.mua.util.Label;
@@ -147,6 +148,11 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
         });
         binding.mailboxList.setAdapter(labelListAdapter);
         lttrsViewModel.getNavigatableLabels().observe(this, labelListAdapter::submitList);
+        lttrsViewModel.getFailureEvent().observe(this, this::onFailureEvent);
+    }
+
+    private void onFailureEvent(Event<Failure> failureEvent) {
+        LOGGER.info("failure event "+failureEvent.consume().getException());
     }
 
     @Override
@@ -263,11 +269,8 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
 
     }
 
-    @Override
-    public void archive(final String threadId) {
-        archive(ImmutableSet.of(threadId));
-    }
 
+    @Override
     public void archive(Collection<String> threadIds) {
         final int count = threadIds.size();
         lttrsViewModel.archive(threadIds);
@@ -281,10 +284,6 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
     }
 
     @Override
-    public void moveToInbox(final String threadId) {
-        moveToInbox(ImmutableSet.of(threadId));
-    }
-
     public void moveToInbox(final Collection<String> threadIds) {
         final int count = threadIds.size();
         final Snackbar snackbar = Snackbar.make(
@@ -298,10 +297,6 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
     }
 
     @Override
-    public void moveToTrash(final String threadId) {
-        moveToTrash(ImmutableSet.of(threadId));
-    }
-
     public void moveToTrash(final Collection<String> threadIds) {
         final int count = threadIds.size();
         final Snackbar snackbar = Snackbar.make(
@@ -334,10 +329,6 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
     }
 
     @Override
-    public void removeFromMailbox(String threadId, MailboxWithRoleAndName mailbox) {
-        removeFromMailbox(ImmutableSet.of(threadId), mailbox);
-    }
-
     public void removeFromMailbox(Collection<String> threadIds, MailboxWithRoleAndName mailbox) {
         final int count = threadIds.size();
         final Snackbar snackbar = Snackbar.make(
@@ -350,6 +341,42 @@ public class LttrsActivity extends AppCompatActivity implements OnLabelOpened, T
         lttrsViewModel.removeFromMailbox(threadIds, mailbox);
     }
 
+    @Override
+    public void markRead(Collection<String> threadIds) {
+        this.lttrsViewModel.markRead(threadIds);
+    }
+
+    @Override
+    public void markUnread(Collection<String> threadIds) {
+        this.lttrsViewModel.markUnread(threadIds);
+    }
+
+    @Override
+    public void markImportant(Collection<String> threadIds) {
+        this.lttrsViewModel.markImportant(threadIds);
+    }
+
+    @Override
+    public void markNotImportant(Collection<String> threadIds) {
+        this.lttrsViewModel.markNotImportant(threadIds);
+    }
+
+    @Override
+    public void toggleFlagged(String threadId, boolean target) {
+        this.lttrsViewModel.toggleFlagged(threadId, target);
+    }
+
+    @Override
+    public void addFlag(Collection<String> threadIds) {
+        this.lttrsViewModel.addFlag(threadIds);
+    }
+
+    @Override
+    public void removeFlag(Collection<String> threadIds) {
+        this.lttrsViewModel.removeFlag(threadIds);
+    }
+
+    @Override
     public void removeFromKeyword(Collection<String> threadIds, final String keyword) {
         final int count = threadIds.size();
         final Snackbar snackbar = Snackbar.make(

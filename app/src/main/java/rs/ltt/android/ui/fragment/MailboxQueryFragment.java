@@ -50,7 +50,6 @@ public class MailboxQueryFragment extends AbstractMailboxQueryFragment {
                 threadOverviewItem.threadId,
                 label,
                 threadOverviewItem.getSubject(),
-                threadOverviewItem.getKeywords(),
                 important
         ));
     }
@@ -66,6 +65,6 @@ public class MailboxQueryFragment extends AbstractMailboxQueryFragment {
                 mailboxQueryViewModel.getMailbox().getValue(),
                 "MailboxQueryViewModel had no information about the mailbox we were viewing"
         );
-        requireLttrsActivity().removeFromMailbox(threadIds, mailbox);
+        getThreadModifier().removeFromMailbox(threadIds, mailbox);
     }
 }

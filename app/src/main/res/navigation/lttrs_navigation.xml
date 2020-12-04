@@ -92,10 +92,6 @@
             app:argType="string"
             app:nullable="true" />
         <argument
-            android:name="keywords"
-            app:argType="string[]"
-            app:nullable="false" />
-        <argument
             android:name="important"
             app:argType="boolean"
             app:nullable="false" />

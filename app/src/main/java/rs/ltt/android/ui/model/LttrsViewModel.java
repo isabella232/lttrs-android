@@ -23,6 +23,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 import androidx.work.WorkInfo;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.slf4j.Logger;
@@ -32,8 +33,11 @@ import java.util.Collection;
 import java.util.List;
 
 import rs.ltt.android.repository.MainRepository;
-import rs.ltt.android.repository.ThreadRepository;
+import rs.ltt.android.repository.LttrsRepository;
+import rs.ltt.android.util.Event;
+import rs.ltt.android.worker.Failure;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
+import rs.ltt.jmap.common.entity.Keyword;
 import rs.ltt.jmap.mua.util.Label;
 import rs.ltt.jmap.mua.util.LabelUtil;
 
@@ -44,7 +48,7 @@ public class LttrsViewModel extends AndroidViewModel {
     private final LiveData<List<Label>> navigatableLabels;
     private final MainRepository mainRepository;
     private final long accountId;
-    private final ThreadRepository threadRepository;
+    private final LttrsRepository lttrsRepository;
     private String currentSearchTerm;
 
     public LttrsViewModel(@NonNull Application application, final long accountId) {
@@ -52,11 +56,15 @@ public class LttrsViewModel extends AndroidViewModel {
         LOGGER.debug("creating instance of LttrsViewModel");
         this.mainRepository = new MainRepository(application);
         this.accountId = accountId;
-        this.threadRepository = new ThreadRepository(application, accountId);
+        this.lttrsRepository = new LttrsRepository(application, accountId);
         this.navigatableLabels = Transformations.map(
-                this.threadRepository.getMailboxes(),
+                this.lttrsRepository.getMailboxes(),
                 LabelUtil::fillUpAndSort
         );
+    }
+
+    public LiveData<Event<Failure>> getFailureEvent() {
+        return this.lttrsRepository.getFailureEvent();
     }
 
     public long getAccountId() {
@@ -81,35 +89,63 @@ public class LttrsViewModel extends AndroidViewModel {
     }
 
     public ListenableFuture<LiveData<WorkInfo>> moveToTrash(final Collection<String> threadIds) {
-        return this.threadRepository.moveToTrash(threadIds);
+        return this.lttrsRepository.moveToTrash(threadIds);
     }
 
     public void cancelMoveToTrash(final WorkInfo workInfo, final Collection<String> threadIds) {
-        this.threadRepository.cancelMoveToTrash(workInfo, threadIds);
+        this.lttrsRepository.cancelMoveToTrash(workInfo, threadIds);
     }
 
     public void archive(Collection<String> threadIds) {
-        this.threadRepository.archive(threadIds);
+        this.lttrsRepository.archive(threadIds);
     }
 
     public void moveToInbox(Collection<String> threadIds) {
-        this.threadRepository.moveToInbox(threadIds);
+        this.lttrsRepository.moveToInbox(threadIds);
     }
 
     public void removeFromMailbox(final Collection<String> threadIds, final IdentifiableMailboxWithRole mailbox) {
-        this.threadRepository.removeFromMailbox(threadIds, mailbox);
+        this.lttrsRepository.removeFromMailbox(threadIds, mailbox);
     }
 
     public void copyToMailbox(final Collection<String> threadIds, final IdentifiableMailboxWithRole mailbox) {
-        this.threadRepository.copyToMailbox(threadIds, mailbox);
+        this.lttrsRepository.copyToMailbox(threadIds, mailbox);
     }
 
     public void removeKeyword(final Collection<String> threadIds, final String keyword) {
-        this.threadRepository.removeKeyword(threadIds, keyword);
+        this.lttrsRepository.removeKeyword(threadIds, keyword);
     }
 
     public void addKeyword(final Collection<String> threadIds, final String keyword) {
-        this.threadRepository.addKeyword(threadIds, keyword);
+        this.lttrsRepository.addKeyword(threadIds, keyword);
+    }
+
+    public void toggleFlagged(String threadId, boolean target) {
+        this.lttrsRepository.toggleFlagged(ImmutableSet.of(threadId), target);
+    }
+
+    public void markRead(final Collection<String> threadIds) {
+        this.lttrsRepository.markRead(threadIds);
+    }
+
+    public void markUnread(final Collection<String> threadIds) {
+        this.lttrsRepository.markUnRead(threadIds);
+    }
+
+    public void markImportant(final Collection<String> threadIds) {
+        this.lttrsRepository.markImportant(threadIds);
+    }
+
+    public void markNotImportant(final Collection<String> threadIds) {
+        this.lttrsRepository.markNotImportant(threadIds);
+    }
+
+    public void addFlag(final Collection<String> threadIds) {
+        this.addKeyword(threadIds, Keyword.FLAGGED);
+    }
+
+    public void removeFlag(final Collection<String> threadIds) {
+        this.removeKeyword(threadIds, Keyword.FLAGGED);
     }
 
 }

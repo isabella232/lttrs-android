@@ -24,7 +24,7 @@ public class MainThreadExecutor implements Executor {
 
     private static final MainThreadExecutor INSTANCE = new MainThreadExecutor();
 
-    private final Handler handler = new Handler(Looper.myLooper());
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
     public void execute(final Runnable command) {

@@ -27,23 +27,20 @@ public class ThreadViewModelFactory implements ViewModelProvider.Factory {
     private final long accountId;
     private final String threadId;
     private final String label;
-    private final boolean triggerRead;
 
     public ThreadViewModelFactory(final Application application,
                                   final long accountId,
                                   final String threadId,
-                                  final String label,
-                                  boolean triggerRead) {
+                                  final String label) {
         this.application = application;
         this.accountId = accountId;
         this.threadId = threadId;
         this.label = label;
-        this.triggerRead = triggerRead;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return modelClass.cast(new ThreadViewModel(application, accountId, threadId, label, triggerRead));
+        return modelClass.cast(new ThreadViewModel(application, accountId, threadId, label));
     }
 }

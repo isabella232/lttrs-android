@@ -20,6 +20,7 @@ import android.app.Activity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import rs.ltt.android.ui.ThreadModifier;
 import rs.ltt.android.ui.activity.LttrsActivity;
 import rs.ltt.android.ui.model.LttrsViewModel;
 
@@ -39,5 +40,13 @@ abstract class AbstractLttrsFragment extends Fragment {
             return (LttrsActivity) activity;
         }
         throw new IllegalStateException("Fragment is not attached to LttrsActivity");
+    }
+
+    ThreadModifier getThreadModifier() {
+        final Activity activity = requireActivity();
+        if (activity instanceof ThreadModifier) {
+            return (ThreadModifier) activity;
+        }
+        throw new IllegalStateException("Activity does not implement ThreadModifier");
     }
 }

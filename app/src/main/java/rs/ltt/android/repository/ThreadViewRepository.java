@@ -32,11 +32,12 @@ import rs.ltt.android.entity.FullEmail;
 import rs.ltt.android.entity.KeywordOverwriteEntity;
 import rs.ltt.android.entity.MailboxOverwriteEntity;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
+import rs.ltt.android.entity.Seen;
 import rs.ltt.android.entity.ThreadHeader;
 
-public class ThreadRepository extends LttrsRepository {
+public class ThreadViewRepository extends AbstractMuaRepository {
 
-    public ThreadRepository(final Application application, final long accountId) {
+    public ThreadViewRepository(final Application application, final long accountId) {
         super(application, accountId);
     }
 
@@ -57,22 +58,22 @@ public class ThreadRepository extends LttrsRepository {
         return database.overwriteDao().getMailboxOverwrites(threadId);
     }
 
-    public ListenableFuture<List<ExpandedPosition>> getExpandedPositions(String threadId) {
+    public ListenableFuture<Seen> getSeen(String threadId) {
         ListenableFuture<KeywordOverwriteEntity> overwriteFuture = database.overwriteDao().getKeywordOverwrite(threadId);
         return Futures.transformAsync(overwriteFuture, overwrite -> {
             if (overwrite != null) {
                 if (overwrite.value) {
-                    return database.threadAndEmailDao().getMaxPosition(threadId);
+                    return Seen.of(true, database.threadAndEmailDao().getMaxPosition(threadId));
                 } else {
-                    return database.threadAndEmailDao().getAllPositions(threadId);
+                    return Seen.of(false, database.threadAndEmailDao().getAllPositions(threadId));
                 }
             } else {
                 ListenableFuture<List<ExpandedPosition>> unseenFuture = database.threadAndEmailDao().getUnseenPositions(threadId);
                 return Futures.transformAsync(unseenFuture, unseen -> {
                     if (unseen == null || unseen.size() == 0) {
-                        return database.threadAndEmailDao().getMaxPosition(threadId);
+                        return Seen.of(true, database.threadAndEmailDao().getMaxPosition(threadId));
                     } else {
-                        return Futures.immediateFuture(unseen);
+                        return Seen.of(false, Futures.immediateFuture(unseen));
                     }
                 }, MoreExecutors.directExecutor());
             }
