@@ -185,6 +185,7 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
             final UUID uuid = (UUID) data.getSerializableExtra(ComposeActivity.EDITING_TASK_ID_EXTRA);
             final boolean threadDiscarded = data.getBooleanExtra(ComposeActivity.DISCARDED_THREAD_EXTRA, false);
             if (uuid != null) {
+                getLttrsViewModel().observeForFailure(uuid);
                 threadViewModel.waitForEdit(uuid);
             } else if (threadDiscarded) {
                 final NavController navController = Navigation.findNavController(

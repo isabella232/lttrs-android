@@ -18,6 +18,7 @@ package rs.ltt.android.repository;
 import android.app.Application;
 
 import androidx.lifecycle.LiveData;
+import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkContinuation;
 import androidx.work.WorkManager;
@@ -31,6 +32,7 @@ import java.util.UUID;
 import rs.ltt.android.entity.EditableEmail;
 import rs.ltt.android.entity.IdentityWithNameAndEmail;
 import rs.ltt.android.ui.model.ComposeViewModel;
+import rs.ltt.android.worker.AbstractMuaWorker;
 import rs.ltt.android.worker.DiscardDraftWorker;
 import rs.ltt.android.worker.SaveDraftWorker;
 import rs.ltt.android.worker.SendEmailWorker;
@@ -100,15 +102,20 @@ public class ComposeRepository extends AbstractMuaRepository {
                 ))
                 .build();
         final WorkManager workManager = WorkManager.getInstance(application);
-        WorkContinuation continuation = workManager.beginWith(saveDraftRequest);
+        final WorkContinuation continuation = workManager.beginUniqueWork(
+                AbstractMuaWorker.uniqueName(accountId),
+                ExistingWorkPolicy.APPEND_OR_REPLACE,
+                saveDraftRequest
+        );
         if (discard != null) {
             final OneTimeWorkRequest discardPreviousDraft = new OneTimeWorkRequest.Builder(DiscardDraftWorker.class)
                     .setConstraints(CONNECTED_CONSTRAINT)
                     .setInputData(DiscardDraftWorker.data(accountId, discard.id))
                     .build();
-            continuation = continuation.then(discardPreviousDraft);
+            continuation.then(discardPreviousDraft).enqueue();
+        } else {
+            continuation.enqueue();
         }
-        continuation.enqueue();
         return saveDraftRequest.getId();
     }
 

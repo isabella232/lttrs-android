@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import rs.ltt.android.entity.KeywordOverwriteEntity;
@@ -267,14 +268,22 @@ public class LttrsRepository extends AbstractMuaRepository {
     }
 
     protected LiveData<WorkInfo> dispatchWorkRequest(final OneTimeWorkRequest workRequest) {
-        LOGGER.info("dispatching work request {} ",workRequest);
         final WorkManager workManager = WorkManager.getInstance(application);
         workManager.enqueueUniqueWork(
                 ArchiveWorker.uniqueName(accountId),
                 ExistingWorkPolicy.APPEND_OR_REPLACE,
                 workRequest
         );
-        final LiveData<WorkInfo> workInfoLiveData = workManager.getWorkInfoByIdLiveData(workRequest.getId());
+        return observeForFailure(workRequest);
+    }
+
+    protected LiveData<WorkInfo> observeForFailure(final OneTimeWorkRequest workRequest) {
+        return observeForFailure(workRequest.getId());
+    }
+
+    public LiveData<WorkInfo> observeForFailure(final UUID id) {
+        final WorkManager workManager = WorkManager.getInstance(application);
+        final LiveData<WorkInfo> workInfoLiveData = workManager.getWorkInfoByIdLiveData(id);
         MainThreadExecutor.getInstance().execute(() -> failureEventMediator.addSource(workInfoLiveData, workInfo -> {
             if (workInfo.getState().isFinished()) {
                 failureEventMediator.removeSource(workInfoLiveData);

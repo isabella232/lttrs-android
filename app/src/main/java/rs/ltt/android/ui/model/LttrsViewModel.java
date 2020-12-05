@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import rs.ltt.android.repository.MainRepository;
 import rs.ltt.android.repository.LttrsRepository;
@@ -165,5 +166,9 @@ public class LttrsViewModel extends AndroidViewModel {
 
     public void removeFlag(final Collection<String> threadIds) {
         this.removeKeyword(threadIds, Keyword.FLAGGED);
+    }
+
+    public void observeForFailure(final UUID id) {
+        this.lttrsRepository.observeForFailure(id);
     }
 }
