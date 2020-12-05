@@ -56,40 +56,30 @@ android {
 
 dependencies {
 
-    def appcompat_version = "1.2.0"
-    def lifecycle_version = "2.2.0"
-    def nav_version = "2.3.1"
-    def paging_version = "2.1.2"
-    def recycler_view_version = "1.1.0"
-    def recycler_view_selection_version = "1.1.0-rc03"
-    def swipe_refresh_layout_version = "1.1.0"
-    def room_version = "2.2.5"
-    def work_version = "2.4.0"
-
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.1'
 
     //AndroidX
-    implementation "androidx.appcompat:appcompat:$appcompat_version"
+    implementation "androidx.appcompat:appcompat:$rootProject.ext.appcompatVersion"
 
-    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-extensions:$rootProject.ext.lifecycleVersion"
 
-    implementation "androidx.navigation:navigation-fragment:$nav_version"
-    implementation "androidx.navigation:navigation-ui:$nav_version"
+    implementation "androidx.navigation:navigation-fragment:$rootProject.ext.navVersion"
+    implementation "androidx.navigation:navigation-ui:$rootProject.ext.navVersion"
 
-    implementation "androidx.paging:paging-common:$paging_version"
-    implementation "androidx.paging:paging-runtime:$paging_version"
+    implementation "androidx.paging:paging-common:$rootProject.ext.pagingVersion"
+    implementation "androidx.paging:paging-runtime:$rootProject.ext.pagingVersion"
 
 
-    implementation "androidx.room:room-runtime:$room_version"
-    implementation "androidx.room:room-guava:$room_version"
-    annotationProcessor "androidx.room:room-compiler:$room_version"
+    implementation "androidx.room:room-runtime:$rootProject.ext.roomVersion"
+    implementation "androidx.room:room-guava:$rootProject.ext.roomVersion"
+    annotationProcessor "androidx.room:room-compiler:$rootProject.ext.roomVersion"
 
-    implementation "androidx.recyclerview:recyclerview:$recycler_view_version"
-    implementation "androidx.recyclerview:recyclerview-selection:$recycler_view_selection_version"
+    implementation "androidx.recyclerview:recyclerview:$rootProject.ext.recyclerViewVersion"
+    implementation "androidx.recyclerview:recyclerview-selection:$rootProject.ext.recyclerViewSelectionVersion"
 
-    implementation "androidx.swiperefreshlayout:swiperefreshlayout:$swipe_refresh_layout_version"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:$rootProject.ext.swipeRefreshLayoutVersion"
 
-    implementation "androidx.work:work-runtime:$work_version"
+    implementation "androidx.work:work-runtime:$rootProject.ext.workVersion"
 
 
     //Google
@@ -105,7 +95,7 @@ dependencies {
 
 
     //Own libraries (libraries we wrote and can commit to)
-    implementation ('rs.ltt.jmap:jmap-mua:0.5.2') {
+    implementation ("rs.ltt.jmap:jmap-mua:$rootProject.ext.muaVersion") {
         changing = true
     }
 
@@ -113,8 +103,10 @@ dependencies {
     //Testing
     testImplementation 'junit:junit:4.13.1'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
-    androidTestImplementation "androidx.test.espresso:espresso-intents:3.3.0"
-    androidTestImplementation "androidx.test.espresso:espresso-contrib:3.3.0"
-    androidTestImplementation 'rs.ltt.jmap:jmap-mock-server:0.5.1'
+    androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.ext.espressoVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-intents:$rootProject.ext.espressoVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-contrib:$rootProject.ext.espressoVersion"
+    androidTestImplementation ("rs.ltt.jmap:jmap-mock-server:$rootProject.ext.muaVersion") {
+        changing = true
+    }
 }

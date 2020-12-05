@@ -1,13 +1,26 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-
 buildscript {
+
+    ext {
+        appcompatVersion = "1.2.0"
+        lifecycleVersion = "2.2.0"
+        navVersion = "2.3.2"
+        pagingVersion = "2.1.2"
+        recyclerViewVersion = "1.1.0"
+        recyclerViewSelectionVersion = "1.1.0-rc03"
+        swipeRefreshLayoutVersion = "1.1.0"
+        roomVersion = "2.2.5"
+        workVersion = "2.4.0"
+        muaVersion = "0.5.2"
+        espressoVersion = "3.3.0"
+    }
+
     repositories {
         google()
         jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.1'
-        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:2.3.1"
+        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$navVersion"
     }
 }
 
