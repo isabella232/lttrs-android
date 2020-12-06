@@ -138,37 +138,38 @@ public class ComposeViewModel extends AndroidViewModel {
         return isOnlyEmailInThread;
     }
 
-    public boolean send() {
+    public UUID send() {
         final IdentityWithNameAndEmail identity = getIdentity();
         if (identity == null) {
             postErrorMessage(R.string.select_sender);
-            return false;
+            throw new IllegalStateException();
         }
         final Draft currentDraft = getCurrentDraft();
         if (currentDraft.to.size() <= 0) {
             postErrorMessage(R.string.add_at_least_one_recipient);
-            return false;
+            throw new IllegalStateException();
         }
         for (EmailAddress emailAddress : currentDraft.to) {
             if (EmailAddressUtil.isValid(emailAddress)) {
                 continue;
             }
             postErrorMessage(R.string.the_address_x_is_invalid, emailAddress.getEmail());
-            return false;
+            throw new IllegalStateException();
         }
         LOGGER.info("sending with identity {}", identity.getId());
         final EditableEmail editableEmail = getEmail();
+        final UUID workInfoId;
         if (this.composeAction == ComposeAction.EDIT_DRAFT
                 && editableEmail != null
                 && currentDraft.unedited(Draft.edit(editableEmail))) {
             LOGGER.info("draft remains unedited. submitting...");
-            this.repository.submitEmail(identity, editableEmail);
+            workInfoId = this.repository.submitEmail(identity, editableEmail);
         } else {
             final Collection<String> inReplyTo = inReplyTo(editableEmail, composeAction);
-            this.repository.sendEmail(identity, currentDraft, inReplyTo);
+            workInfoId = this.repository.sendEmail(identity, currentDraft, inReplyTo, editableEmail);
         }
         this.draftHasBeenHandled = true;
-        return true;
+        return workInfoId;
     }
 
     private static Collection<String> inReplyTo(@Nullable EditableEmail editableEmail, ComposeAction action) {

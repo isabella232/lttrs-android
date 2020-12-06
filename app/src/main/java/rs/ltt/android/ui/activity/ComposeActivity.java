@@ -212,11 +212,15 @@ public class ComposeActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                setResultIntent();
+                saveDraft();
                 break;
             case R.id.action_send:
-                if (composeViewModel.send()) {
+                try {
+                    final UUID workInfoId = composeViewModel.send();
+                    setResultIntent(workInfoId);
                     finish();
+                } catch (IllegalStateException e) {
+                    //do nothing. error message has already been posted
                 }
                 break;
             case R.id.action_discard:
@@ -229,18 +233,22 @@ public class ComposeActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        setResultIntent();
+        saveDraft();
         super.onBackPressed();
     }
 
-    private void setResultIntent() {
+    private void saveDraft() {
         final UUID uuid = composeViewModel == null ? null : composeViewModel.saveDraft();
         if (uuid != null) {
             LOGGER.info("Storing draft saving worker task uuid");
-            final Intent intent = new Intent();
-            intent.putExtra(EDITING_TASK_ID_EXTRA, uuid);
-            setResult(RESULT_OK, intent);
+            setResultIntent(uuid);
         }
+    }
+
+    private void setResultIntent(final UUID workInfoId) {
+        final Intent intent = new Intent();
+        intent.putExtra(EDITING_TASK_ID_EXTRA, workInfoId);
+        setResult(RESULT_OK, intent);
     }
 
     private void discardDraft() {

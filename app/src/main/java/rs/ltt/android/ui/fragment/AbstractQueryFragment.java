@@ -89,6 +89,7 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
 
         binding.setViewModel(viewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
+        //TODO: we should listen for UUID in the activity result
         binding.compose.setOnClickListener((v) -> ComposeActivity.compose(this, getLttrsViewModel().getAccountId()));
         if (showComposeButton() && actionMode == null) {
             binding.compose.show();
@@ -114,11 +115,6 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
 
         return binding.getRoot();
     }
-
-    private void failureEvent(Event<Failure> failureEvent) {
-        LOGGER.info("failure event {}", failureEvent.consume().getException());
-    }
-
 
     private void setupAdapter(final Future<MailboxWithRoleAndName> importantMailbox) {
         this.threadOverviewAdapter = new ThreadOverviewAdapter();

@@ -89,8 +89,18 @@ public abstract class AbstractCreateEmailWorker extends AbstractMuaWorker {
                 .build();
     }
 
+    protected Result refreshAndFetchThreadId(String emailId) {
+        refresh();
+        final String threadId = getDatabase().threadAndEmailDao().getThreadId(emailId);
+        LOGGER.info("Email saved as draft with id {} in thread {}", emailId, threadId);
+        final Data data = new Data.Builder()
+                .putString("emailId", emailId)
+                .putString("threadId", threadId)
+                .build();
+        return Result.success(data);
+    }
 
-    protected void refresh() {
+    private void refresh() {
         try {
             final Status status = getMua().refresh().get();
         } catch (Exception e) {

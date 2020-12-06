@@ -55,7 +55,7 @@ public class ComposeRepository extends AbstractMuaRepository {
         return database.threadAndEmailDao().getEditableEmail(id);
     }
 
-    public void sendEmail(IdentifiableIdentity identity, ComposeViewModel.Draft draft, final Collection<String> inReplyTo) {
+    public UUID sendEmail(IdentifiableIdentity identity, ComposeViewModel.Draft draft, final Collection<String> inReplyTo, EditableEmail discard) {
         final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(SendEmailWorker.class)
                 .setConstraints(CONNECTED_CONSTRAINT)
                 .setInputData(SendEmailWorker.data(
@@ -69,10 +69,24 @@ public class ComposeRepository extends AbstractMuaRepository {
                 ))
                 .build();
         final WorkManager workManager = WorkManager.getInstance(application);
+        final WorkContinuation continuation = workManager.beginUniqueWork(
+                AbstractMuaWorker.uniqueName(accountId),
+                ExistingWorkPolicy.APPEND_OR_REPLACE,
+                workRequest);
+        if (discard != null) {
+            final OneTimeWorkRequest discardPreviousDraft = new OneTimeWorkRequest.Builder(DiscardDraftWorker.class)
+                    .setConstraints(CONNECTED_CONSTRAINT)
+                    .setInputData(DiscardDraftWorker.data(accountId, discard.id))
+                    .build();
+            continuation.then(discardPreviousDraft).enqueue();
+        } else {
+            continuation.enqueue();
+        }
         workManager.enqueue(workRequest);
+        return workRequest.getId();
     }
 
-    public void submitEmail(IdentityWithNameAndEmail identity, EditableEmail editableEmail) {
+    public UUID submitEmail(IdentityWithNameAndEmail identity, EditableEmail editableEmail) {
         final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(SubmitEmailWorker.class)
                 .setConstraints(CONNECTED_CONSTRAINT)
                 .setInputData(SubmitEmailWorker.data(
@@ -83,6 +97,7 @@ public class ComposeRepository extends AbstractMuaRepository {
                 .build();
         final WorkManager workManager = WorkManager.getInstance(application);
         workManager.enqueue(workRequest);
+        return workRequest.getId();
     }
 
     public UUID saveDraft(final IdentifiableIdentity identity,

@@ -42,8 +42,8 @@ public class SendEmailWorker extends AbstractCreateEmailWorker {
         final IdentityWithNameAndEmail identity = getIdentity();
         final Email email = buildEmail(identity);
         try {
-            getMua().send(email, identity).get();
-            return Result.success();
+            final String emailId = getMua().send(email, identity).get();
+            return refreshAndFetchThreadId(emailId);
         } catch (ExecutionException e) {
             LOGGER.warn("Unable to send email", e);
             return Result.failure();

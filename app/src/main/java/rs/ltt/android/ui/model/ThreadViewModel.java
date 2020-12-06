@@ -69,7 +69,7 @@ public class ThreadViewModel extends AndroidViewModel {
     private final String threadId;
     private final String label;
     private final ThreadViewRepository threadViewRepository;
-    private final MutableLiveData<Event<String>> threadViewRedirect = new MutableLiveData<>();
+    private final MediatorLiveData<Event<String>> threadViewRedirect = new MediatorLiveData<>();
     private LiveData<PagedList<FullEmail>> emails;
     private MediatorLiveData<SubjectWithImportance> subjectWithImportance;
     private LiveData<Boolean> flagged;
@@ -187,20 +187,17 @@ public class ThreadViewModel extends AndroidViewModel {
 
     public void waitForEdit(UUID uuid) {
         final WorkManager workManager = WorkManager.getInstance(getApplication());
-        LiveData<WorkInfo> liveData = workManager.getWorkInfoByIdLiveData(uuid);
-        liveData.observeForever(new Observer<WorkInfo>() {
-            @Override
-            public void onChanged(WorkInfo workInfo) {
-                if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
-                    final Data data = workInfo.getOutputData();
-                    final String threadId = data.getString("threadId");
-                    if (threadId != null && !ThreadViewModel.this.threadId.equals(threadId)) {
-                        LOGGER.info("redirecting to thread {}", threadId);
-                        threadViewRedirect.postValue(new Event<>(threadId));
-                    }
-                    liveData.removeObserver(this);
-                } else if (workInfo.getState() == WorkInfo.State.FAILED) {
-                    liveData.removeObserver(this);
+        final LiveData<WorkInfo> liveData = workManager.getWorkInfoByIdLiveData(uuid);
+        threadViewRedirect.addSource(liveData, workInfo -> {
+            if (workInfo.getState().isFinished()) {
+                threadViewRedirect.removeSource(liveData);
+            }
+            if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                final Data data = workInfo.getOutputData();
+                final String threadId = data.getString("threadId");
+                if (threadId != null && !ThreadViewModel.this.threadId.equals(threadId)) {
+                    LOGGER.info("redirecting to thread {}", threadId);
+                    threadViewRedirect.postValue(new Event<>(threadId));
                 }
             }
         });
