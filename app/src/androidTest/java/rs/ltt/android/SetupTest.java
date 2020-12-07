@@ -54,8 +54,8 @@ public class SetupTest {
         protected List<MailboxInfo> generateMailboxes() {
             return Arrays.asList(
                     new MailboxInfo(UUID.randomUUID().toString(), "Inbox", Role.INBOX),
-                    new MailboxInfo(UUID.randomUUID().toString(), "Archive", null),
-                    new MailboxInfo(UUID.randomUUID().toString(), "Drafts", null)
+                    new MailboxInfo(UUID.randomUUID().toString(), "Archive", null), //no role -> assignment screen
+                    new MailboxInfo(UUID.randomUUID().toString(), "Drafts", Role.SENT) //wrong role -> reassignment screen
             );
         }
     };
@@ -118,7 +118,7 @@ public class SetupTest {
         intended(hasComponent(LttrsActivity.class.getName()));
         onView(withId(R.id.thread_list)).perform(RecyclerViewActions.actionOnItemAtPosition(0, swipeRight()));
 
-        Thread.sleep(5000);
+        Thread.sleep(10000);
     }
 
     @Test

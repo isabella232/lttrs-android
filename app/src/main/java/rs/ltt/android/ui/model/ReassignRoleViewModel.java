@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.repository.MailboxRepository;
+import rs.ltt.jmap.common.entity.Mailbox;
 import rs.ltt.jmap.common.entity.Role;
 
 public class ReassignRoleViewModel extends AndroidViewModel {
@@ -20,6 +21,7 @@ public class ReassignRoleViewModel extends AndroidViewModel {
 
     private final LiveData<MailboxWithRoleAndName> mailbox;
     private final LiveData<Boolean> isReassignment;
+    private final Role role;
 
     public ReassignRoleViewModel(@NonNull final Application application,
                                  @NonNull final Long accountId,
@@ -30,10 +32,19 @@ public class ReassignRoleViewModel extends AndroidViewModel {
         this.mailboxRepository = new MailboxRepository(application, accountId);
         this.mailbox = this.mailboxRepository.getMailbox(mailboxId);
         this.isReassignment = Transformations.map(this.mailbox, m-> m.getRole() != null);
+        this.role = role;
     }
 
     public LiveData<Boolean> isReassignment() {
         return this.isReassignment;
+    }
+
+    public LiveData<MailboxWithRoleAndName> getMailbox() {
+        return mailbox;
+    }
+
+    public String getRole() {
+        return this.role.toString();
     }
 
     public static class Factory implements ViewModelProvider.Factory {

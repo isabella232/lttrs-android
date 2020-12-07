@@ -18,9 +18,10 @@ package rs.ltt.android.entity;
 import java.util.Collection;
 
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
+import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRoleAndName;
 import rs.ltt.jmap.common.entity.Role;
 
-public class MailboxWithRoleAndName implements IdentifiableMailboxWithRole {
+public class MailboxWithRoleAndName implements IdentifiableMailboxWithRoleAndName {
 
     public String id;
     public Role role;
@@ -34,6 +35,11 @@ public class MailboxWithRoleAndName implements IdentifiableMailboxWithRole {
     @Override
     public String getId() {
         return id;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     public static boolean isAnyOfRole(Collection<MailboxWithRoleAndName> mailboxes, Role role) {

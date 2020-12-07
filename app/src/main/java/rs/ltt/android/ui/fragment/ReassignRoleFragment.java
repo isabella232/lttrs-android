@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.FragmentReassignRoleBinding;
+import rs.ltt.android.databinding.FragmentReassignRoleBindingImpl;
 import rs.ltt.android.ui.model.ReassignRoleViewModel;
 import rs.ltt.jmap.common.entity.Role;
 
@@ -40,7 +41,7 @@ public class ReassignRoleFragment extends AbstractLttrsFragment {
                 getViewLifecycleOwner(),
                 reassign -> getLttrsViewModel().setActivityTitle(reassign != null && reassign ? R.string.reassign_role : R.string.assign_role)
         );
-        binding.setReassignRoleViewModel(viewModel);
+        binding.setModel(viewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
         return binding.getRoot();
     }

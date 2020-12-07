@@ -89,4 +89,9 @@
     <string name="could_not_store_account_credentials">Could not store account credentials</string>
     <string name="reassign_role">Reassign role</string>
     <string name="assign_role">Assign role</string>
+    <string name="reassign_role_question">You already have a label called %1$s with the role of %2$s. Would you like to reassign it the role of %3$s?</string>
+    <string name="assign_role_question">You already have a label called %1$s. Would you like to assign it the role of %2$s?</string>
+    <string name="assign_role_detailed_explanation">Ltt.rs needs a label (mailbox) with the role of %1$s to work correctly. If you don’t want to use the label called %2$s for that purpose you can tap cancel and use your desktop or web client to create a different label with the role of %1$s.</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
 </resources>
