@@ -16,6 +16,7 @@
 package rs.ltt.android.ui.fragment;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -45,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -89,7 +91,6 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
 
         binding.setViewModel(viewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
-        //TODO: we should listen for UUID in the activity result
         binding.compose.setOnClickListener((v) -> ComposeActivity.compose(this, getLttrsViewModel().getAccountId()));
         if (showComposeButton() && actionMode == null) {
             binding.compose.show();
@@ -114,6 +115,18 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         new ItemTouchHelper(queryItemTouchHelper).attachToRecyclerView(binding.threadList);
 
         return binding.getRoot();
+    }
+
+    @Override
+    public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+        LOGGER.info("on activity result code={}, result={}, intent={}", requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == ComposeActivity.REQUEST_EDIT_DRAFT && resultCode == ComposeActivity.RESULT_OK) {
+            final UUID uuid = (UUID) data.getSerializableExtra(ComposeActivity.EDITING_TASK_ID_EXTRA);
+            if (uuid != null) {
+                getLttrsViewModel().observeForFailure(uuid);
+            }
+        }
     }
 
     private void setupAdapter(final Future<MailboxWithRoleAndName> importantMailbox) {

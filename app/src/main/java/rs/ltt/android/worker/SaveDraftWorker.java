@@ -47,7 +47,7 @@ public class SaveDraftWorker extends AbstractCreateEmailWorker {
             return refreshAndFetchThreadId(emailId);
         } catch (ExecutionException e) {
             LOGGER.warn("Unable to safe email as draft", e);
-            return Result.failure();
+            return Result.failure(Failure.of(e.getCause()));
         } catch (InterruptedException e) {
             return Result.retry();
         }

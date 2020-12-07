@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 import okhttp3.mockwebserver.MockWebServer;
+import rs.ltt.android.ui.activity.ComposeActivity;
 import rs.ltt.android.ui.activity.LttrsActivity;
 import rs.ltt.android.ui.activity.SetupActivity;
 import rs.ltt.jmap.client.api.HttpJmapApiClient;
@@ -26,7 +27,9 @@ import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mock.server.JmapDispatcher;
 import rs.ltt.jmap.mock.server.MockMailServer;
 
+import static androidx.test.espresso.Espresso.closeSoftKeyboard;
 import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.Espresso.pressBack;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.swipeDown;
 import static androidx.test.espresso.action.ViewActions.swipeRight;
@@ -51,7 +54,8 @@ public class SetupTest {
         protected List<MailboxInfo> generateMailboxes() {
             return Arrays.asList(
                     new MailboxInfo(UUID.randomUUID().toString(), "Inbox", Role.INBOX),
-                    new MailboxInfo(UUID.randomUUID().toString(), "Archive", null)
+                    new MailboxInfo(UUID.randomUUID().toString(), "Archive", null),
+                    new MailboxInfo(UUID.randomUUID().toString(), "Drafts", null)
             );
         }
     };
@@ -103,9 +107,24 @@ public class SetupTest {
     public void setupAndSwipePreexistingArchive() throws InterruptedException {
         onView(withId(R.id.email_address)).perform(typeText(JmapDispatcher.USERNAME));
         onView(withId(R.id.next)).perform(click());
+        onView(withId(R.id.url)).perform(typeText(mockWebServer.url(JmapDispatcher.WELL_KNOWN_PATH).toString()));
+        onView(withId(R.id.next)).perform(click());
 
-        onView(withId(R.id.header)).check(matches(withText("Info required")));
+        onView(withId(R.id.password)).perform(typeText(JmapDispatcher.PASSWORD));
+        onView(withId(R.id.next)).perform(click());
 
+        Thread.sleep(2000);
+
+        intended(hasComponent(LttrsActivity.class.getName()));
+        onView(withId(R.id.thread_list)).perform(RecyclerViewActions.actionOnItemAtPosition(0, swipeRight()));
+
+        Thread.sleep(5000);
+    }
+
+    @Test
+    public void setupAndDraft() throws InterruptedException {
+        onView(withId(R.id.email_address)).perform(typeText(JmapDispatcher.USERNAME));
+        onView(withId(R.id.next)).perform(click());
         onView(withId(R.id.url)).perform(typeText(mockWebServer.url(JmapDispatcher.WELL_KNOWN_PATH).toString()));
         onView(withId(R.id.next)).perform(click());
 
@@ -116,10 +135,14 @@ public class SetupTest {
 
         intended(hasComponent(LttrsActivity.class.getName()));
 
-        onView(withId(R.id.thread_list)).perform(RecyclerViewActions.actionOnItemAtPosition(0, swipeRight()));
+        onView(withId(R.id.compose)).perform(click());
+        intended(hasComponent(ComposeActivity.class.getName()));
 
-        Thread.sleep(5000);
+        onView(withId(R.id.subject)).perform(typeText("Hello word!"));
+        closeSoftKeyboard();
+        pressBack();
 
+        Thread.sleep(3000);
     }
 
     @Test
