@@ -52,6 +52,10 @@ android {
     buildFeatures {
         dataBinding true
     }
+
+    lintOptions {
+        disable 'MissingTranslation'
+    }
 }
 
 dependencies {
@@ -95,7 +99,7 @@ dependencies {
 
 
     //Own libraries (libraries we wrote and can commit to)
-    implementation ("rs.ltt.jmap:jmap-mua:$rootProject.ext.muaVersion") {
+    implementation("rs.ltt.jmap:jmap-mua:$rootProject.ext.muaVersion") {
         changing = true
     }
 
@@ -106,7 +110,7 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.ext.espressoVersion"
     androidTestImplementation "androidx.test.espresso:espresso-intents:$rootProject.ext.espressoVersion"
     androidTestImplementation "androidx.test.espresso:espresso-contrib:$rootProject.ext.espressoVersion"
-    androidTestImplementation ("rs.ltt.jmap:jmap-mock-server:$rootProject.ext.muaVersion") {
+    androidTestImplementation("rs.ltt.jmap:jmap-mock-server:$rootProject.ext.muaVersion") {
         changing = true
     }
 }
