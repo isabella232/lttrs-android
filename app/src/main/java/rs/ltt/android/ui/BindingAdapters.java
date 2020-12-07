@@ -341,7 +341,7 @@ public class BindingAdapters {
                 spinner.getContext(),
                 android.R.layout.simple_spinner_item,
                 representations);
-        adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+        adapter.setDropDownViewResource(R.layout.item_simple_spinner_dropdown);
         spinner.setAdapter(adapter);
     }
 }

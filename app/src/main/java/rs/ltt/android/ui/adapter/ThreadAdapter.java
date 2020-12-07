@@ -31,8 +31,8 @@ import java.util.Collection;
 import java.util.Set;
 
 import rs.ltt.android.R;
-import rs.ltt.android.databinding.EmailHeaderBinding;
-import rs.ltt.android.databinding.EmailItemBinding;
+import rs.ltt.android.databinding.ItemEmailBinding;
+import rs.ltt.android.databinding.ItemEmailHeaderBinding;
 import rs.ltt.android.entity.ExpandedPosition;
 import rs.ltt.android.entity.FullEmail;
 import rs.ltt.android.entity.SubjectWithImportance;
@@ -82,9 +82,9 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
     public AbstractThreadItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         if (viewType == ITEM_VIEW_TYPE) {
-            return new ThreadItemViewHolder(DataBindingUtil.inflate(inflater, R.layout.email_item, parent, false));
+            return new ThreadItemViewHolder(DataBindingUtil.inflate(inflater, R.layout.item_email, parent, false));
         } else {
-            return new ThreadHeaderViewHolder(DataBindingUtil.inflate(inflater, R.layout.email_header, parent, false));
+            return new ThreadHeaderViewHolder(DataBindingUtil.inflate(inflater, R.layout.item_email_header, parent, false));
         }
 
     }
@@ -173,7 +173,7 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
         }
     }
 
-    class AbstractThreadItemViewHolder extends RecyclerView.ViewHolder {
+    static class AbstractThreadItemViewHolder extends RecyclerView.ViewHolder {
 
 
         AbstractThreadItemViewHolder(@NonNull View itemView) {
@@ -181,21 +181,21 @@ public class ThreadAdapter extends RecyclerView.Adapter<ThreadAdapter.AbstractTh
         }
     }
 
-    class ThreadItemViewHolder extends AbstractThreadItemViewHolder {
+    static class ThreadItemViewHolder extends AbstractThreadItemViewHolder {
 
-        private final EmailItemBinding binding;
+        private final ItemEmailBinding binding;
 
-        ThreadItemViewHolder(@NonNull EmailItemBinding binding) {
+        ThreadItemViewHolder(@NonNull ItemEmailBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }
     }
 
-    class ThreadHeaderViewHolder extends AbstractThreadItemViewHolder {
+    static class ThreadHeaderViewHolder extends AbstractThreadItemViewHolder {
 
-        private final EmailHeaderBinding binding;
+        private final ItemEmailHeaderBinding binding;
 
-        ThreadHeaderViewHolder(@NonNull EmailHeaderBinding binding) {
+        ThreadHeaderViewHolder(@NonNull ItemEmailHeaderBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }

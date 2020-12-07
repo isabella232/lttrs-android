@@ -37,8 +37,8 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.Future;
 
 import rs.ltt.android.R;
-import rs.ltt.android.databinding.ThreadOverviewItemBinding;
-import rs.ltt.android.databinding.ThreadOverviewItemLoadingBinding;
+import rs.ltt.android.databinding.ItemThreadOverviewBinding;
+import rs.ltt.android.databinding.ItemThreadOverviewLoadingBinding;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.ui.BindingAdapters;
@@ -79,9 +79,9 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
     public AbstractThreadOverviewViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         final LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         if (viewType == THREAD_ITEM_VIEW_TYPE) {
-            return new ThreadOverviewViewHolder(DataBindingUtil.inflate(layoutInflater, R.layout.thread_overview_item, parent, false));
+            return new ThreadOverviewViewHolder(DataBindingUtil.inflate(layoutInflater, R.layout.item_thread_overview, parent, false));
         } else {
-            return new ThreadOverviewLoadingViewHolder(DataBindingUtil.inflate(layoutInflater, R.layout.thread_overview_item_loading, parent, false));
+            return new ThreadOverviewLoadingViewHolder(DataBindingUtil.inflate(layoutInflater, R.layout.item_thread_overview_loading, parent, false));
         }
     }
 
@@ -196,7 +196,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
     }
 
 
-    abstract class AbstractThreadOverviewViewHolder extends RecyclerView.ViewHolder {
+    abstract static class AbstractThreadOverviewViewHolder extends RecyclerView.ViewHolder {
 
         AbstractThreadOverviewViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -205,10 +205,10 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
 
     public class ThreadOverviewViewHolder extends AbstractThreadOverviewViewHolder {
 
-        final public ThreadOverviewItemBinding binding;
+        final public ItemThreadOverviewBinding binding;
         private int position;
 
-        ThreadOverviewViewHolder(@NonNull ThreadOverviewItemBinding binding) {
+        ThreadOverviewViewHolder(@NonNull ItemThreadOverviewBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }
@@ -235,11 +235,11 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
         }
     }
 
-    public class ThreadOverviewLoadingViewHolder extends AbstractThreadOverviewViewHolder {
+    public static class ThreadOverviewLoadingViewHolder extends AbstractThreadOverviewViewHolder {
 
-        final ThreadOverviewItemLoadingBinding binding;
+        final ItemThreadOverviewLoadingBinding binding;
 
-        ThreadOverviewLoadingViewHolder(@NonNull ThreadOverviewItemLoadingBinding binding) {
+        ThreadOverviewLoadingViewHolder(@NonNull ItemThreadOverviewLoadingBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }

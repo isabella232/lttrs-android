@@ -26,6 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.core.widget.ImageViewCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.AsyncDifferConfig;
 import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
@@ -34,8 +35,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import rs.ltt.android.R;
-import rs.ltt.android.databinding.MailboxListHeaderBinding;
-import rs.ltt.android.databinding.MailboxListItemBinding;
+import rs.ltt.android.databinding.ItemMailboxBinding;
+import rs.ltt.android.databinding.ItemMailboxHeaderBinding;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.jmap.mua.util.KeywordLabel;
 import rs.ltt.jmap.mua.util.Label;
@@ -72,10 +73,10 @@ public class LabelListAdapter extends RecyclerView.Adapter<LabelListAdapter.Abst
     @Override
     public AbstractMailboxViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == ITEM_VIEW_TYPE) {
-            MailboxListItemBinding binding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), R.layout.mailbox_list_item, parent, false);
+            ItemMailboxBinding binding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), R.layout.item_mailbox, parent, false);
             return new MailboxViewHolder(binding);
         } else {
-            MailboxListHeaderBinding binding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), R.layout.mailbox_list_header, parent, false);
+            ItemMailboxHeaderBinding binding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), R.layout.item_mailbox_header, parent, false);
             return new MailboxHeaderViewHolder(binding);
         }
     }
@@ -169,26 +170,26 @@ public class LabelListAdapter extends RecyclerView.Adapter<LabelListAdapter.Abst
         void onLabelSelected(final Label label, boolean currentlySelected);
     }
 
-    class AbstractMailboxViewHolder extends RecyclerView.ViewHolder {
+    static class AbstractMailboxViewHolder extends RecyclerView.ViewHolder {
 
         AbstractMailboxViewHolder(@NonNull View itemView) {
             super(itemView);
         }
     }
 
-    class MailboxViewHolder extends AbstractMailboxViewHolder {
+    static class MailboxViewHolder extends AbstractMailboxViewHolder {
 
-        private final MailboxListItemBinding binding;
+        private final ItemMailboxBinding binding;
 
-        MailboxViewHolder(@NonNull MailboxListItemBinding binding) {
+        MailboxViewHolder(@NonNull ItemMailboxBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }
     }
 
-    class MailboxHeaderViewHolder extends AbstractMailboxViewHolder {
+    static class MailboxHeaderViewHolder extends AbstractMailboxViewHolder {
 
-        MailboxHeaderViewHolder(@NonNull MailboxListHeaderBinding binding) {
+        MailboxHeaderViewHolder(@NonNull ItemMailboxHeaderBinding binding) {
             super(binding.getRoot());
         }
     }

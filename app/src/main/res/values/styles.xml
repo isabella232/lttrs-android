@@ -46,7 +46,7 @@
         <item name="colorControlNormal">@color/colorSecondaryOnSurface</item>
         <item name="colorControlHighlight">@color/colorDivider</item>
         <item name="autoCompleteTextViewStyle">@style/AutoCompleteTextViewStyle</item>
-        <item name="suggestionRowLayout">@layout/search_suggestion_item</item>
+        <item name="suggestionRowLayout">@layout/item_search_suggestion</item>
         <item name="android:maxWidth">9999dp</item>
     </style>
 
