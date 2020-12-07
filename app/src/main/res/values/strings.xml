@@ -87,4 +87,6 @@
     <string name="draft">Draft</string>
     <string name="compose_cc">Cc</string>
     <string name="could_not_store_account_credentials">Could not store account credentials</string>
+    <string name="reassign_role">Reassign role</string>
+    <string name="assign_role">Assign role</string>
 </resources>

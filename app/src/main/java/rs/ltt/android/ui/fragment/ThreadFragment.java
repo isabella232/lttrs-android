@@ -60,9 +60,7 @@ import rs.ltt.android.ui.adapter.OnComposeActionTriggered;
 import rs.ltt.android.ui.adapter.OnFlaggedToggled;
 import rs.ltt.android.ui.adapter.ThreadAdapter;
 import rs.ltt.android.ui.model.ThreadViewModel;
-import rs.ltt.android.ui.model.ThreadViewModelFactory;
 import rs.ltt.android.util.Event;
-import rs.ltt.jmap.common.entity.Keyword;
 
 public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedToggled, OnComposeActionTriggered {
 
@@ -89,7 +87,7 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
         final String label = arguments.getLabel();
         final ViewModelProvider viewModelProvider = new ViewModelProvider(
                 getViewModelStore(),
-                new ThreadViewModelFactory(
+                new ThreadViewModel.Factory(
                         requireActivity().getApplication(),
                         getLttrsViewModel().getAccountId(),
                         threadId,

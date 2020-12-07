@@ -47,7 +47,6 @@ import rs.ltt.android.databinding.ActivityComposeBinding;
 import rs.ltt.android.ui.ChipDrawableSpan;
 import rs.ltt.android.ui.ComposeAction;
 import rs.ltt.android.ui.model.ComposeViewModel;
-import rs.ltt.android.ui.model.ComposeViewModelFactory;
 import rs.ltt.jmap.mua.util.MailToUri;
 
 //TODO handle save instance state
@@ -105,7 +104,7 @@ public class ComposeActivity extends AppCompatActivity {
 
         final ViewModelProvider viewModelProvider = new ViewModelProvider(
                 this,
-                new ComposeViewModelFactory(
+                new ComposeViewModel.Factory(
                         getApplication(),
                         getViewModelParameter(savedInstanceState)
                 )

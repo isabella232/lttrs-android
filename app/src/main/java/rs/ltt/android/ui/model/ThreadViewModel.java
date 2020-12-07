@@ -24,6 +24,8 @@ import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.paging.PagedList;
 import androidx.work.Data;
 import androidx.work.WorkInfo;
@@ -143,7 +145,7 @@ public class ThreadViewModel extends AndroidViewModel {
         this.subjectWithImportance.addSource(importance, important -> subjectWithImportance.setValue(SubjectWithImportance.of(header.getValue(), important)));
         this.subjectWithImportance.addSource(header, threadHeader -> subjectWithImportance.setValue(SubjectWithImportance.of(threadHeader, importance.getValue())));
 
-        this.flagged = Transformations.map(header, h ->  h != null && h.showAsFlagged());
+        this.flagged = Transformations.map(header, h -> h != null && h.showAsFlagged());
 
         //TODO add LiveData that is true when header != null and display 'Thread not found' or something in UI
     }
@@ -230,4 +232,29 @@ public class ThreadViewModel extends AndroidViewModel {
             );
         }
     }
+
+    public static class Factory implements ViewModelProvider.Factory {
+
+        private final Application application;
+        private final long accountId;
+        private final String threadId;
+        private final String label;
+
+        public Factory(final Application application,
+                       final long accountId,
+                       final String threadId,
+                       final String label) {
+            this.application = application;
+            this.accountId = accountId;
+            this.threadId = threadId;
+            this.label = label;
+        }
+
+        @NonNull
+        @Override
+        public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+            return modelClass.cast(new ThreadViewModel(application, accountId, threadId, label));
+        }
+    }
+
 }

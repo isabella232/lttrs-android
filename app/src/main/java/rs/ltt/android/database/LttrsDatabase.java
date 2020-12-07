@@ -80,6 +80,7 @@ import rs.ltt.android.entity.ThreadItemEntity;
 @TypeConverters(Converters.class)
 public abstract class LttrsDatabase extends RoomDatabase {
 
+    //TODO do we want to migrate this to a Guava Cache?
     @SuppressLint("UseSparseArrays")
     private static final Map<Long, LttrsDatabase> INSTANCES = new HashMap<>();
 

@@ -30,7 +30,6 @@ import rs.ltt.android.ui.ActionModeMenuConfiguration;
 import rs.ltt.android.ui.QueryItemTouchHelper;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
 import rs.ltt.android.ui.model.MailboxQueryViewModel;
-import rs.ltt.android.ui.model.MailboxQueryViewModelFactory;
 import rs.ltt.jmap.common.entity.Role;
 
 
@@ -42,7 +41,7 @@ public abstract class AbstractMailboxQueryFragment extends AbstractQueryFragment
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final ViewModelProvider viewModelProvider = new ViewModelProvider(
                 getViewModelStore(),
-                new MailboxQueryViewModelFactory(
+                new MailboxQueryViewModel.Factory(
                         requireActivity().getApplication(),
                         getLttrsViewModel().getAccountId(),
                         getMailboxId()

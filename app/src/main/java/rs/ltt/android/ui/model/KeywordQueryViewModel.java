@@ -21,6 +21,8 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
@@ -31,7 +33,7 @@ public class KeywordQueryViewModel extends AbstractQueryViewModel {
 
     private final String keyword;
 
-    KeywordQueryViewModel(final Application application, final long accountId, @NonNull final String keyword) {
+    private KeywordQueryViewModel(final Application application, final long accountId, @NonNull final String keyword) {
         super(application, accountId);
         this.keyword = keyword;
         //TODO; we probably want to change this to someInThreadHaveKeyword
@@ -49,5 +51,24 @@ public class KeywordQueryViewModel extends AbstractQueryViewModel {
     @Override
     protected LiveData<EmailQuery> getQuery() {
         return emailQueryLiveData;
+    }
+
+    public static class Factory implements ViewModelProvider.Factory {
+
+        private final Application application;
+        private final long accountId;
+        private final String keyword;
+
+        public Factory(@NonNull Application application, final long accountId, @NonNull String keyword) {
+            this.application = application;
+            this.accountId = accountId;
+            this.keyword = keyword;
+        }
+
+        @NonNull
+        @Override
+        public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+            return modelClass.cast(new KeywordQueryViewModel(application, accountId, keyword));
+        }
     }
 }

@@ -18,8 +18,11 @@ package rs.ltt.android.ui.model;
 
 import android.app.Application;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,4 +61,24 @@ public class MailboxQueryViewModel extends AbstractQueryViewModel {
     protected LiveData<EmailQuery> getQuery() {
         return emailQueryLiveData;
     }
+
+
+    public static class Factory implements ViewModelProvider.Factory {
+
+    private final Application application;
+    private final long accountId;
+    private final String id;
+
+    public Factory(Application application, final long accountId, String id) {
+        this.application = application;
+        this.accountId = accountId;
+        this.id = id;
+    }
+
+    @NonNull
+    @Override
+    public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+        return modelClass.cast(new MailboxQueryViewModel(application, accountId, id));
+    }
+}
 }

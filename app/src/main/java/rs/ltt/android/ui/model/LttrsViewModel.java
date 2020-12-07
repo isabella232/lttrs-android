@@ -18,10 +18,13 @@ package rs.ltt.android.ui.model;
 import android.app.Application;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.work.WorkInfo;
 
 import com.google.common.collect.ImmutableSet;
@@ -32,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import rs.ltt.android.repository.MainRepository;
@@ -85,6 +89,10 @@ public class LttrsViewModel extends AndroidViewModel {
 
     public void setActivityTitle(final String title) {
         this.activityTitle.postValue(title);
+    }
+
+    public void setActivityTitle(final @StringRes int res) {
+        this.activityTitle.postValue(getApplication().getString(res));
     }
 
     public LiveData<String> getActivityTitle() {
@@ -170,5 +178,22 @@ public class LttrsViewModel extends AndroidViewModel {
 
     public void observeForFailure(final UUID id) {
         this.lttrsRepository.observeForFailure(id);
+    }
+
+    public static class Factory implements ViewModelProvider.Factory {
+
+        private final Application application;
+        private final long accountId;
+
+        public Factory(@NonNull final Application application, @NonNull final long accountId) {
+            this.application = application;
+            this.accountId = accountId;
+        }
+
+        @NonNull
+        @Override
+        public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+            return Objects.requireNonNull(modelClass.cast(new LttrsViewModel(application, accountId)));
+        }
     }
 }

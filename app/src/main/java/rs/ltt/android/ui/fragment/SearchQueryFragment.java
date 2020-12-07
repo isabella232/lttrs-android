@@ -34,7 +34,6 @@ import rs.ltt.android.ui.ActionModeMenuConfiguration;
 import rs.ltt.android.ui.QueryItemTouchHelper;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
 import rs.ltt.android.ui.model.SearchQueryViewModel;
-import rs.ltt.android.ui.model.SearchQueryViewModelFactory;
 
 
 public class SearchQueryFragment extends AbstractQueryFragment {
@@ -47,7 +46,7 @@ public class SearchQueryFragment extends AbstractQueryFragment {
         final String term = SearchQueryFragmentArgs.fromBundle(bundle == null ? new Bundle() : bundle).getText();
         final ViewModelProvider viewModelProvider = new ViewModelProvider(
                 getViewModelStore(),
-                new SearchQueryViewModelFactory(
+                new SearchQueryViewModel.Factory(
                         requireActivity().getApplication(),
                         getLttrsViewModel().getAccountId(),
                         term

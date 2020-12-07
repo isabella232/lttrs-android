@@ -32,7 +32,6 @@ import rs.ltt.android.ui.ActionModeMenuConfiguration;
 import rs.ltt.android.ui.QueryItemTouchHelper;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
 import rs.ltt.android.ui.model.KeywordQueryViewModel;
-import rs.ltt.android.ui.model.KeywordQueryViewModelFactory;
 import rs.ltt.jmap.common.entity.Keyword;
 import rs.ltt.jmap.mua.util.KeywordLabel;
 
@@ -50,7 +49,7 @@ public class KeywordQueryFragment extends AbstractQueryFragment {
         ).getKeyword();
         final ViewModelProvider viewModelProvider = new ViewModelProvider(
                 getViewModelStore(),
-                new KeywordQueryViewModelFactory(
+                new KeywordQueryViewModel.Factory(
                         requireActivity().getApplication(),
                         getLttrsViewModel().getAccountId(),
                         keywordLabel.getKeyword()

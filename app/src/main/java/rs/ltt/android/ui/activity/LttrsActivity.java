@@ -63,7 +63,6 @@ import rs.ltt.android.ui.ThreadModifier;
 import rs.ltt.android.ui.WeakActionModeCallback;
 import rs.ltt.android.ui.adapter.LabelListAdapter;
 import rs.ltt.android.ui.model.LttrsViewModel;
-import rs.ltt.android.ui.model.LttrsViewModelFactory;
 import rs.ltt.android.util.Event;
 import rs.ltt.android.util.MainThreadExecutor;
 import rs.ltt.android.worker.Failure;
@@ -105,7 +104,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
 
         final ViewModelProvider viewModelProvider = new ViewModelProvider(
                 getViewModelStore(),
-                new LttrsViewModelFactory(
+                new LttrsViewModel.Factory(
                         getApplication(),
                         accountId
                 )
@@ -113,10 +112,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
         lttrsViewModel = viewModelProvider.get(LttrsViewModel.class);
         setSupportActionBar(binding.toolbar);
 
-        final NavController navController = Navigation.findNavController(
-                this,
-                R.id.nav_host_fragment
-        );
+        final NavController navController = getNavController();
 
         binding.drawerLayout.addDrawerListener(this);
 
@@ -151,7 +147,18 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
     }
 
     private void onFailureEvent(Event<Failure> failureEvent) {
-        LOGGER.info("failure event "+failureEvent.consume().getException());
+        if (failureEvent.isConsumable()) {
+            final Failure failure = failureEvent.consume();
+            LOGGER.info("processing failure event {}", failure.getException());
+            if (failure instanceof Failure.PreExistingMailbox) {
+                //TODO do we want to dismiss any snackbars?
+                final Failure.PreExistingMailbox preExistingMailbox = (Failure.PreExistingMailbox) failure;
+                getNavController().navigate(LttrsNavigationDirections.actionToReassignRole(
+                        preExistingMailbox.getMailboxId(),
+                        preExistingMailbox.getRole().toString()
+                ));
+            }
+        }
     }
 
     @Override
@@ -187,33 +194,25 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
         return super.onCreateOptionsMenu(menu);
     }
 
+    private NavController getNavController() {
+        return Navigation.findNavController(this, R.id.nav_host_fragment);
+    }
+
     private int getCurrentDestinationId() {
-        final NavController navController = Navigation.findNavController(
-                this,
-                R.id.nav_host_fragment
-        );
-        final NavDestination currentDestination = navController.getCurrentDestination();
+        final NavDestination currentDestination = getNavController().getCurrentDestination();
         return currentDestination == null ? 0 : currentDestination.getId();
     }
 
     @Override
     public void onStart() {
-        final NavController navController = Navigation.findNavController(
-                this,
-                R.id.nav_host_fragment
-        );
-        navController.addOnDestinationChangedListener(this);
+        getNavController().addOnDestinationChangedListener(this);
         super.onStart();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        final NavController navController = Navigation.findNavController(
-                this,
-                R.id.nav_host_fragment
-        );
-        navController.removeOnDestinationChangedListener(this);
+        getNavController().removeOnDestinationChangedListener(this);
     }
 
     private void configureActionBarForDestination(NavDestination destination) {
@@ -226,17 +225,14 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(showMenu ? R.drawable.ic_menu_black_24dp : R.drawable.ic_arrow_back_white_24dp);
         actionbar.setDisplayShowTitleEnabled(destinationId != R.id.thread);
+        invalidateOptionsMenu();
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                final NavController navController = Navigation.findNavController(
-                        this,
-                        R.id.nav_host_fragment
-                );
-                final NavDestination currentDestination = navController.getCurrentDestination();
+                final NavDestination currentDestination = getNavController().getCurrentDestination();
                 if (currentDestination != null && MAIN_DESTINATIONS.contains(currentDestination.getId())) {
                     binding.drawerLayout.openDrawer(GravityCompat.START);
                     return true;
@@ -259,11 +255,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
             binding.mailboxList.requestFocus();
 
             lttrsViewModel.insertSearchSuggestion(query);
-            final NavController navController = Navigation.findNavController(
-                    this,
-                    R.id.nav_host_fragment
-            );
-            navController.navigate(LttrsNavigationDirections.actionSearch(query));
+            getNavController().navigate(LttrsNavigationDirections.actionSearch(query));
         }
 
     }
@@ -423,11 +415,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
             animateCloseSearchToolbar();
         }
         if (getCurrentDestinationId() == R.id.search) {
-            final NavController navController = Navigation.findNavController(
-                    this,
-                    R.id.nav_host_fragment
-            );
-            navController.navigateUp();
+            getNavController() .navigateUp();
         }
         return true;
     }

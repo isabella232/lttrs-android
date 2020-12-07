@@ -86,5 +86,13 @@ public class Failure {
             this.mailboxId = mailboxId;
             this.role = role;
         }
+
+        public String getMailboxId() {
+            return mailboxId;
+        }
+
+        public Role getRole() {
+            return role;
+        }
     }
 }

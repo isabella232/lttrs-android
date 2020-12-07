@@ -23,6 +23,8 @@ import androidx.annotation.StringRes;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.FutureCallback;
@@ -37,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import rs.ltt.android.R;
@@ -71,7 +74,7 @@ public class ComposeViewModel extends AndroidViewModel {
 
     private boolean draftHasBeenHandled = false;
 
-    ComposeViewModel(@NonNull final Application application, final Parameter parameter) {
+    private ComposeViewModel(@NonNull final Application application, final Parameter parameter) {
         super(application);
         this.composeAction = parameter.composeAction;
         this.uri = parameter.uri;
@@ -395,6 +398,23 @@ public class ComposeViewModel extends AndroidViewModel {
                     && EmailAddressUtil.equalCollections(draft.getCc(), cc)
                     && subject.equals(draft.subject)
                     && body.equals(draft.body);
+        }
+    }
+
+    public static class Factory implements ViewModelProvider.Factory {
+
+        private final Application application;
+        private final ComposeViewModel.Parameter parameter;
+
+        public Factory(@NonNull Application application, @NonNull ComposeViewModel.Parameter parameter) {
+            this.application = application;
+            this.parameter = parameter;
+        }
+
+        @NonNull
+        @Override
+        public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+            return Objects.requireNonNull(modelClass.cast(new ComposeViewModel(application, parameter)));
         }
     }
 }

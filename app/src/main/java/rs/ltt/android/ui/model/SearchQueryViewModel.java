@@ -18,9 +18,12 @@ package rs.ltt.android.ui.model;
 
 import android.app.Application;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -79,4 +82,24 @@ public class SearchQueryViewModel extends AbstractQueryViewModel {
             return null;
         }
     }
+
+    public static class Factory implements ViewModelProvider.Factory {
+
+        private final Application application;
+        private final long accountId;
+        private final String query;
+
+        public Factory(Application application, final long accountId, String query) {
+            this.application = application;
+            this.accountId = accountId;
+            this.query = query;
+        }
+
+        @NonNull
+        @Override
+        public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+            return modelClass.cast(new SearchQueryViewModel(application, accountId, query));
+        }
+    }
+
 }
