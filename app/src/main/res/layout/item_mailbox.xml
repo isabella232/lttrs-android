@@ -15,7 +15,8 @@
   -->
 
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
         <variable
@@ -42,6 +43,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="32dp"
+                tools:src="@drawable/ic_archive_black_24dp"
                 app:role="@{label.getRole()}"/>
 
             <TextView
@@ -50,6 +52,7 @@
                 android:layout_centerVertical="true"
                 android:layout_toEndOf="@+id/icon"
                 android:text="@{label.getName()}"
+                tools:text="Archive"
                 android:textAppearance="?textAppearanceSubtitle1"/>
             <TextView
                 android:layout_width="wrap_content"
@@ -58,6 +61,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="16dp"
                 app:count="@{label.getCount()}"
+                tools:text="23"
                 android:textAppearance="?textAppearanceSubtitle1" />
 
         </RelativeLayout>

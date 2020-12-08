@@ -118,7 +118,7 @@ public class SetupTest {
         intended(hasComponent(LttrsActivity.class.getName()));
         onView(withId(R.id.thread_list)).perform(RecyclerViewActions.actionOnItemAtPosition(0, swipeRight()));
 
-        Thread.sleep(10000);
+        Thread.sleep(5000);
     }
 
     @Test

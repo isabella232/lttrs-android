@@ -13,6 +13,7 @@ import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.repository.MailboxRepository;
 import rs.ltt.jmap.common.entity.Mailbox;
 import rs.ltt.jmap.common.entity.Role;
+import rs.ltt.jmap.mua.util.MailboxUtil;
 
 public class ReassignRoleViewModel extends AndroidViewModel {
 
@@ -43,8 +44,13 @@ public class ReassignRoleViewModel extends AndroidViewModel {
         return mailbox;
     }
 
-    public String getRole() {
-        return this.role.toString();
+    public String getHumanReadableRole() {
+        //TODO replace with translated version
+        return MailboxUtil.humanReadable(this.role);
+    }
+
+    public Role getRole() {
+        return this.role;
     }
 
     public static class Factory implements ViewModelProvider.Factory {
