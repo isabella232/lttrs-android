@@ -17,4 +17,9 @@
 <resources>
     <dimen name="toolbar_icon_width">48dp</dimen>
     <dimen name="divider_height">0.5dp</dimen>
+    <dimen name="mailbox_width_port">264dp</dimen>
+    <dimen name="mailbox_height_port">56dp</dimen>
+    <dimen name="mailbox_width_land">192dp</dimen>
+    <dimen name="mailbox_height_land">48dp</dimen>
+
 </resources>

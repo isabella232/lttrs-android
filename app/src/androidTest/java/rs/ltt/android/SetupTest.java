@@ -31,6 +31,7 @@ import static androidx.test.espresso.Espresso.closeSoftKeyboard;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.Espresso.pressBack;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.action.ViewActions.pressImeActionButton;
 import static androidx.test.espresso.action.ViewActions.swipeDown;
 import static androidx.test.espresso.action.ViewActions.swipeRight;
 import static androidx.test.espresso.action.ViewActions.typeText;
@@ -106,12 +107,17 @@ public class SetupTest {
     @Test
     public void setupAndSwipePreexistingArchive() throws InterruptedException {
         onView(withId(R.id.email_address)).perform(typeText(JmapDispatcher.USERNAME));
-        onView(withId(R.id.next)).perform(click());
+        onView(withId(R.id.email_address)).perform(pressImeActionButton());
+        Thread.sleep(1000);
+        //onView(withId(R.id.next)).perform(click());
         onView(withId(R.id.url)).perform(typeText(mockWebServer.url(JmapDispatcher.WELL_KNOWN_PATH).toString()));
-        onView(withId(R.id.next)).perform(click());
+        onView(withId(R.id.url)).perform(pressImeActionButton());
+        //onView(withId(R.id.next)).perform(click());
+        Thread.sleep(1000);
 
         onView(withId(R.id.password)).perform(typeText(JmapDispatcher.PASSWORD));
-        onView(withId(R.id.next)).perform(click());
+        onView(withId(R.id.password)).perform(pressImeActionButton());
+        //onView(withId(R.id.next)).perform(click());
 
         Thread.sleep(2000);
 
