@@ -44,7 +44,7 @@
                 android:layout_below="@+id/question"
                 android:layout_centerHorizontal="true"
                 bind:mailbox="@{model.getMailbox()}"
-                bind:role="@{model.getRole()}"/>
+                bind:role="@{model.getRole()}" />
 
 
             <TextView
@@ -72,6 +72,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentBottom="true"
+                android:onClick="@{(v) -> model.confirm()}"
                 android:text="@string/confirm" />
 
         </RelativeLayout>

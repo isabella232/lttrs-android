@@ -8,11 +8,16 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+
+import java.util.UUID;
 
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.FragmentReassignRoleBinding;
 import rs.ltt.android.databinding.FragmentReassignRoleBindingImpl;
 import rs.ltt.android.ui.model.ReassignRoleViewModel;
+import rs.ltt.android.util.Event;
 import rs.ltt.jmap.common.entity.Role;
 
 public class ReassignRoleFragment extends AbstractLttrsFragment {
@@ -43,7 +48,25 @@ public class ReassignRoleFragment extends AbstractLttrsFragment {
         );
         binding.setModel(viewModel);
         binding.setLifecycleOwner(getViewLifecycleOwner());
+        binding.cancel.setOnClickListener(this::onCancel);
+        viewModel.getWorkerDispatchedEvent().observe(getViewLifecycleOwner(), this::onWorkerDispatchedEvent);
         return binding.getRoot();
+    }
+
+    private void onWorkerDispatchedEvent(final Event<UUID> event) {
+        if (event.isConsumable()) {
+            final UUID id = event.consume();
+            getLttrsViewModel().observeForFailure(id);
+            getNavController().navigateUp();
+        }
+    }
+
+    private void onCancel(View view) {
+        getNavController().navigateUp();
+    }
+
+    private NavController getNavController() {
+        return Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
     }
 
 }
