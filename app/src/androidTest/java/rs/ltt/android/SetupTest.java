@@ -125,6 +125,12 @@ public class SetupTest {
         onView(withId(R.id.thread_list)).perform(RecyclerViewActions.actionOnItemAtPosition(0, swipeRight()));
 
         Thread.sleep(5000);
+
+        onView(withText("Confirm")).perform(click());
+
+        Thread.sleep(2000);
+
+        onView(withId(R.id.swipe_to_refresh)).perform(swipeDown());
     }
 
     @Test

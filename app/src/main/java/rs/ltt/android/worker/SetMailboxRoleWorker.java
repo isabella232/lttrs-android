@@ -26,7 +26,7 @@ public class SetMailboxRoleWorker extends AbstractMuaWorker {
     private final String mailboxId;
     private final Role role;
 
-    SetMailboxRoleWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public SetMailboxRoleWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         final Data data = getInputData();
         this.mailboxId = Preconditions.checkNotNull(data.getString(MAILBOX_ID_KEY));

@@ -30,7 +30,7 @@ public class Failure {
         final Class<?> clazz;
         try {
             clazz = Class.forName(Strings.nullToEmpty(exception));
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             throw new IllegalArgumentException(e);
         }
         if (clazz == PreexistingMailboxException.class) {

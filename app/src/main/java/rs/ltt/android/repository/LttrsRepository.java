@@ -5,6 +5,7 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
+import androidx.work.Data;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
@@ -289,7 +290,12 @@ public class LttrsRepository extends AbstractMuaRepository {
                 failureEventMediator.removeSource(workInfoLiveData);
             }
             if (workInfo.getState() == WorkInfo.State.FAILED) {
-                failureEventMediator.postValue(new Event<>(Failure.of(workInfo.getOutputData())));
+                final Data data = workInfo.getOutputData();
+                try {
+                    failureEventMediator.postValue(new Event<>(Failure.of(data)));
+                } catch (final IllegalArgumentException e) {
+                    LOGGER.warn("Work info failure not recognized {}", data);
+                }
             }
         }));
         return workInfoLiveData;
