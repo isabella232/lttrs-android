@@ -49,6 +49,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -87,6 +88,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
     private MenuItem mSearchItem;
     private SearchView mSearchView;
     private ActionMode actionMode;
+    private WeakReference<Snackbar> mostRecentSnackbar;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -151,7 +153,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
             final Failure failure = failureEvent.consume();
             LOGGER.info("processing failure event {}", failure.getException());
             if (failure instanceof Failure.PreExistingMailbox) {
-                //TODO do we want to dismiss any snackbars?
+                dismissSnackbar();
                 final Failure.PreExistingMailbox preExistingMailbox = (Failure.PreExistingMailbox) failure;
                 getNavController().navigate(LttrsNavigationDirections.actionToReassignRole(
                         preExistingMailbox.getMailboxId(),
@@ -260,6 +262,19 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
 
     }
 
+    private void showSnackbar(final Snackbar snackbar) {
+        this.mostRecentSnackbar = new WeakReference<>(snackbar);
+        snackbar.show();
+    }
+
+    private void dismissSnackbar() {
+        final Snackbar snackbar = this.mostRecentSnackbar != null ? this.mostRecentSnackbar.get() : null;
+        if (snackbar != null && snackbar.isShown()) {
+            LOGGER.info("Dismissing snackbar");
+            snackbar.dismiss();
+        }
+    }
+
 
     @Override
     public void archive(Collection<String> threadIds) {
@@ -271,7 +286,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
                 Snackbar.LENGTH_LONG
         );
         snackbar.setAction(R.string.undo, v -> lttrsViewModel.moveToInbox(threadIds));
-        snackbar.show();
+        showSnackbar(snackbar);
     }
 
     @Override
@@ -283,7 +298,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
                 Snackbar.LENGTH_LONG
         );
         snackbar.setAction(R.string.undo, v -> lttrsViewModel.archive(threadIds));
-        snackbar.show();
+        showSnackbar(snackbar);
         lttrsViewModel.moveToInbox(threadIds);
     }
 
@@ -305,7 +320,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
                 LOGGER.warn("Unable to cancel moveToTrash operation", e);
             }
         });
-        snackbar.show();
+        showSnackbar(snackbar);
         future.addListener(() -> {
             try {
                 future.get().observe(this, workInfo -> {
@@ -328,7 +343,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
                 Snackbar.LENGTH_LONG
         );
         snackbar.setAction(R.string.undo, v -> lttrsViewModel.copyToMailbox(threadIds, mailbox));
-        snackbar.show();
+        showSnackbar(snackbar);
         lttrsViewModel.removeFromMailbox(threadIds, mailbox);
     }
 
@@ -381,7 +396,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
                 Snackbar.LENGTH_LONG
         );
         snackbar.setAction(R.string.undo, v -> lttrsViewModel.addKeyword(threadIds, keyword));
-        snackbar.show();
+        showSnackbar(snackbar);
         lttrsViewModel.removeKeyword(threadIds, keyword);
     }
 
