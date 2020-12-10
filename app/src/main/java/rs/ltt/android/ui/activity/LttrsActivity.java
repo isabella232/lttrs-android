@@ -120,7 +120,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
 
         labelListAdapter.setOnMailboxOverviewItemSelectedListener((label, currentlySelected) -> {
             binding.drawerLayout.closeDrawer(GravityCompat.START);
-            if (currentlySelected) {
+            if (currentlySelected && MAIN_DESTINATIONS.contains(getCurrentDestinationId())) {
                 return;
             }
             final boolean navigateToInbox = label.getRole() == Role.INBOX;
