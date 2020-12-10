@@ -41,12 +41,8 @@ public class MailboxQueryFragment extends AbstractMailboxQueryFragment {
     @Override
     public void onThreadClicked(ThreadOverviewItem threadOverviewItem, boolean important) {
         MailboxOverviewItem mailbox = mailboxQueryViewModel.getMailbox().getValue();
-        final NavController navController = Navigation.findNavController(
-                requireActivity(),
-                R.id.nav_host_fragment
-        );
         final String label = mailbox != null && mailbox.role == null ? mailbox.name : null;
-        navController.navigate(LttrsNavigationDirections.actionToThread(
+        getNavController().navigate(LttrsNavigationDirections.actionToThread(
                 threadOverviewItem.threadId,
                 label,
                 threadOverviewItem.getSubject(),

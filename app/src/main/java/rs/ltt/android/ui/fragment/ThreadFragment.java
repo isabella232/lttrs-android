@@ -144,9 +144,8 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
     private void onThreadViewRedirect(final Event<String> event) {
         if (event.isConsumable()) {
             final String threadId = event.consume();
-            final NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
             //TODO once draft worker copies over flags and mailboxes we might want to put them in here as well
-            navController.navigate(LttrsNavigationDirections.actionToThread(
+            getNavController().navigate(LttrsNavigationDirections.actionToThread(
                     threadId,
                     null,
                     null,
@@ -155,20 +154,28 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
         }
     }
 
-    private void onEmailsChanged(PagedList<FullEmail> fullEmails) {
+    private void onEmailsChanged(final PagedList<FullEmail> fullEmails) {
         if (threadViewModel.jumpedToFirstUnread.compareAndSet(false, true)) {
-            threadViewModel.expandedPositions.addListener(() -> {
-                try {
-                    List<ExpandedPosition> expandedPositions = threadViewModel.expandedPositions.get();
-                    threadAdapter.expand(expandedPositions);
-                    threadAdapter.submitList(fullEmails, () -> {
-                        final int pos = expandedPositions.get(0).position;
-                        binding.list.scrollToPosition(pos == 0 ? 0 : pos + 1);
-                    });
-                } catch (Exception e) {
+            Futures.addCallback(
+                    threadViewModel.expandedPositions,
+                    new FutureCallback<List<ExpandedPosition>>() {
+                        @Override
+                        public void onSuccess(final List<ExpandedPosition> expandedPositions) {
+                            threadAdapter.expand(expandedPositions);
+                            threadAdapter.submitList(fullEmails, () -> {
+                                final int pos = expandedPositions.get(0).position;
+                                binding.list.scrollToPosition(pos == 0 ? 0 : pos + 1);
+                            });
+                        }
 
-                }
-            }, MoreExecutors.directExecutor());
+                        @Override
+                        public void onFailure(@NotNull Throwable t) {
+                            LOGGER.error("Unable to calculate expanded positions", t);
+                            threadAdapter.submitList(fullEmails);
+                        }
+                    },
+                    MoreExecutors.directExecutor()
+            );
         } else {
             threadAdapter.submitList(fullEmails);
         }
@@ -186,11 +193,7 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
                 getLttrsViewModel().observeForFailure(uuid);
                 threadViewModel.waitForEdit(uuid);
             } else if (threadDiscarded) {
-                final NavController navController = Navigation.findNavController(
-                        requireActivity(),
-                        R.id.nav_host_fragment
-                );
-                navController.popBackStack();
+                getNavController().popBackStack();
             }
         }
     }
@@ -212,10 +215,7 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem menuItem) {
 
-        final NavController navController = Navigation.findNavController(
-                requireActivity(),
-                R.id.nav_host_fragment
-        );
+        final NavController navController = getNavController();
 
         switch (menuItem.getItemId()) {
             case R.id.action_mark_unread:

@@ -196,7 +196,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
         return super.onCreateOptionsMenu(menu);
     }
 
-    private NavController getNavController() {
+    public NavController getNavController() {
         return Navigation.findNavController(this, R.id.nav_host_fragment);
     }
 

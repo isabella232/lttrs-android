@@ -64,9 +64,4 @@ public class ReassignRoleFragment extends AbstractLttrsFragment {
     private void onCancel(View view) {
         getNavController().navigateUp();
     }
-
-    private NavController getNavController() {
-        return Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
-    }
-
 }

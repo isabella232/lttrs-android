@@ -19,7 +19,10 @@ import android.app.Activity;
 
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
+import rs.ltt.android.R;
 import rs.ltt.android.ui.ThreadModifier;
 import rs.ltt.android.ui.activity.LttrsActivity;
 import rs.ltt.android.ui.model.LttrsViewModel;
@@ -48,5 +51,9 @@ abstract class AbstractLttrsFragment extends Fragment {
             return (ThreadModifier) activity;
         }
         throw new IllegalStateException("Activity does not implement ThreadModifier");
+    }
+
+    NavController getNavController() {
+        return requireLttrsActivity().getNavController();
     }
 }
