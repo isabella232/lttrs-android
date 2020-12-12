@@ -73,7 +73,7 @@ public class ThreadViewModel extends AndroidViewModel {
     private final ThreadViewRepository threadViewRepository;
     private final MediatorLiveData<Event<String>> threadViewRedirect = new MediatorLiveData<>();
     private LiveData<PagedList<FullEmail>> emails;
-    private MediatorLiveData<SubjectWithImportance> subjectWithImportance;
+    private final MediatorLiveData<SubjectWithImportance> subjectWithImportance = new MediatorLiveData<>();
     private LiveData<Boolean> flagged;
     private LiveData<List<MailboxWithRoleAndName>> mailboxes;
     private LiveData<MenuConfiguration> menuConfiguration;
@@ -141,13 +141,19 @@ public class ThreadViewModel extends AndroidViewModel {
             return importantOverwrite != null ? importantOverwrite.value : MailboxWithRoleAndName.isAnyOfRole(list, Role.IMPORTANT);
         });
 
-        this.subjectWithImportance = new MediatorLiveData<>();
-        this.subjectWithImportance.addSource(importance, important -> subjectWithImportance.setValue(SubjectWithImportance.of(header.getValue(), important)));
-        this.subjectWithImportance.addSource(header, threadHeader -> subjectWithImportance.setValue(SubjectWithImportance.of(threadHeader, importance.getValue())));
+        this.subjectWithImportance.addSource(importance, important -> setSubjectWithImportance(header.getValue(), important));
+        this.subjectWithImportance.addSource(header, threadHeader -> setSubjectWithImportance(threadHeader, importance.getValue()));
 
         this.flagged = Transformations.map(header, h -> h != null && h.showAsFlagged());
 
         //TODO add LiveData that is true when header != null and display 'Thread not found' or something in UI
+    }
+
+    private void setSubjectWithImportance(ThreadHeader header, Boolean important) {
+        if (header == null || important == null) {
+            return;
+        }
+        this.subjectWithImportance.postValue(SubjectWithImportance.of(header, important));
     }
 
     public LiveData<Event<String>> getThreadViewRedirect() {
