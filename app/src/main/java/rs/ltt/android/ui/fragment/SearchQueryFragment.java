@@ -79,6 +79,11 @@ public class SearchQueryFragment extends AbstractQueryFragment {
     }
 
     @Override
+    protected boolean isQueryItemRemovedAfterSwipe() {
+        return false;
+    }
+
+    @Override
     protected void onQueryItemSwiped(ThreadOverviewItem item) {
         Preconditions.checkState(searchQueryViewModel.isInInbox(item), "Swiped thread is not in inbox");
         archive(item);

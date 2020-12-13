@@ -29,8 +29,6 @@ import androidx.appcompat.view.ActionMode;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.LiveData;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.paging.PagedList;
 import androidx.recyclerview.selection.SelectionPredicates;
 import androidx.recyclerview.selection.SelectionTracker;
@@ -63,8 +61,6 @@ import rs.ltt.android.ui.adapter.ThreadOverviewAdapter;
 import rs.ltt.android.ui.adapter.ThreadOverviewItemDetailsLookup;
 import rs.ltt.android.ui.adapter.ThreadOverviewItemKeyProvider;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
-import rs.ltt.android.util.Event;
-import rs.ltt.android.worker.Failure;
 import rs.ltt.jmap.mua.util.Label;
 
 
@@ -76,6 +72,7 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractQueryFragment.class);
     protected FragmentThreadListBinding binding;
     private ThreadOverviewAdapter threadOverviewAdapter;
+    private ItemTouchHelper itemTouchHelper;
     private ActionMode actionMode;
     private SelectionTracker<String> tracker;
 
@@ -108,11 +105,8 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
 
         viewModel.getEmailModificationWorkInfo().observe(getViewLifecycleOwner(), this::emailModification);
 
-        final QueryItemTouchHelper queryItemTouchHelper = new QueryItemTouchHelper();
-
-        queryItemTouchHelper.setOnQueryItemSwipeListener(this);
-
-        new ItemTouchHelper(queryItemTouchHelper).attachToRecyclerView(binding.threadList);
+        this.itemTouchHelper = new ItemTouchHelper(new QueryItemTouchHelper(this));
+        this.itemTouchHelper.attachToRecyclerView(binding.threadList);
 
         return binding.getRoot();
     }
@@ -190,6 +184,8 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
 
     private void nullReferences() {
         this.binding.threadList.setAdapter(null);
+        this.itemTouchHelper.attachToRecyclerView(null);
+        this.itemTouchHelper = null;
         this.threadOverviewAdapter.setTracker(null);
         this.threadOverviewAdapter = null;
         this.tracker = null;
@@ -265,14 +261,25 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
 
     protected abstract QueryItemTouchHelper.Swipable onQueryItemSwipe(ThreadOverviewItem item);
 
+    protected abstract boolean isQueryItemRemovedAfterSwipe();
+
     @Override
-    public void onQueryItemSwiped(int position) {
+    public void onQueryItemSwiped(final RecyclerView.ViewHolder viewHolder) {
+        final int position = viewHolder.getAdapterPosition();
         final ThreadOverviewItem item = threadOverviewAdapter.getItem(position);
         if (item == null) {
             throw new IllegalStateException("Swipe Item not found");
         }
-        tracker.deselect(item.threadId);
         onQueryItemSwiped(item);
+        if (isQueryItemRemovedAfterSwipe()) {
+            tracker.deselect(item.threadId);
+        } else {
+            LOGGER.debug("Reset swipe because we do not expect QueryItem to be removed");
+            //Those two instructions seem to be the only combination that resets the swiped state
+            //ItemTouchHelper usually assumes that the items gets removed
+            threadOverviewAdapter.notifyItemChanged(position);
+            itemTouchHelper.startSwipe(viewHolder);
+        }
     }
 
     protected abstract void onQueryItemSwiped(ThreadOverviewItem item);

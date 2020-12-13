@@ -82,6 +82,11 @@ public class KeywordQueryFragment extends AbstractQueryFragment {
     }
 
     @Override
+    protected boolean isQueryItemRemovedAfterSwipe() {
+        return true;
+    }
+
+    @Override
     public void onFlaggedToggled(final String threadId, final boolean target) {
         if (Keyword.FLAGGED.equals(keywordQueryViewModel.getKeyword()) && !target) {
             removeKeyword(threadId);

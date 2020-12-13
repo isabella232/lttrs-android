@@ -28,10 +28,11 @@ import rs.ltt.android.ui.adapter.ThreadOverviewAdapter;
 
 public class QueryItemTouchHelper extends ItemTouchHelper.SimpleCallback {
 
-    private OnQueryItemSwipe onQueryItemSwipe;
+    private final OnQueryItemSwipe onQueryItemSwipe;
 
-    public QueryItemTouchHelper() {
+    public QueryItemTouchHelper(OnQueryItemSwipe onQueryItemSwipe) {
         super(0, ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT);
+        this.onQueryItemSwipe = onQueryItemSwipe;
     }
 
     @Override
@@ -72,7 +73,7 @@ public class QueryItemTouchHelper extends ItemTouchHelper.SimpleCallback {
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
         if (onQueryItemSwipe != null) {
-            onQueryItemSwipe.onQueryItemSwiped(viewHolder.getAdapterPosition());
+            onQueryItemSwipe.onQueryItemSwiped(viewHolder);
         }
     }
 
@@ -92,16 +93,12 @@ public class QueryItemTouchHelper extends ItemTouchHelper.SimpleCallback {
         }
     }
 
-    public void setOnQueryItemSwipeListener(OnQueryItemSwipe listener) {
-        this.onQueryItemSwipe = listener;
-    }
-
     public enum Swipable {
         NO, ARCHIVE, REMOVE_LABEL, REMOVE_FLAGGED
     }
 
     public interface OnQueryItemSwipe {
         Swipable onQueryItemSwipe(int position);
-        void onQueryItemSwiped(int position);
+        void onQueryItemSwiped(@NonNull RecyclerView.ViewHolder viewHolder);
     }
 }

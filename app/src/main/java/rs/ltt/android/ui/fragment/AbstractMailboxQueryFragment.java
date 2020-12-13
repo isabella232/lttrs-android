@@ -83,6 +83,10 @@ public abstract class AbstractMailboxQueryFragment extends AbstractQueryFragment
         }
     }
 
+    @Override
+    protected boolean isQueryItemRemovedAfterSwipe() {
+        return true;
+    }
 
     @Override
     protected boolean showComposeButton() {
