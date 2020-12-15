@@ -21,8 +21,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
-
 import java.util.Collection;
 import java.util.List;
 
@@ -30,13 +28,7 @@ public class WorkInfoUtil {
 
 
     private static Collection<WorkInfo.State> transform(List<WorkInfo> info) {
-        return Collections2.transform(info, new Function<WorkInfo, WorkInfo.State>() {
-            @NullableDecl
-            @Override
-            public WorkInfo.State apply(@NullableDecl WorkInfo input) {
-                return input == null ? null : input.getState();
-            }
-        });
+        return Collections2.transform(info, input -> input == null ? null : input.getState());
     }
 
     public static boolean allDone(List<WorkInfo> info) {

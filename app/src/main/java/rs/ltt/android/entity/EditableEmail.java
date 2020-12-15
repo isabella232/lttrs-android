@@ -17,12 +17,9 @@ package rs.ltt.android.entity;
 
 import androidx.room.Relation;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
-
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -108,13 +105,13 @@ public class EditableEmail implements IdentifiableEmailWithAddresses, Identifiab
     }
 
     private Collection<rs.ltt.jmap.common.entity.EmailAddress> getAddresses(final EmailAddressType type) {
-        return Collections2.transform(Collections2.filter(emailAddresses, input -> input != null && input.type == type), new Function<EmailAddress, rs.ltt.jmap.common.entity.EmailAddress>() {
-            @NullableDecl
-            @Override
-            public rs.ltt.jmap.common.entity.EmailAddress apply(@NullableDecl EmailAddress input) {
-                return input == null ? null : rs.ltt.jmap.common.entity.EmailAddress.builder().email(input.email).name(input.name).build();
-            }
-        });
+        return Collections2.transform(
+                Collections2.filter(
+                        emailAddresses,
+                        input -> input != null && input.type == type
+                ),
+                input -> input == null ? null : rs.ltt.jmap.common.entity.EmailAddress.builder().email(input.email).name(input.name).build()
+        );
     }
 
     @Override

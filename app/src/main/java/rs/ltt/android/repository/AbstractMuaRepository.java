@@ -47,6 +47,7 @@ import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 import rs.ltt.jmap.mua.Mua;
+import rs.ltt.jmap.mua.util.StandardQueries;
 
 public abstract class AbstractMuaRepository {
 
@@ -96,12 +97,9 @@ public abstract class AbstractMuaRepository {
     }
 
     protected void insertQueryItemOverwrite(final Collection<String> threadIds, final IdentifiableMailboxWithRole mailbox) {
-        insertQueryItemOverwrite(threadIds,
-                EmailQuery.of(
-                        EmailFilterCondition.builder()
-                                .inMailbox(mailbox.getId())
-                                .build(),
-                        true),
+        insertQueryItemOverwrite(
+                threadIds,
+                StandardQueries.mailbox(mailbox),
                 QueryItemOverwriteEntity.Type.MAILBOX
         );
     }
@@ -111,24 +109,17 @@ public abstract class AbstractMuaRepository {
     }
 
     protected void insertQueryItemOverwrite(final Collection<String> threadIds, final String keyword) {
-        insertQueryItemOverwrite(threadIds,
-                EmailQuery.of(
-                        EmailFilterCondition.builder()
-                                .inMailboxOtherThan(
-                                        database.mailboxDao().getMailboxes(Role.TRASH, Role.JUNK)
-                                )
-                                .hasKeyword(keyword)
-                                .build(),
-                        true),
+        insertQueryItemOverwrite(
+                threadIds,
+                StandardQueries.keyword(keyword, database.mailboxDao().getMailboxes(Role.TRASH, Role.JUNK)),
                 QueryItemOverwriteEntity.Type.KEYWORD
         );
     }
 
     protected void insertQueryItemOverwrite(final Collection<String> threadIds,
-                                          final EmailQuery emailQuery,
-                                          final QueryItemOverwriteEntity.Type type) {
-        final String queryString = emailQuery.toQueryString();
-        final QueryEntity queryEntity = database.queryDao().get(queryString);
+                                            final EmailQuery emailQuery,
+                                            final QueryItemOverwriteEntity.Type type) {
+        final QueryEntity queryEntity = database.queryDao().get(emailQuery.asHash());
         if (queryEntity != null) {
             database.overwriteDao().insertQueryOverwrites(
                     Collections2.transform(
@@ -148,29 +139,20 @@ public abstract class AbstractMuaRepository {
 
     protected void deleteQueryItemOverwrite(final Collection<String> threadIds, final IdentifiableMailboxWithRole mailbox) {
         deleteQueryItemOverwrite(threadIds,
-                EmailQuery.of(
-                        EmailFilterCondition.builder().
-                                inMailbox(mailbox.getId())
-                                .build(),
-                        true),
+                StandardQueries.mailbox(mailbox),
                 QueryItemOverwriteEntity.Type.MAILBOX
         );
     }
 
     protected void deleteQueryItemOverwrite(final Collection<String> threadIds, final String keyword) {
         deleteQueryItemOverwrite(threadIds,
-                EmailQuery.of(
-                        EmailFilterCondition.builder()
-                                .hasKeyword(keyword)
-                                .build(),
-                        true),
+                StandardQueries.keyword(keyword, database.mailboxDao().getMailboxes(Role.TRASH, Role.JUNK)),
                 QueryItemOverwriteEntity.Type.KEYWORD
         );
     }
 
     private void deleteQueryItemOverwrite(final Collection<String> threadIds, final EmailQuery emailQuery, QueryItemOverwriteEntity.Type type) {
-        final String queryString = emailQuery.toQueryString();
-        QueryEntity queryEntity = database.queryDao().get(queryString);
+        QueryEntity queryEntity = database.queryDao().get(emailQuery.asHash());
         if (queryEntity != null) {
             database.overwriteDao().deleteQueryOverwrites(
                     Collections2.transform(

@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
+import rs.ltt.jmap.mua.util.StandardQueries;
 
 public class MailboxQueryViewModel extends AbstractQueryViewModel {
 
@@ -43,11 +44,11 @@ public class MailboxQueryViewModel extends AbstractQueryViewModel {
     MailboxQueryViewModel(final Application application, final long accountId, final String mailboxId) {
         super(application, accountId);
         this.mailbox = this.queryRepository.getMailboxOverviewItem(mailboxId);
-        this.emailQueryLiveData = Transformations.map(mailbox, input -> {
-            if (input == null) {
+        this.emailQueryLiveData = Transformations.map(mailbox, mailbox -> {
+            if (mailbox == null) {
                 return EmailQuery.unfiltered(true);
             } else {
-                return EmailQuery.of(EmailFilterCondition.builder().inMailbox(input.id).build(), true);
+                return StandardQueries.mailbox(mailbox);
             }
         });
         init();

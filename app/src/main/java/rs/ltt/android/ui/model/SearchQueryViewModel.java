@@ -34,6 +34,7 @@ import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 import rs.ltt.jmap.mua.util.MailboxUtil;
+import rs.ltt.jmap.mua.util.StandardQueries;
 
 public class SearchQueryViewModel extends AbstractQueryViewModel {
 
@@ -45,10 +46,9 @@ public class SearchQueryViewModel extends AbstractQueryViewModel {
         super(application, accountId);
         this.searchTerm = searchTerm;
         this.inbox = queryRepository.getInbox();
-        this.searchQueryLiveData = Transformations.map(queryRepository.getTrashAndJunk(), trashAndJunk -> EmailQuery.of(
-                EmailFilterCondition.builder().text(searchTerm).inMailboxOtherThan(trashAndJunk).build(),
-                true
-        ));
+        this.searchQueryLiveData = Transformations.map(
+                queryRepository.getTrashAndJunk(),
+                trashAndJunk -> StandardQueries.search(searchTerm, trashAndJunk));
         init();
     }
 

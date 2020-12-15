@@ -15,8 +15,9 @@
 
 package rs.ltt.android.cache;
 
-import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,13 +69,13 @@ public class DatabaseCache implements Cache {
         return database.mailboxDao().getState(EntityType.MAILBOX);
     }
 
-    @NonNullDecl
+    @NonNull
     @Override
-    public QueryStateWrapper getQueryState(@NullableDecl String query) {
+    public QueryStateWrapper getQueryState(@Nullable String query) {
         return database.stateDao().getQueryStateWrapper(query);
     }
 
-    @NonNullDecl
+    @NonNull
     @Override
     public ObjectsState getObjectsState() {
         return database.stateDao().getObjectsState();

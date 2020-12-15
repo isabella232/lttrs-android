@@ -25,8 +25,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -157,13 +155,7 @@ public class ThreadOverviewItem {
     private List<Email> calculateOrderedEmails() {
         final List<ThreadItemEntity> threadItemEntities = new ArrayList<>(this.threadItemEntities);
         Collections.sort(threadItemEntities, (o1, o2) -> o1.getPosition() - o2.getPosition());
-        final Map<String, Email> emailMap = Maps.uniqueIndex(emails, new Function<Email, String>() {
-            @NullableDecl
-            @Override
-            public String apply(Email input) {
-                return input.id;
-            }
-        });
+        final Map<String, Email> emailMap = Maps.uniqueIndex(emails, input -> input.id);
         final List<Email> orderedList = new ArrayList<>(emails.size());
         for (ThreadItemEntity threadItemEntity : threadItemEntities) {
             Email email = emailMap.get(threadItemEntity.emailId);

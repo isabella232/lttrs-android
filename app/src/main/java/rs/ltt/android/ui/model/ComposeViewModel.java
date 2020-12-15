@@ -32,7 +32,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -253,7 +252,7 @@ public class ComposeViewModel extends AndroidViewModel {
     private void initializeWithEmail() {
         Futures.addCallback(this.email, new FutureCallback<EditableEmail>() {
             @Override
-            public void onSuccess(@NullableDecl final EditableEmail result) {
+            public void onSuccess(@Nullable final EditableEmail result) {
                 initializeWithEmail(result);
             }
 

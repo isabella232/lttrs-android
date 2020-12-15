@@ -58,7 +58,7 @@ public class QueryRepository extends AbstractMuaRepository {
     }
 
     public LiveData<PagedList<ThreadOverviewItem>> getThreadOverviewItems(final EmailQuery query) {
-        return new LivePagedListBuilder<>(database.queryDao().getThreadOverviewItems(query.toQueryString()), 30)
+        return new LivePagedListBuilder<>(database.queryDao().getThreadOverviewItems(query.asHash()), 30)
                 .setBoundaryCallback(new PagedList.BoundaryCallback<ThreadOverviewItem>() {
                     @Override
                     public void onZeroItemsLoaded() {
@@ -86,15 +86,15 @@ public class QueryRepository extends AbstractMuaRepository {
     }
 
     public LiveData<Boolean> isRunningQueryFor(final EmailQuery query) {
-        return Transformations.map(runningQueriesLiveData, queryStrings -> queryStrings.contains(query.toQueryString()));
+        return Transformations.map(runningQueriesLiveData, queryStrings -> queryStrings.contains(query.asHash()));
     }
 
     public LiveData<Boolean> isRunningPagingRequestFor(final EmailQuery query) {
-        return Transformations.map(runningPagingRequestsLiveData, queryStrings -> queryStrings.contains(query.toQueryString()));
+        return Transformations.map(runningPagingRequestsLiveData, queryStrings -> queryStrings.contains(query.asHash()));
     }
 
     public void refresh(final EmailQuery emailQuery) {
-        final String queryString = emailQuery.toQueryString();
+        final String queryString = emailQuery.asHash();
         synchronized (this) {
             if (!runningQueries.add(queryString)) {
                 LOGGER.debug("skipping refresh since already running");
@@ -125,7 +125,7 @@ public class QueryRepository extends AbstractMuaRepository {
     }
 
     public void refreshInBackground(final EmailQuery emailQuery) {
-        final String queryString = emailQuery.toQueryString();
+        final String queryString = emailQuery.asHash();
         synchronized (this) {
             if (runningQueries.contains(queryString) || runningPagingRequests.contains(queryString)) {
                 LOGGER.debug("skipping background refresh");
@@ -138,7 +138,7 @@ public class QueryRepository extends AbstractMuaRepository {
 
 
     private void requestNextPage(final EmailQuery emailQuery, String afterEmailId) {
-        final String queryString = emailQuery.toQueryString();
+        final String queryString = emailQuery.asHash();
         synchronized (this) {
             if (!runningPagingRequests.add(queryString)) {
                 LOGGER.debug("skipping paging request since already running");

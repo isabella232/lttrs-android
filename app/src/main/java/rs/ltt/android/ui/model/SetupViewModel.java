@@ -21,6 +21,7 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -33,7 +34,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,6 +94,10 @@ public class SetupViewModel extends AndroidViewModel {
                 || t instanceof SSLPeerUnverifiedException;
     }
 
+    private static boolean secure(final HttpUrl url) {
+        return url.scheme().equals("https") || (BuildConfig.DEBUG && url.host().equals("localhost"));
+    }
+
     public LiveData<Boolean> isLoading() {
         return this.loading;
     }
@@ -140,7 +144,7 @@ public class SetupViewModel extends AndroidViewModel {
             this.emailAddress.postValue(emailAddress);
             Futures.addCallback(getSession(), new FutureCallback<Session>() {
                 @Override
-                public void onSuccess(@NullableDecl Session session) {
+                public void onSuccess(@Nullable Session session) {
                     Preconditions.checkNotNull(session);
                     processAccounts(session);
                 }
@@ -191,7 +195,7 @@ public class SetupViewModel extends AndroidViewModel {
             this.passwordError.postValue(null);
             Futures.addCallback(getSession(), new FutureCallback<Session>() {
                 @Override
-                public void onSuccess(@NullableDecl Session session) {
+                public void onSuccess(@Nullable Session session) {
                     Preconditions.checkNotNull(session);
                     processAccounts(session);
                 }
@@ -242,7 +246,7 @@ public class SetupViewModel extends AndroidViewModel {
         this.sessionResourceError.postValue(null);
         Futures.addCallback(getSession(), new FutureCallback<Session>() {
             @Override
-            public void onSuccess(@NullableDecl Session session) {
+            public void onSuccess(@Nullable Session session) {
                 Preconditions.checkNotNull(session);
                 processAccounts(session);
             }
@@ -269,10 +273,6 @@ public class SetupViewModel extends AndroidViewModel {
         return true;
     }
 
-    private static boolean secure(final HttpUrl url) {
-        return url.scheme().equals("https") || (BuildConfig.DEBUG && url.host().equals("localhost"));
-    }
-
     private ListenableFuture<Session> getSession() {
         final JmapClient jmapClient = new JmapClient(
                 Strings.nullToEmpty(emailAddress.getValue()),
@@ -295,7 +295,7 @@ public class SetupViewModel extends AndroidViewModel {
             );
             Futures.addCallback(insertFuture, new FutureCallback<Long[]>() {
                 @Override
-                public void onSuccess(@NullableDecl Long[] ids) {
+                public void onSuccess(@Nullable Long[] ids) {
                     recentlyAddedIds = ids;
                     redirection.postValue(new Event<>(Target.LTTRS));
                 }

@@ -17,15 +17,12 @@ package rs.ltt.android.repository;
 
 import android.app.Application;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
-
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import java.util.Collection;
 import java.util.List;
@@ -62,10 +59,10 @@ public class MainRepository {
     }
 
     public ListenableFuture<Long[]> insertAccountsRefreshMailboxes(final String username,
-                                                                 final String password,
-                                                                 final HttpUrl sessionResource,
-                                                                 final String primaryAccountId,
-                                                                 final Map<String, Account> accounts) {
+                                                                   final String password,
+                                                                   final HttpUrl sessionResource,
+                                                                   final String primaryAccountId,
+                                                                   final Map<String, Account> accounts) {
         final SettableFuture<Long[]> settableFuture = SettableFuture.create();
         IO_EXECUTOR.execute(() -> {
             try {
@@ -78,15 +75,7 @@ public class MainRepository {
                 );
                 final Long[] ids = Lists.transform(credentials, c -> c.id).toArray(new Long[0]);
                 LttrsApplication.get(application).invalidateMostRecentlySelectedAccountId();
-                final Collection<ListenableFuture<Status>> mailboxRefreshes = Collections2.transform(
-                        credentials,
-                        new Function<AccountWithCredentials, ListenableFuture<Status>>() {
-                            @NullableDecl
-                            @Override
-                            public ListenableFuture<Status> apply(@NullableDecl AccountWithCredentials account) {
-                                return retrieveMailboxes(account);
-                            }
-                        });
+                final Collection<ListenableFuture<Status>> mailboxRefreshes = Collections2.transform(credentials, this::retrieveMailboxes);
                 settableFuture.setFuture(Futures.whenAllComplete(mailboxRefreshes).call(() -> ids, MoreExecutors.directExecutor()));
             } catch (Exception e) {
                 settableFuture.setException(e);

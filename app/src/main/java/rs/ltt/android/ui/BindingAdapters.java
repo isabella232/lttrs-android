@@ -43,8 +43,6 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -329,13 +327,7 @@ public class BindingAdapters {
         if (identities == null) {
             representations = Collections.emptyList();
         } else {
-            representations = Lists.transform(identities, new Function<IdentityWithNameAndEmail, String>() {
-                @NullableDecl
-                @Override
-                public String apply(IdentityWithNameAndEmail input) {
-                    return EmailAddressUtil.toString(input.getEmailAddress());
-                }
-            });
+            representations = Lists.transform(identities, input -> EmailAddressUtil.toString(input.getEmailAddress()));
         }
         final ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 spinner.getContext(),

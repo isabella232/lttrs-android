@@ -26,6 +26,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
+import rs.ltt.jmap.mua.util.StandardQueries;
 
 public class KeywordQueryViewModel extends AbstractQueryViewModel {
 
@@ -36,11 +37,10 @@ public class KeywordQueryViewModel extends AbstractQueryViewModel {
     private KeywordQueryViewModel(final Application application, final long accountId, @NonNull final String keyword) {
         super(application, accountId);
         this.keyword = keyword;
-        //TODO; we probably want to change this to someInThreadHaveKeyword
-        this.emailQueryLiveData = Transformations.map(queryRepository.getTrashAndJunk(), trashAndJunk -> EmailQuery.of(
-                EmailFilterCondition.builder().hasKeyword(keyword).inMailboxOtherThan(trashAndJunk).build(),
-                true
-        ));
+        this.emailQueryLiveData = Transformations.map(
+                queryRepository.getTrashAndJunk(),
+                trashAndJunk -> StandardQueries.keyword(keyword, trashAndJunk)
+        );
         init();
     }
 
