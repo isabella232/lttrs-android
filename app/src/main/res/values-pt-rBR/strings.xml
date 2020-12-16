@@ -41,8 +41,8 @@
     <string name="sign_in">Iniciar sessão</string>
     <string name="deleted">Excluído</string>
     <plurals name="n_deleted">
-        <item quantity="one">%s excluído</item>
-        <item quantity="other">%s excluídos</item>
+        <item quantity="one">%d excluído</item>
+        <item quantity="other">%d excluídos</item>
     </plurals>
     <string name="undo">Desfazer</string>
     <plurals name="n_archived">
@@ -58,8 +58,8 @@
     <string name="remove_label">Remover etiqueta</string>
     <string name="remove_label_x">Remover etiqueta %s</string>
     <plurals name="n_moved_to_inbox">
-        <item quantity="one">%s movido para caixa de entrada</item>
-        <item quantity="other">%s movidos para caixa de entrada</item>
+        <item quantity="one">%d movido para caixa de entrada</item>
+        <item quantity="other">%d movidos para caixa de entrada</item>
     </plurals>
     <string name="move_to_inbox">Mover para caixa de entrada</string>
     <string name="to_x">a %s</string>
@@ -71,4 +71,11 @@
     <string name="mark_read">Marcar como lido</string>
     <string name="mark_unread">Marcar como não lido</string>
     <string name="archive">Arquivar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="confirm">Confirmar</string>
+    <string name="assign_role_detailed_explanation">Ltt.rs precisa de uma etiqueta (caixa de correio) com a função de %1$s para funcionar corretamente. Se você não quiser usar a etiqueta chamada %2$s para esse fim, você pode tocar em cancelar e usar seu clientedesktop ou web para criar uma função diferente com a função de %1$s.</string>
+    <string name="assign_role_question">Você já tem uma etiqueta chamada %1$s. Gostaria de atribui-la com a função de %2$s\?</string>
+    <string name="reassign_role_question">Você já tem uma etiqueta chamada %1$s com a função de %2$s. Você gostaria de reatribuí-la com a função de %3$s\?</string>
+    <string name="assign_role">Atribuir função</string>
+    <string name="reassign_role">Reatribuir função</string>
 </resources>

@@ -75,4 +75,11 @@
     <string name="invalid_session_resource">Nu există un serviciu de e-mail valid la această adresă</string>
     <string name="endpoint_not_found">Nu există un serviciu de e-mail la această adresă</string>
     <string name="could_not_store_account_credentials">Nu s-au putut stoca datele de autentificare</string>
+    <string name="cancel">Anulare</string>
+    <string name="confirm">Confirmare</string>
+    <string name="assign_role_detailed_explanation">Ltt.rs are nevoie de o etichetă (cutie poștală) cu rolul de %1$s pentru a funcționa corect. Dacă nu doriți să utilizați eticheta denumită %2$s în acest scop, puteți atinge revocare și utilizați clientul desktop sau web pentru a crea o etichetă diferită cu rolul de %1$s.</string>
+    <string name="assign_role_question">Aveți deja o etichetă numită %1$s. Doriți să îi atribuiți rolul de %2$s\?</string>
+    <string name="reassign_role_question">Aveți deja o etichetă numită %1$s cu rolul %2$s. Doriți să-i reatribuiți rolul %3$s\?</string>
+    <string name="assign_role">Atribuire rol</string>
+    <string name="reassign_role">Reatribuire rol</string>
 </resources>
