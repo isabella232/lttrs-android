@@ -324,7 +324,11 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
         future.addListener(() -> {
             try {
                 future.get().observe(this, workInfo -> {
-                    if (workInfo != null && workInfo.getState() != WorkInfo.State.ENQUEUED && snackbar.isShown()) {
+                    if (workInfo != null && workInfo.getState().isFinished() && snackbar.isShown()) {
+                        LOGGER.info(
+                                "Dismissing Move To Trash undo snackbar prematurely because WorkInfo went into state {}",
+                                workInfo.getState()
+                        );
                         snackbar.dismiss();
                     }
                 });

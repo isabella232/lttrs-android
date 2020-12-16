@@ -23,6 +23,8 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
 
+import java.util.List;
+
 import rs.ltt.android.R;
 import rs.ltt.android.entity.SearchSuggestionEntity;
 
@@ -41,4 +43,6 @@ public abstract class SearchSuggestionDao {
     @Insert(onConflict = REPLACE)
     public abstract void insert(SearchSuggestionEntity entity);
 
+    @Query("select `query` from search_suggestion")
+    public abstract List<String> getSearchQueries();
 }

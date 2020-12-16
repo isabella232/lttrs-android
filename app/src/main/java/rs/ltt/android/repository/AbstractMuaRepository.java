@@ -104,6 +104,19 @@ public abstract class AbstractMuaRepository {
         );
     }
 
+    protected void insertSearchQueryItemOverwrite(final Collection<String> threadIds, final String searchTerm) {
+        final EmailQuery search = StandardQueries.search(searchTerm, database.mailboxDao().getMailboxes(Role.TRASH, Role.JUNK));
+        final QueryEntity queryEntity = database.queryDao().get(search.asHash());
+        if (queryEntity != null) {
+            database.overwriteDao().insertQueryOverwrites(
+                    Collections2.transform(
+                            threadIds,
+                            threadId -> new QueryItemOverwriteEntity(queryEntity.id, threadId, QueryItemOverwriteEntity.Type.SEARCH)
+                    )
+            );
+        }
+    }
+
     protected void insertQueryItemOverwrite(final String threadId, final String keyword) {
         insertQueryItemOverwrite(ImmutableSet.of(threadId), keyword);
     }

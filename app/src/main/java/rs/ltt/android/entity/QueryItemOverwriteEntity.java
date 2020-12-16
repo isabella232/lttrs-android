@@ -58,6 +58,7 @@ public class QueryItemOverwriteEntity {
     public enum Type {
         KEYWORD,
         MAILBOX,
+        SEARCH,
         OTHER
     }
 }

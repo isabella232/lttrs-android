@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import rs.ltt.android.database.AppDatabase;
 import rs.ltt.android.entity.KeywordOverwriteEntity;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.MailboxOverwriteEntity;
@@ -81,11 +82,11 @@ public class LttrsRepository extends AbstractMuaRepository {
     }
 
     public void copyToMailbox(@NonNull final Collection<String> threadIds, @NonNull final IdentifiableMailboxWithRole mailbox) {
+        if (mailbox.getRole() == Role.IMPORTANT) {
+            markImportant(threadIds);
+            return;
+        }
         IO_EXECUTOR.execute(() -> {
-            if (mailbox.getRole() == Role.IMPORTANT) {
-                markImportantNow(threadIds);
-                return;
-            }
             deleteQueryItemOverwrite(threadIds, mailbox);
             for (final String threadId : threadIds) {
                 final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(CopyToMailboxWorker.class)
@@ -152,6 +153,10 @@ public class LttrsRepository extends AbstractMuaRepository {
             for (String keyword : KeywordUtil.KEYWORD_ROLE.keySet()) {
                 insertQueryItemOverwrite(threadIds, keyword);
             }
+            final AppDatabase appDatabase = AppDatabase.getInstance(application);
+            for(final String searchQuery : appDatabase.searchSuggestionDao().getSearchQueries()) {
+                insertSearchQueryItemOverwrite(threadIds, searchQuery);
+            }
             database.overwriteDao().insertMailboxOverwrites(
                     MailboxOverwriteEntity.of(threadIds, Role.INBOX, false)
             );
@@ -178,22 +183,20 @@ public class LttrsRepository extends AbstractMuaRepository {
     }
 
     public void markImportant(final Collection<String> threadIds) {
-        IO_EXECUTOR.execute(() -> markImportantNow(threadIds));
-    }
-
-    private void markImportantNow(final Collection<String> threadIds) {
-        database.overwriteDao().insertMailboxOverwrites(
-                MailboxOverwriteEntity.of(threadIds, Role.IMPORTANT, true)
-        );
-        deleteQueryItemOverwrite(threadIds, Role.IMPORTANT);
-        for (final String threadId : threadIds) {
-            final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MarkImportantWorker.class)
-                    .setConstraints(CONNECTED_CONSTRAINT)
-                    .setInputData(MarkImportantWorker.data(accountId, threadId))
-                    .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
-                    .build();
-            dispatchWorkRequest(workRequest);
-        }
+        IO_EXECUTOR.execute(() -> {
+            database.overwriteDao().insertMailboxOverwrites(
+                    MailboxOverwriteEntity.of(threadIds, Role.IMPORTANT, true)
+            );
+            deleteQueryItemOverwrite(threadIds, Role.IMPORTANT);
+            for (final String threadId : threadIds) {
+                final OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(MarkImportantWorker.class)
+                        .setConstraints(CONNECTED_CONSTRAINT)
+                        .setInputData(MarkImportantWorker.data(accountId, threadId))
+                        .addTag(AbstractMuaWorker.TAG_EMAIL_MODIFICATION)
+                        .build();
+                dispatchWorkRequest(workRequest);
+            }
+        });
     }
 
     public void markNotImportant(final Collection<String> threadIds) {

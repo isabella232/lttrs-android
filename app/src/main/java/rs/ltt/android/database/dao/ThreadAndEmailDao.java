@@ -286,7 +286,7 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
             insertEmails(created);
         }
         if (updatedProperties != null) {
-            for (Email email : update.getUpdated()) {
+            for (final Email email : update.getUpdated()) {
                 if (!emailExists(email.getId())) {
                     LOGGER.warn("skipping updates to email {} because we don’t have that", email.getId());
                     continue;
