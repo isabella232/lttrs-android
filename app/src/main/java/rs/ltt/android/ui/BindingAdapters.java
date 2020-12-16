@@ -22,7 +22,6 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
-import android.text.style.DynamicDrawableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.text.style.StyleSpan;
@@ -40,7 +39,6 @@ import androidx.lifecycle.LiveData;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
 import java.time.Duration;
@@ -66,6 +64,10 @@ public class BindingAdapters {
 
     private static final Duration SIX_HOURS = Duration.ofHours(6);
     private static final Duration THREE_MONTH = Duration.ofDays(90);
+
+    private static final char NON_BREAKING_SPACE = '\u00a0';
+    private static final char NARROW_NON_BREAKING_SPACE = '\u202F';
+    private static final char RIGHT_POINTING_DOUBLE_ANGLE_QUOTATION_MARK = '\u00bb';
 
     private static boolean sameYear(final Instant a, final Instant b) {
         final ZoneId local = ZoneId.systemDefault();
@@ -260,9 +262,16 @@ public class BindingAdapters {
             return;
         }
         if (subjectWithImportance.important) {
-            SpannableStringBuilder header = new SpannableStringBuilder(subjectWithImportance.subject);
-            header.append("\u2004\u00bb"); // 1/3 em - 1/2 em would be 2002
-            header.setSpan(new ImageSpan(text.getContext(), R.drawable.ic_important_amber_22sp, DynamicDrawableSpan.ALIGN_BASELINE), header.length() - 1, header.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            final SpannableStringBuilder header = new SpannableStringBuilder(subjectWithImportance.subject)
+                    .append(NON_BREAKING_SPACE)
+                    .append(NARROW_NON_BREAKING_SPACE)
+                    .append(RIGHT_POINTING_DOUBLE_ANGLE_QUOTATION_MARK);
+            header.setSpan(
+                    new ImageSpan(text.getContext(), R.drawable.ic_important_amber_22sp, ImageSpan.ALIGN_BASELINE),
+                    header.length() - 1,
+                    header.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            );
             text.setText(header);
         } else {
             text.setText(subjectWithImportance.subject);
