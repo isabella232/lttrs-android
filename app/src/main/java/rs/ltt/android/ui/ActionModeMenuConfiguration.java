@@ -26,7 +26,7 @@ import rs.ltt.android.ui.adapter.ThreadOverviewAdapter;
 public class ActionModeMenuConfiguration {
 
     public enum QueryType {
-        ARCHIVE, INBOX, FLAGGED, IMPORTANT, LABEL, SPECIAL
+        ARCHIVE, INBOX, FLAGGED, IMPORTANT, LABEL, SPECIAL, TRASH
     }
 
 

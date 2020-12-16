@@ -307,6 +307,7 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         );
         final MenuItem archive = menu.findItem(R.id.action_archive);
         final MenuItem removeLabel = menu.findItem(R.id.action_remove_label);
+        final MenuItem moveToTrash = menu.findItem(R.id.action_move_to_trash);
         final MenuItem markRead = menu.findItem(R.id.action_mark_read);
         final MenuItem markUnRead = menu.findItem(R.id.action_mark_unread);
         final MenuItem moveToInbox = menu.findItem(R.id.action_move_to_inbox);
@@ -318,6 +319,10 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         if (queryType == ActionModeMenuConfiguration.QueryType.ARCHIVE) {
             archive.setVisible(false);
             removeLabel.setVisible(false);
+        } else if (queryType == ActionModeMenuConfiguration.QueryType.TRASH) {
+            archive.setVisible(false);
+            removeLabel.setVisible(false);
+            moveToTrash.setVisible(false);
         } else if (queryType == ActionModeMenuConfiguration.QueryType.SPECIAL) {
             archive.setVisible(false);
             removeLabel.setVisible(false);
