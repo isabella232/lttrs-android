@@ -71,4 +71,11 @@
     <string name="delete">Elimina</string>
     <string name="mark_read">Segna come già letto</string>
     <string name="mark_unread">Segna come non letto</string>
+    <string name="cancel">Annulla</string>
+    <string name="confirm">Conferma</string>
+    <string name="assign_role_detailed_explanation">Ltt.rs richiede un\'etichetta (cassetta postale) con il ruolo di %1$s per funzionare correttamente. Se non vuoi usare l\'etichetta chiamata %2$s a quello scopo, puoi annullare ed usare il tuo client desktop o web per creare un\'etichetta diversa con il ruolo di %1$s.</string>
+    <string name="assign_role_question">Hai già un\'etichetta chiamata %1$s. Vuoi assegnarle il ruolo di %2$s\?</string>
+    <string name="reassign_role_question">Hai già un\'etichetta chiamata %1$s con il ruolo di %2$s. Vuoi riassegnarle il ruolo di %3$s\?</string>
+    <string name="assign_role">Assegna ruolo</string>
+    <string name="reassign_role">Riassegna ruolo</string>
 </resources>
