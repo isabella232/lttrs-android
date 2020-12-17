@@ -153,7 +153,7 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         tracker.onRestoreInstanceState(savedInstanceState);
     }
 
-    private void observeThreadOverviewItems(LiveData<PagedList<ThreadOverviewItem>> liveData) {
+    private void observeThreadOverviewItems(final LiveData<PagedList<ThreadOverviewItem>> liveData) {
         final AtomicBoolean actionModeRefreshed = new AtomicBoolean(false);
         liveData.observe(getViewLifecycleOwner(), threadOverviewItems -> {
             final RecyclerView.LayoutManager layoutManager = binding.threadList.getLayoutManager();
@@ -163,9 +163,7 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
             } else {
                 atTop = false;
             }
-            LOGGER.debug("submitting list");
             threadOverviewAdapter.submitList(threadOverviewItems, () -> {
-                LOGGER.debug("list submitted");
                 if (atTop && binding != null) {
                     binding.threadList.scrollToPosition(0);
                 }

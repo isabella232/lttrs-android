@@ -25,6 +25,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.paging.PagedList;
 import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.selection.ItemDetailsLookup;
 import androidx.recyclerview.selection.SelectionTracker;
@@ -50,6 +51,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
     private static final Logger LOGGER = LoggerFactory.getLogger(ThreadOverviewAdapter.class);
 
     private boolean isLoading = false;
+    private boolean initialLoadComplete = false;
 
     private static final int THREAD_ITEM_VIEW_TYPE = 0;
     private static final int LOADING_ITEM_VIEW_TYPE = 1;
@@ -127,7 +129,6 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
         });
         if (selected) {
             threadOverviewHolder.binding.threadLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.selected_background));
-            //threadOverviewHolder.binding.threadLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.accent12));
         } else {
             final TypedValue outValue = new TypedValue();
             context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
@@ -136,7 +137,7 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
     }
 
     private void onBindViewHolder(final ThreadOverviewLoadingViewHolder threadOverviewLoadingViewHolder) {
-        threadOverviewLoadingViewHolder.binding.loading.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        threadOverviewLoadingViewHolder.binding.loading.setVisibility(isLoading() ? View.VISIBLE : View.GONE);
     }
 
     private MailboxWithRoleAndName getImportantMailbox() {
@@ -157,11 +158,37 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
     }
 
     public void setLoading(final boolean loading) {
-        final boolean before = this.isLoading;
+        final boolean before = isLoading();
         this.isLoading = loading;
-        if (before != loading) {
+        refreshLoadingIndicator(before);
+    }
+
+    private void refreshLoadingIndicator(final boolean before) {
+        if (before != isLoading()) {
             notifyItemChanged(super.getItemCount());
         }
+    }
+
+    private void setInitialLoadComplete(final boolean initialLoadComplete) {
+        final boolean before = isLoading();
+        this.initialLoadComplete = initialLoadComplete;
+        refreshLoadingIndicator(before);
+    }
+
+    private boolean isLoading() {
+        return this.isLoading || !initialLoadComplete;
+    }
+
+    @Override
+    public void submitList(final PagedList<ThreadOverviewItem> pagedList) {
+        setInitialLoadComplete(true);
+        super.submitList(pagedList);
+    }
+
+    @Override
+    public void submitList(final PagedList<ThreadOverviewItem> pagedList, final Runnable runnable) {
+        setInitialLoadComplete(true);
+        super.submitList(pagedList, runnable);
     }
 
     public void setImportantMailbox(Future<MailboxWithRoleAndName> importantMailbox) {
