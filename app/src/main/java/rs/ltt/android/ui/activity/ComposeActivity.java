@@ -35,6 +35,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.common.base.Preconditions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,8 +63,8 @@ public class ComposeActivity extends AppCompatActivity {
     private ActivityComposeBinding binding;
     private ComposeViewModel composeViewModel;
 
-    public static void compose(final Fragment fragment, Long account) {
-        launch(fragment, account, null, ComposeAction.NEW);
+    public static void compose(final Fragment fragment) {
+        launch(fragment, null, null, ComposeAction.NEW);
     }
 
     public static void editDraft(final Fragment fragment, Long account, final String emailId) {
@@ -78,9 +79,14 @@ public class ComposeActivity extends AppCompatActivity {
                                final Long account,
                                final String emailId,
                                final ComposeAction action) {
-        LOGGER.info("launching ComposeActivity for account {}", account);
+        Preconditions.checkNotNull(action);
         final Intent intent = new Intent(fragment.getContext(), ComposeActivity.class);
-        intent.putExtra(ACCOUNT_EXTRA, account);
+        if (account != null) {
+            LOGGER.info("launching for account {} with {}", account, action);
+            intent.putExtra(ACCOUNT_EXTRA, account);
+        } else {
+            LOGGER.info("launching with {}", action);
+        }
         intent.putExtra(COMPOSE_ACTION_EXTRA, action.toString());
         if (emailId != null) {
             intent.putExtra(EMAIL_ID_EXTRA, emailId);
@@ -182,7 +188,7 @@ public class ComposeActivity extends AppCompatActivity {
         }
         try {
             return MailToUri.get(data.toString());
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             LOGGER.warn("activity was called with invalid URI {}. {}", data.toString(), e.getMessage());
             return null;
         }

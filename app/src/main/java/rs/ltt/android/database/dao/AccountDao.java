@@ -15,6 +15,7 @@
 
 package rs.ltt.android.database.dao;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -41,20 +42,20 @@ public abstract class AccountDao {
     @Query("select account.id as id, username,password,sessionResource,accountId from credentials join account on credentialsId = credentials.id where account.id=:id limit 1")
     public abstract AccountWithCredentials getAccount(Long id);
 
-    @Query("select account.id as id, username,password,sessionResource,accountId from credentials join account on credentialsId = credentials.id order by lastSelectedAt desc limit 1")
-    public abstract ListenableFuture<AccountWithCredentials> getMostRecentlySelectedAccountFuture();
+    @Query("select id from account")
+    public abstract  LiveData<List<Long>> getAccountIds();
 
     @Query("select id from account order by lastSelectedAt desc limit 1")
     public abstract Long getMostRecentlySelectedAccountId();
+
+    @Query("select exists (select 1 from account)")
+    public abstract boolean hasAccounts();
 
     @Insert
     abstract Long insert(CredentialsEntity entity);
 
     @Insert
     abstract Long insert(AccountEntity entity);
-
-    @Query("select exists (select 1 from account)")
-    public abstract boolean hasAccounts();
 
     @Transaction
     public List<AccountWithCredentials> insert(String username,

@@ -32,7 +32,12 @@ public class LttrsApplication extends Application {
     private final static Object CACHE_LOCK = new Object();
 
     public boolean noAccountsConfigured() {
-        return getMostRecentlySelectedAccountId() == null;
+        synchronized (CACHE_LOCK) {
+            if (mostRecentlySelectedAccountId != null) {
+                return false;
+            }
+        }
+        return !AppDatabase.getInstance(this).accountDao().hasAccounts();
     }
 
     public Long getMostRecentlySelectedAccountId() {

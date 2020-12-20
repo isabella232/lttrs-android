@@ -20,6 +20,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -54,6 +55,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import rs.ltt.android.LttrsApplication;
 import rs.ltt.android.LttrsNavigationDirections;
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.ActivityLttrsBinding;
@@ -93,14 +95,16 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        LOGGER.debug("onCreate()");
         binding = DataBindingUtil.setContentView(this, R.layout.activity_lttrs);
-
         final Intent intent = getIntent();
         final long accountId;
         if (intent != null && intent.hasExtra(EXTRA_ACCOUNT_ID)) {
             accountId = intent.getLongExtra(EXTRA_ACCOUNT_ID, -1);
         } else {
-            throw new IllegalStateException("LttrsActivity needs to be launched with account id");
+            final long start = SystemClock.elapsedRealtime();
+            accountId = LttrsApplication.get(this).getMostRecentlySelectedAccountId();
+            LOGGER.warn("Got most recently selected account id from database in {}ms. This should not be happening", (SystemClock.elapsedRealtime() - start));
         }
 
 

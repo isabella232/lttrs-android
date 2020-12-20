@@ -23,9 +23,11 @@ import androidx.annotation.StringRes;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -40,13 +42,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import rs.ltt.android.R;
+import rs.ltt.android.database.AppDatabase;
 import rs.ltt.android.entity.EditableEmail;
 import rs.ltt.android.entity.IdentityWithNameAndEmail;
 import rs.ltt.android.repository.ComposeRepository;
 import rs.ltt.android.ui.ComposeAction;
 import rs.ltt.android.util.Event;
+import rs.ltt.android.util.MergedListsLiveData;
 import rs.ltt.jmap.common.entity.EmailAddress;
 import rs.ltt.jmap.mua.util.EmailAddressUtil;
 import rs.ltt.jmap.mua.util.EmailUtil;
@@ -56,7 +61,6 @@ public class ComposeViewModel extends AndroidViewModel {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComposeViewModel.class);
 
-    private final ComposeRepository repository;
     private final ComposeAction composeAction;
     private final MailToUri uri;
     private final ListenableFuture<EditableEmail> email;
@@ -77,17 +81,34 @@ public class ComposeViewModel extends AndroidViewModel {
         super(application);
         this.composeAction = parameter.composeAction;
         this.uri = parameter.uri;
-        this.repository = new ComposeRepository(application, parameter.accountId);
-        this.identities = this.repository.getIdentities();
+        final LiveData<List<Long>> accountIds = AppDatabase.getInstance(application).accountDao().getAccountIds();
         if (composeAction == ComposeAction.NEW) {
+            Preconditions.checkState(
+                    parameter.accountId == null,
+                    "Account ID should be null when invoking with ComposeAction.NEW"
+            );
             this.email = null;
             initializeWithEmail(null);
+            this.identities = Transformations.switchMap(
+                    accountIds,
+                    ids -> new MergedListsLiveData<>(ids.stream()
+                            .map(id -> getRepository(id).getIdentities())
+                            .collect(Collectors.toList())
+                    )
+            );
         } else {
-            this.email = this.repository.getEditableEmail(parameter.emailId);
+            Preconditions.checkNotNull(parameter.emailId);
+            Preconditions.checkNotNull(parameter.accountId);
+            this.identities = getRepository(parameter.accountId).getIdentities();
+            this.email = getRepository(parameter.accountId).getEditableEmail(parameter.emailId);
         }
         if (parameter.freshStart && this.email != null) {
             initializeWithEmail();
         }
+    }
+
+    private ComposeRepository getRepository(Long accountId) {
+        return new ComposeRepository(getApplication(), accountId);
     }
 
     public LiveData<Event<String>> getErrorMessage() {
@@ -135,7 +156,7 @@ public class ComposeViewModel extends AndroidViewModel {
 
     public boolean discard() {
         final EditableEmail email = getEmail();
-        final boolean isOnlyEmailInThread = email == null || repository.discard(email);
+        final boolean isOnlyEmailInThread = email == null || getRepository(email.accountId).discard(email);
         this.draftHasBeenHandled = true;
         return isOnlyEmailInThread;
     }
@@ -161,14 +182,16 @@ public class ComposeViewModel extends AndroidViewModel {
         LOGGER.info("sending with identity {}", identity.getId());
         final EditableEmail editableEmail = getEmail();
         final UUID workInfoId;
+        final ComposeRepository repository = getRepository(identity.accountId);
         if (this.composeAction == ComposeAction.EDIT_DRAFT
                 && editableEmail != null
                 && currentDraft.unedited(Draft.edit(editableEmail))) {
             LOGGER.info("draft remains unedited. submitting...");
-            workInfoId = this.repository.submitEmail(identity, editableEmail);
+            //TODO double check that editableEmail accountId matches identity accountId
+            workInfoId = repository.submitEmail(identity, editableEmail);
         } else {
             final Collection<String> inReplyTo = inReplyTo(editableEmail, composeAction);
-            workInfoId = this.repository.sendEmail(identity, currentDraft, inReplyTo, editableEmail);
+            workInfoId = repository.sendEmail(identity, currentDraft, inReplyTo, editableEmail);
         }
         this.draftHasBeenHandled = true;
         return workInfoId;
@@ -218,7 +241,7 @@ public class ComposeViewModel extends AndroidViewModel {
             discard = null;
         }
         final Collection<String> inReplyTo = inReplyTo(editableEmail, composeAction);
-        final UUID uuid = this.repository.saveDraft(identity, currentDraft, inReplyTo, discard);
+        final UUID uuid = getRepository(identity.accountId).saveDraft(identity, currentDraft, inReplyTo, discard);
         this.draftHasBeenHandled = true;
         return uuid;
     }

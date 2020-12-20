@@ -32,6 +32,8 @@ import rs.ltt.jmap.common.entity.IdentifiableEmailWithSubject;
 
 public class EditableEmail implements IdentifiableEmailWithAddresses, IdentifiableEmailWithSubject {
 
+    public Long accountId;
+
     public String id;
 
     public String threadId;

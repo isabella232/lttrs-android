@@ -48,11 +48,11 @@ public class ComposeRepository extends AbstractMuaRepository {
     }
 
     public LiveData<List<IdentityWithNameAndEmail>> getIdentities() {
-        return database.identityDao().getIdentitiesLiveData();
+        return database.identityDao().getIdentitiesLiveData(accountId);
     }
 
     public ListenableFuture<EditableEmail> getEditableEmail(final String id) {
-        return database.threadAndEmailDao().getEditableEmail(id);
+        return database.threadAndEmailDao().getEditableEmail(accountId, id);
     }
 
     public UUID sendEmail(IdentifiableIdentity identity, ComposeViewModel.Draft draft, final Collection<String> inReplyTo, EditableEmail discard) {

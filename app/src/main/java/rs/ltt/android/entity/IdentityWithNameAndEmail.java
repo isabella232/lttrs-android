@@ -20,6 +20,7 @@ import rs.ltt.jmap.common.entity.IdentifiableIdentity;
 
 public class IdentityWithNameAndEmail implements IdentifiableIdentity {
 
+    public Long accountId;
     public String id;
     public String name;
     public String email;

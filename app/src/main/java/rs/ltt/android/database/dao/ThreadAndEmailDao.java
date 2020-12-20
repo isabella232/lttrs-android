@@ -198,8 +198,8 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
     public abstract DataSource.Factory<Integer, FullEmail> getEmails(String threadId);
 
     @Transaction
-    @Query("select id,threadId,subject from email where id=:id")
-    public abstract ListenableFuture<EditableEmail> getEditableEmail(String id);
+    @Query("select :accountId as accountId,id,threadId,subject from email where id=:id")
+    public abstract ListenableFuture<EditableEmail> getEditableEmail(Long accountId, String id);
 
     @Transaction
     @Query("select subject,email.threadId from thread_item join email on thread_item.emailId=email.id where thread_item.threadId=:threadId order by position limit 1")

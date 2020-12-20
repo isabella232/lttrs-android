@@ -59,8 +59,8 @@ public abstract class IdentityDao extends AbstractEntityDao {
     @Query("delete from identity where id=:id")
     abstract void delete(String id);
 
-    @Query("select id,name,email from identity")
-    public abstract LiveData<List<IdentityWithNameAndEmail>> getIdentitiesLiveData();
+    @Query("select :accountId as accountId, id,name,email from identity")
+    public abstract LiveData<List<IdentityWithNameAndEmail>> getIdentitiesLiveData(final Long accountId);
 
     @Query("select id,name,email from identity where id=:id limit 1")
     public abstract IdentityWithNameAndEmail get(String id);
