@@ -18,7 +18,7 @@ package rs.ltt.android.entity;
 import rs.ltt.jmap.common.entity.EmailAddress;
 import rs.ltt.jmap.common.entity.IdentifiableIdentity;
 
-public class IdentityWithNameAndEmail implements IdentifiableIdentity {
+public class IdentityWithNameAndEmail implements IdentifiableIdentity, IdentifiableWithOwner {
 
     public Long accountId;
     public String id;
@@ -28,6 +28,11 @@ public class IdentityWithNameAndEmail implements IdentifiableIdentity {
     @Override
     public String getId() {
         return id;
+    }
+
+    @Override
+    public Long getAccountId() {
+        return accountId;
     }
 
     public EmailAddress getEmailAddress() {

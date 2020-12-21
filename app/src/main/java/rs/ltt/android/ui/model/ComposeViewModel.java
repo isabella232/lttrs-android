@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
 import rs.ltt.android.R;
 import rs.ltt.android.database.AppDatabase;
 import rs.ltt.android.entity.EditableEmail;
+import rs.ltt.android.entity.IdentifiableWithOwner;
 import rs.ltt.android.entity.IdentityWithNameAndEmail;
 import rs.ltt.android.repository.ComposeRepository;
 import rs.ltt.android.ui.ComposeAction;
@@ -88,7 +89,6 @@ public class ComposeViewModel extends AndroidViewModel {
                     "Account ID should be null when invoking with ComposeAction.NEW"
             );
             this.email = null;
-            initializeWithEmail(null);
             this.identities = Transformations.switchMap(
                     accountIds,
                     ids -> new MergedListsLiveData<>(ids.stream()
@@ -96,14 +96,15 @@ public class ComposeViewModel extends AndroidViewModel {
                             .collect(Collectors.toList())
                     )
             );
+            initializeWithEmail(null);
         } else {
             Preconditions.checkNotNull(parameter.emailId);
             Preconditions.checkNotNull(parameter.accountId);
             this.identities = getRepository(parameter.accountId).getIdentities();
             this.email = getRepository(parameter.accountId).getEditableEmail(parameter.emailId);
-        }
-        if (parameter.freshStart && this.email != null) {
-            initializeWithEmail();
+            if (parameter.freshStart) {
+                initializeWithEmail();
+            }
         }
     }
 
@@ -167,6 +168,10 @@ public class ComposeViewModel extends AndroidViewModel {
             postErrorMessage(R.string.select_sender);
             throw new IllegalStateException();
         }
+        final EditableEmail editableEmail = getEmail();
+        if (editableEmail != null) {
+            IdentifiableWithOwner.checkSameOwner(editableEmail, identity);
+        }
         final Draft currentDraft = getCurrentDraft();
         if (currentDraft.to.size() <= 0) {
             postErrorMessage(R.string.add_at_least_one_recipient);
@@ -180,14 +185,12 @@ public class ComposeViewModel extends AndroidViewModel {
             throw new IllegalStateException();
         }
         LOGGER.info("sending with identity {}", identity.getId());
-        final EditableEmail editableEmail = getEmail();
         final UUID workInfoId;
         final ComposeRepository repository = getRepository(identity.accountId);
         if (this.composeAction == ComposeAction.EDIT_DRAFT
                 && editableEmail != null
                 && currentDraft.unedited(Draft.edit(editableEmail))) {
             LOGGER.info("draft remains unedited. submitting...");
-            //TODO double check that editableEmail accountId matches identity accountId
             workInfoId = repository.submitEmail(identity, editableEmail);
         } else {
             final Collection<String> inReplyTo = inReplyTo(editableEmail, composeAction);

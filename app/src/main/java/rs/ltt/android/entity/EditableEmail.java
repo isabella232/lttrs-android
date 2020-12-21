@@ -30,7 +30,7 @@ import java.util.Map;
 import rs.ltt.jmap.common.entity.IdentifiableEmailWithAddresses;
 import rs.ltt.jmap.common.entity.IdentifiableEmailWithSubject;
 
-public class EditableEmail implements IdentifiableEmailWithAddresses, IdentifiableEmailWithSubject {
+public class EditableEmail implements IdentifiableEmailWithAddresses, IdentifiableEmailWithSubject, IdentifiableWithOwner {
 
     public Long accountId;
 
@@ -124,5 +124,10 @@ public class EditableEmail implements IdentifiableEmailWithAddresses, Identifiab
     @Override
     public String getId() {
         return id;
+    }
+
+    @Override
+    public Long getAccountId() {
+        return accountId;
     }
 }

@@ -216,31 +216,35 @@ public class ComposeActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                saveDraft();
-                break;
-            case R.id.action_send:
-                try {
-                    final UUID workInfoId = composeViewModel.send();
-                    setResultIntent(workInfoId);
-                    finish();
-                } catch (IllegalStateException e) {
-                    //do nothing. error message has already been posted
-                }
-                break;
-            case R.id.action_discard:
-                discardDraft();
-                break;
+        final int itemId = item.getItemId();
+        if (itemId == android.R.id.home) {
+            saveDraft();
+            return super.onOptionsItemSelected(item);
+        } else if (itemId == R.id.action_send) {
+            send();
+            return true;
+        } else if (itemId == R.id.action_discard) {
+            discardDraft();
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
-
     }
 
     @Override
     public void onBackPressed() {
         saveDraft();
         super.onBackPressed();
+    }
+
+    private void send() {
+        try {
+            final UUID workInfoId = composeViewModel.send();
+            setResultIntent(workInfoId);
+            finish();
+        } catch (final IllegalStateException e) {
+            LOGGER.debug("Aborting send", e);
+        }
     }
 
     private void saveDraft() {
