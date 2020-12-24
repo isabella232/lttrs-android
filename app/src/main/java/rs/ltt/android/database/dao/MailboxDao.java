@@ -86,6 +86,13 @@ public abstract class MailboxDao extends AbstractEntityDao {
     @Query("select id,role,name from mailbox where id=:id limit 1")
     public abstract LiveData<MailboxWithRoleAndName> getMailboxLiveData(String id);
 
+    @Query("select id,role,name from mailbox where role is null or role in (:roles)")
+    protected abstract LiveData<List<MailboxWithRoleAndName>> getMailboxesWithRoleEqualsNullOrIn(Role... roles);
+
+    public LiveData<List<MailboxWithRoleAndName>> getLabels() {
+        return getMailboxesWithRoleEqualsNullOrIn(Role.INBOX);
+    }
+
     @Query("select id,parentid,name,sortOrder,unreadThreads,totalThreads,role from mailbox where id=:id")
     public abstract MailboxOverviewItem getMailbox(String id);
 
@@ -97,6 +104,9 @@ public abstract class MailboxDao extends AbstractEntityDao {
 
     @Query("select distinct mailbox.id,role,name from email join email_mailbox on email_mailbox.emailId=email.id join mailbox on email_mailbox.mailboxId=mailbox.id where threadId in (:threadIds)")
     public abstract List<MailboxWithRoleAndName> getMailboxesForThreads(Collection<String> threadIds);
+
+    @Query("select distinct mailbox.id from email join email_mailbox on email_mailbox.emailId=email.id join mailbox on email_mailbox.mailboxId=mailbox.id where threadId in (:threadIds)")
+    public abstract LiveData<List<String>> getMailboxIdsForThreadsLiveData(String[] threadIds);
 
     @Query("select count((select 1 where not exists(select * from email_mailbox join mailbox on email_mailbox.mailboxId=mailbox.id where mailbox.role=:role and email_mailbox.emailId=email.id))) > 0 from email where threadId=:threadId")
     public abstract LiveData<Boolean> isAnyNotIn(String threadId, Role role);

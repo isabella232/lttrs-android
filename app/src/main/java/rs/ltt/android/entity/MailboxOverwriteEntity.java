@@ -23,7 +23,9 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Collections2;
 
 import java.util.Collection;
+import java.util.List;
 
+import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRoleAndName;
 import rs.ltt.jmap.common.entity.Role;
 
 import static androidx.room.ForeignKey.CASCADE;
@@ -37,6 +39,8 @@ import static androidx.room.ForeignKey.CASCADE;
         )
 )
 public class MailboxOverwriteEntity {
+
+    private static final String EMPTY_STRING = "";
 
     @NonNull
     public String threadId;
@@ -54,7 +58,7 @@ public class MailboxOverwriteEntity {
         MailboxOverwriteEntity entity = new MailboxOverwriteEntity();
         entity.threadId = threadId;
         entity.role = role.toString();
-        entity.name = "";
+        entity.name = EMPTY_STRING;
         entity.value = value;
         return entity;
     }
@@ -66,7 +70,7 @@ public class MailboxOverwriteEntity {
     public static MailboxOverwriteEntity of(String threadId, @NonNull String label, boolean value) {
         MailboxOverwriteEntity entity = new MailboxOverwriteEntity();
         entity.threadId = threadId;
-        entity.role = "";
+        entity.role = EMPTY_STRING;
         entity.name = label;
         entity.value = value;
         return entity;
@@ -85,6 +89,23 @@ public class MailboxOverwriteEntity {
         for (MailboxOverwriteEntity overwriteEntity : overwriteEntities) {
             if (role.toString().equals(overwriteEntity.role)) {
                 return overwriteEntity;
+            }
+        }
+        return null;
+    }
+
+    public static Boolean getOverwrite(final List<MailboxOverwriteEntity> mailboxOverwrites, IdentifiableMailboxWithRoleAndName mailbox) {
+        final Role role = mailbox.getRole();
+        final String name = mailbox.getName();
+        for (final MailboxOverwriteEntity overwrite : mailboxOverwrites) {
+            if (role != null) {
+                if (role.toString().equals(overwrite.role)) {
+                    return overwrite.value;
+                }
+            } else if (name != null) {
+                if (name.equals(overwrite.name)) {
+                    return overwrite.value;
+                }
             }
         }
         return null;

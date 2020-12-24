@@ -94,4 +94,7 @@
     <string name="assign_role_detailed_explanation">Ltt.rs needs a label (mailbox) with the role of %1$s to work correctly. If you don’t want to use the label called %2$s for that purpose you can tap cancel and use your desktop or web client to create a different label with the role of %1$s.</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
+    <string name="change_labels">Change labels</string>
+    <string name="label_as">Label as</string>
+    <string name="apply_changes">Apply changes</string>
 </resources>

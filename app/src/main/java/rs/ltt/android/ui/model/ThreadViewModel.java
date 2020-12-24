@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -256,7 +257,7 @@ public class ThreadViewModel extends AndroidViewModel {
         @NonNull
         @Override
         public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-            return modelClass.cast(new ThreadViewModel(application, accountId, threadId, label));
+            return Objects.requireNonNull(modelClass.cast(new ThreadViewModel(application, accountId, threadId, label)));
         }
     }
 

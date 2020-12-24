@@ -100,4 +100,7 @@ public abstract class OverwriteDao {
 
     @Query("select * from mailbox_overwrite where threadId=:threadId")
     public abstract LiveData<List<MailboxOverwriteEntity>> getMailboxOverwrites(String threadId);
+
+    @Query("select * from mailbox_overwrite where threadId in(:threadIds)")
+    public abstract LiveData<List<MailboxOverwriteEntity>> getMailboxOverwrites(String[] threadIds);
 }

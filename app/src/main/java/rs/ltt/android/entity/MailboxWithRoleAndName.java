@@ -17,7 +17,6 @@ package rs.ltt.android.entity;
 
 import java.util.Collection;
 
-import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRoleAndName;
 import rs.ltt.jmap.common.entity.Role;
 

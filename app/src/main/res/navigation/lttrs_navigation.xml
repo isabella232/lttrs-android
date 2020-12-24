@@ -47,6 +47,10 @@
         app:popUpToInclusive="true" />
 
     <action
+        android:id="@+id/action_change_labels"
+        app:destination="@+id/label_as" />
+
+    <action
         android:id="@+id/action_to_reassign_role"
         app:destination="@+id/reassign_role" />
 
@@ -122,6 +126,16 @@
         <argument
             android:name="role"
             app:argType="string"
+            app:nullable="false" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/label_as"
+        android:name="rs.ltt.android.ui.fragment.ChooseLabelsFragment"
+        android:label="label_as">
+        <argument
+            android:name="threads"
+            app:argType="string[]"
             app:nullable="false" />
     </fragment>
 

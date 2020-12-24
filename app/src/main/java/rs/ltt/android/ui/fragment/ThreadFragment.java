@@ -28,7 +28,6 @@ import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.paging.PagedList;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
@@ -43,7 +42,6 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -80,8 +78,7 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        final Bundle bundle = getArguments();
-        final ThreadFragmentArgs arguments = ThreadFragmentArgs.fromBundle(bundle == null ? new Bundle() : bundle);
+        final ThreadFragmentArgs arguments = ThreadFragmentArgs.fromBundle(requireArguments());
         final String threadId = arguments.getThread();
         final String label = arguments.getLabel();
         final ViewModelProvider viewModelProvider = new ViewModelProvider(
@@ -127,6 +124,18 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
         threadAdapter.setOnComposeActionTriggeredListener(this);
         threadViewModel.getThreadViewRedirect().observe(getViewLifecycleOwner(), this::onThreadViewRedirect);
         return binding.getRoot();
+    }
+
+
+    @Override
+    public void onDestroyView() {
+        nullReferences();
+        super.onDestroyView();
+    }
+
+    private void nullReferences() {
+        this.binding.list.setAdapter(null);
+        this.binding = null;
     }
 
     private void onSeenEvent(Event<Seen> seenEvent) {
@@ -213,54 +222,57 @@ public class ThreadFragment extends AbstractLttrsFragment implements OnFlaggedTo
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem menuItem) {
-
         final NavController navController = getNavController();
-
-        switch (menuItem.getItemId()) {
-            case R.id.action_mark_unread:
-                getThreadModifier().markUnread(
-                        ImmutableList.of(threadViewModel.getThreadId())
-                );
-                navController.popBackStack();
-                return true;
-            case R.id.action_archive:
-                getThreadModifier().archive(
-                        ImmutableList.of(threadViewModel.getThreadId())
-                );
-                navController.popBackStack();
-                return true;
-            case R.id.action_remove_label:
-                getThreadModifier().removeFromMailbox(
-                        ImmutableList.of(threadViewModel.getThreadId()),
-                        threadViewModel.getMailbox()
-                );
-                navController.popBackStack();
-                return true;
-            case R.id.action_move_to_inbox:
-                getThreadModifier().moveToInbox(
-                        ImmutableList.of(threadViewModel.getThreadId())
-                );
-                navController.popBackStack();
-                return true;
-            case R.id.action_move_to_trash:
-                getThreadModifier().moveToTrash(
-                        ImmutableList.of(threadViewModel.getThreadId())
-                );
-                navController.popBackStack();
-                return true;
-            case R.id.action_mark_important:
-                getThreadModifier().markImportant(
-                        ImmutableList.of(threadViewModel.getThreadId())
-                );
-                return true;
-            case R.id.action_mark_not_important:
-                //TODO if label == important (coming from important view); pop back stack
-                getThreadModifier().markNotImportant(
-                        ImmutableList.of(threadViewModel.getThreadId())
-                );
-                return true;
-            default:
-                return super.onOptionsItemSelected(menuItem);
+        final int itemId = menuItem.getItemId();
+        if (itemId == R.id.action_mark_unread) {
+            getThreadModifier().markUnread(
+                    ImmutableList.of(threadViewModel.getThreadId())
+            );
+            navController.popBackStack();
+            return true;
+        } else if (itemId == R.id.action_archive) {
+            getThreadModifier().archive(
+                    ImmutableList.of(threadViewModel.getThreadId())
+            );
+            navController.popBackStack();
+            return true;
+        } else if (itemId == R.id.action_remove_label) {
+            getThreadModifier().removeFromMailbox(
+                    ImmutableList.of(threadViewModel.getThreadId()),
+                    threadViewModel.getMailbox()
+            );
+            navController.popBackStack();
+            return true;
+        } else if (itemId == R.id.action_move_to_inbox) {
+            getThreadModifier().moveToInbox(
+                    ImmutableList.of(threadViewModel.getThreadId())
+            );
+            navController.popBackStack();
+            return true;
+        } else if (itemId == R.id.action_move_to_trash) {
+            getThreadModifier().moveToTrash(
+                    ImmutableList.of(threadViewModel.getThreadId())
+            );
+            navController.popBackStack();
+            return true;
+        } else if (itemId == R.id.action_change_labels) {
+            navController.navigate(LttrsNavigationDirections.actionChangeLabels(
+                    new String[]{threadViewModel.getThreadId()}
+            ));
+            return true;
+        } else if (itemId == R.id.action_mark_important) {
+            getThreadModifier().markImportant(
+                    ImmutableList.of(threadViewModel.getThreadId())
+            );
+            return true;
+        } else if (itemId == R.id.action_mark_not_important) {
+            //TODO if label == important (coming from important view); pop back stack
+            getThreadModifier().markNotImportant(
+                    ImmutableList.of(threadViewModel.getThreadId())
+            );
+            return true;
+        } else {
+            return super.onOptionsItemSelected(menuItem);
         }
     }
 

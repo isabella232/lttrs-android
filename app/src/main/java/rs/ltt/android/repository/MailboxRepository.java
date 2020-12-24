@@ -7,8 +7,10 @@ import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 
+import java.util.List;
 import java.util.UUID;
 
+import rs.ltt.android.entity.MailboxOverwriteEntity;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.worker.SetMailboxRoleWorker;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
@@ -22,6 +24,18 @@ public class MailboxRepository extends AbstractMuaRepository {
 
     public LiveData<MailboxWithRoleAndName> getMailbox(final String id) {
         return database.mailboxDao().getMailboxLiveData(id);
+    }
+
+    public LiveData<List<MailboxWithRoleAndName>> getLabels() {
+        return database.mailboxDao().getLabels();
+    }
+
+    public LiveData<List<String>> getMailboxIdsForThreadsLiveData(final String[] threadIds) {
+        return database.mailboxDao().getMailboxIdsForThreadsLiveData(threadIds);
+    }
+
+    public LiveData<List<MailboxOverwriteEntity>> getMailboxOverwrites(String[] threadIds) {
+        return database.overwriteDao().getMailboxOverwrites(threadIds);
     }
 
     public UUID setRole(final IdentifiableMailboxWithRole mailbox, final Role role) {

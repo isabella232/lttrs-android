@@ -41,6 +41,11 @@
         app:showAsAction="always" />
 
     <item
+        android:id="@+id/action_change_labels"
+        android:title="@string/change_labels"
+        app:showAsAction="never"/>
+
+    <item
         android:id="@+id/action_move_to_inbox"
         android:title="@string/move_to_inbox"
         app:showAsAction="never" />

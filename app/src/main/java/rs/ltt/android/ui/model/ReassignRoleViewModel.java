@@ -10,19 +10,18 @@ import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.repository.MailboxRepository;
 import rs.ltt.android.util.Event;
-import rs.ltt.jmap.common.entity.Mailbox;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mua.util.MailboxUtil;
 
 public class ReassignRoleViewModel extends AndroidViewModel {
 
     private final MailboxRepository mailboxRepository;
-    private final Long accountId;
 
     private final LiveData<MailboxWithRoleAndName> mailbox;
     private final LiveData<Boolean> isReassignment;
@@ -34,7 +33,6 @@ public class ReassignRoleViewModel extends AndroidViewModel {
                                  @NonNull final String mailboxId,
                                  @NonNull final Role role) {
         super(application);
-        this.accountId = accountId;
         this.mailboxRepository = new MailboxRepository(application, accountId);
         this.mailbox = this.mailboxRepository.getMailbox(mailboxId);
         this.isReassignment = Transformations.map(this.mailbox, m-> m.getRole() != null);
@@ -85,12 +83,12 @@ public class ReassignRoleViewModel extends AndroidViewModel {
         @NonNull
         @Override
         public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-            return modelClass.cast(new ReassignRoleViewModel(
+            return Objects.requireNonNull(modelClass.cast(new ReassignRoleViewModel(
                     application,
                     accountId,
                     mailboxId,
                     role
-            ));
+            )));
         }
     }
 }
