@@ -6,14 +6,23 @@ import androidx.lifecycle.LiveData;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
+import androidx.work.WorkRequest;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import rs.ltt.android.entity.MailboxOverwriteEntity;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
+import rs.ltt.android.worker.ModifyLabelsWorker;
 import rs.ltt.android.worker.SetMailboxRoleWorker;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
+import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRoleAndName;
 import rs.ltt.jmap.common.entity.Role;
 
 public class MailboxRepository extends AbstractMuaRepository {
@@ -50,5 +59,23 @@ public class MailboxRepository extends AbstractMuaRepository {
                 workRequest
         );
         return workRequest.getId();
+    }
+
+    public List<UUID> modifyLabels(final String[] threadIds,
+                                   final List<IdentifiableMailboxWithRoleAndName> add,
+                                   final List<IdentifiableMailboxWithRoleAndName> remove) {
+        if (add.size() == 0 && remove.size() == 0) {
+            return Collections.emptyList();
+        }
+        final List<OneTimeWorkRequest> workRequests = Arrays.stream(threadIds)
+                .map(threadId -> new OneTimeWorkRequest.Builder(ModifyLabelsWorker.class)
+                        .setConstraints(CONNECTED_CONSTRAINT)
+                        .setInputData(ModifyLabelsWorker.data(accountId, threadId, add, remove))
+                        .build())
+                .collect(Collectors.toList());
+        IO_EXECUTOR.execute(() -> {
+            
+        });
+        return workRequests.stream().map(WorkRequest::getId).collect(Collectors.toList());
     }
 }

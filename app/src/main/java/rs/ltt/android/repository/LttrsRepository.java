@@ -286,6 +286,12 @@ public class LttrsRepository extends AbstractMuaRepository {
         return observeForFailure(workRequest.getId());
     }
 
+    public void observeForFailure(List<UUID> ids) {
+        for(final UUID id : ids) {
+            observeForFailure(id);
+        }
+    }
+
     public LiveData<WorkInfo> observeForFailure(final UUID id) {
         final WorkManager workManager = WorkManager.getInstance(application);
         final LiveData<WorkInfo> workInfoLiveData = workManager.getWorkInfoByIdLiveData(id);

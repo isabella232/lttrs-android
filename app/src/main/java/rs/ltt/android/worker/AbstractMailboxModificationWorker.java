@@ -37,7 +37,7 @@ public abstract class AbstractMailboxModificationWorker extends AbstractMuaWorke
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMailboxModificationWorker.class);
 
-    private static final String THREAD_ID_KEY = "threadId";
+    protected static final String THREAD_ID_KEY = "threadId";
 
     protected final String threadId;
 

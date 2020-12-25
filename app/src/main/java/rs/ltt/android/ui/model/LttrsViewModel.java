@@ -181,6 +181,10 @@ public class LttrsViewModel extends AndroidViewModel {
         this.lttrsRepository.observeForFailure(id);
     }
 
+    public void observeForFailure(final List<UUID> ids) {
+        this.lttrsRepository.observeForFailure(ids);
+    }
+
     public static class Factory implements ViewModelProvider.Factory {
 
         private final Application application;

@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import rs.ltt.android.entity.MailboxOverwriteEntity;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
@@ -80,7 +81,7 @@ public class ChooseLabelsViewModel extends LttrsViewModel {
         });
     }
 
-    public void applyChanges() {
+    public List<UUID> applyChanges() {
         final List<String> mailboxes = Objects.requireNonNull(this.mailboxes.getValue());
         final List<MailboxOverwriteEntity> mailboxOverwrites = Objects.requireNonNull(this.mailboxOverwrites.getValue());
         final List<MailboxWithRoleAndName> existingMailboxes = Objects.requireNonNull(this.existingLabels.getValue());
@@ -96,6 +97,7 @@ public class ChooseLabelsViewModel extends LttrsViewModel {
         final List<IdentifiableMailboxWithRoleAndName> add = addBuilder.build();
         final List<IdentifiableMailboxWithRoleAndName> remove = removeBuilder.build();
         LOGGER.debug("add: {}, remove: {}", add, remove);
+        return this.mailboxRepository.modifyLabels(threadIds, add, remove);
     }
 
     private List<SelectableMailbox> getSelectableMailboxes(final List<String> mailboxes,

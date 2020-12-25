@@ -12,6 +12,9 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import java.util.List;
+import java.util.UUID;
+
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.DialogViewNewLabelBinding;
 import rs.ltt.android.databinding.FragmentLabelAsBinding;
@@ -85,7 +88,8 @@ public class ChooseLabelsFragment extends AbstractLttrsFragment implements Choos
     }
 
     private void onConfirm(final View view) {
-        this.viewModel.applyChanges();
+        final List<UUID> workRequests = this.viewModel.applyChanges();
+        getLttrsViewModel().observeForFailure(workRequests);
     }
 
     private void onCancel(final View view) {

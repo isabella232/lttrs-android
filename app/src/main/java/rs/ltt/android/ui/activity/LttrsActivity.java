@@ -26,6 +26,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -83,6 +84,9 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
             R.id.inbox,
             R.id.mailbox,
             R.id.keyword
+    );
+    private static final List<Integer> FULL_SCREEN_DIALOG = Arrays.asList(
+            R.id.label_as
     );
     final LabelListAdapter labelListAdapter = new LabelListAdapter();
     private ActivityLttrsBinding binding;
@@ -227,9 +231,16 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
             return;
         }
         final int destinationId = destination.getId();
-        final boolean showMenu = MAIN_DESTINATIONS.contains(destinationId);
         actionbar.setDisplayHomeAsUpEnabled(true);
-        actionbar.setHomeAsUpIndicator(showMenu ? R.drawable.ic_menu_black_24dp : R.drawable.ic_arrow_back_white_24dp);
+        @DrawableRes final int upIndicator;
+        if (MAIN_DESTINATIONS.contains(destinationId)) {
+            upIndicator = R.drawable.ic_menu_black_24dp;
+        } else if (FULL_SCREEN_DIALOG.contains(destinationId)) {
+            upIndicator = R.drawable.ic_baseline_close_24;
+        } else {
+            upIndicator = R.drawable.ic_arrow_back_white_24dp;
+        }
+        actionbar.setHomeAsUpIndicator(upIndicator);
         actionbar.setDisplayShowTitleEnabled(destinationId != R.id.thread);
         invalidateOptionsMenu();
     }
