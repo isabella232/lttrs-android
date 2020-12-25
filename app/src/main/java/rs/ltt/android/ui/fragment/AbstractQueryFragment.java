@@ -62,6 +62,7 @@ import rs.ltt.android.ui.adapter.ThreadOverviewItemDetailsLookup;
 import rs.ltt.android.ui.adapter.ThreadOverviewItemKeyProvider;
 import rs.ltt.android.ui.model.AbstractQueryViewModel;
 import rs.ltt.jmap.mua.util.Label;
+import rs.ltt.jmap.mua.util.LabelWithCount;
 
 
 public abstract class AbstractQueryFragment extends AbstractLttrsFragment implements OnFlaggedToggled,
@@ -209,7 +210,7 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
         }
     }
 
-    void onLabelOpened(final Label label) {
+    void onLabelOpened(final LabelWithCount label) {
         getLttrsViewModel().setSelectedLabel(label);
         getLttrsViewModel().setActivityTitle(label.getName());
     }

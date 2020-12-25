@@ -4,8 +4,9 @@ import com.google.common.base.Objects;
 
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRoleAndName;
 import rs.ltt.jmap.common.entity.Role;
+import rs.ltt.jmap.mua.util.Label;
 
-public class SelectableMailbox implements IdentifiableMailboxWithRoleAndName {
+public class SelectableMailbox implements IdentifiableMailboxWithRoleAndName, Label {
 
     private final String id;
     private final String name;
@@ -26,6 +27,23 @@ public class SelectableMailbox implements IdentifiableMailboxWithRoleAndName {
                 mailbox.getRole(),
                 selected
         );
+    }
+
+    public static SelectableMailbox of(String name, final boolean selected) {
+        return new SelectableMailbox(
+                null,
+                name,
+                null,
+                selected
+        );
+    }
+
+    public MailboxWithRoleAndName toMailboxWithRoleAndName() {
+        final MailboxWithRoleAndName mailbox = new MailboxWithRoleAndName();
+        mailbox.id = id;
+        mailbox.role = role;
+        mailbox.name = name;
+        return mailbox;
     }
 
     @Override
@@ -62,4 +80,5 @@ public class SelectableMailbox implements IdentifiableMailboxWithRoleAndName {
     public int hashCode() {
         return Objects.hashCode(id, name, role, selected);
     }
+
 }

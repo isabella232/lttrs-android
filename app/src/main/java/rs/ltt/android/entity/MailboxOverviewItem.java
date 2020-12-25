@@ -21,8 +21,9 @@ import com.google.common.base.Objects;
 
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mua.util.Label;
+import rs.ltt.jmap.mua.util.LabelWithCount;
 
-public class MailboxOverviewItem extends MailboxWithRoleAndName implements Label {
+public class MailboxOverviewItem extends MailboxWithRoleAndName implements LabelWithCount {
 
     public String parentId;
 

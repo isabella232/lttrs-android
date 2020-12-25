@@ -39,27 +39,28 @@ import rs.ltt.android.databinding.ItemMailboxHeaderBinding;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.jmap.mua.util.KeywordLabel;
 import rs.ltt.jmap.mua.util.Label;
+import rs.ltt.jmap.mua.util.LabelWithCount;
 
 public class LabelListAdapter extends RecyclerView.Adapter<LabelListAdapter.AbstractMailboxViewHolder> {
 
     private static final int ITEM_VIEW_TYPE = 1;
     private static final int HEADER_VIEW_TYPE = 2;
 
-    private static final DiffUtil.ItemCallback<Label> ITEM_CALLBACK = new DiffUtil.ItemCallback<Label>() {
+    private static final DiffUtil.ItemCallback<LabelWithCount> ITEM_CALLBACK = new DiffUtil.ItemCallback<LabelWithCount>() {
         @Override
-        public boolean areItemsTheSame(@NonNull Label oldItem, @NonNull Label newItem) {
+        public boolean areItemsTheSame(@NonNull LabelWithCount oldItem, @NonNull LabelWithCount newItem) {
             return LabelListAdapter.same(oldItem, newItem);
         }
 
         @Override
-        public boolean areContentsTheSame(@NonNull Label oldItem, @NonNull Label newItem) {
+        public boolean areContentsTheSame(@NonNull LabelWithCount oldItem, @NonNull LabelWithCount newItem) {
             return oldItem.equals(newItem);
         }
     };
 
-    private final AsyncListDiffer<Label> mDiffer = new AsyncListDiffer<>(new OffsetListUpdateCallback<>(this, 1), new AsyncDifferConfig.Builder<>(ITEM_CALLBACK).build());
+    private final AsyncListDiffer<LabelWithCount> mDiffer = new AsyncListDiffer<>(new OffsetListUpdateCallback<>(this, 1), new AsyncDifferConfig.Builder<>(ITEM_CALLBACK).build());
 
-    private Label selectedLabel = null;
+    private LabelWithCount selectedLabel = null;
 
     private OnLabelSelected onLabelSelected = null;
 
@@ -87,7 +88,7 @@ public class LabelListAdapter extends RecyclerView.Adapter<LabelListAdapter.Abst
         }
         MailboxViewHolder holder = (MailboxViewHolder) abstractHolder;
         final Context context = holder.binding.getRoot().getContext();
-        final Label label = getItem(position);
+        final LabelWithCount label = getItem(position);
         holder.binding.setLabel(label);
         holder.binding.item.setOnClickListener(v -> {
             if (onLabelSelected != null) {
@@ -105,7 +106,7 @@ public class LabelListAdapter extends RecyclerView.Adapter<LabelListAdapter.Abst
         }
     }
 
-    public void setSelectedLabel(final Label label) {
+    public void setSelectedLabel(final LabelWithCount label) {
         if ((label == null && this.selectedLabel == null) || (same(label, this.selectedLabel))) {
             return;
         }
@@ -120,11 +121,11 @@ public class LabelListAdapter extends RecyclerView.Adapter<LabelListAdapter.Abst
         }
     }
 
-    private int getPosition(final Label label) {
+    private int getPosition(final LabelWithCount label) {
         if (label == null) {
             return RecyclerView.NO_POSITION;
         }
-        final List<Label> items = mDiffer.getCurrentList();
+        final List<LabelWithCount> items = mDiffer.getCurrentList();
         for (int i = 0; i < items.size(); ++i) {
             if (same(label, items.get(i))) {
                 return i + 1;
@@ -143,11 +144,11 @@ public class LabelListAdapter extends RecyclerView.Adapter<LabelListAdapter.Abst
         return position == 0 ? HEADER_VIEW_TYPE : ITEM_VIEW_TYPE;
     }
 
-    private Label getItem(int position) {
+    private LabelWithCount getItem(int position) {
         return this.mDiffer.getCurrentList().get(position - 1);
     }
 
-    public void submitList(List<Label> items) {
+    public void submitList(List<LabelWithCount> items) {
         this.mDiffer.submitList(items);
     }
 

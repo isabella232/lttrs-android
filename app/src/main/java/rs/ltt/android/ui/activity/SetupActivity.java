@@ -75,6 +75,7 @@ public class SetupActivity extends AppCompatActivity {
         });
         setupViewModel.getWarningMessage().observe(this, event -> {
             if (event.isConsumable()) {
+                //TODO: Should we make this a dialog? ComposeActivity uses dialogs too
                 Snackbar.make(binding.getRoot(), event.consume(), Snackbar.LENGTH_LONG).show();
             }
         });

@@ -25,6 +25,7 @@ import com.google.common.collect.Collections2;
 import java.util.Collection;
 import java.util.List;
 
+import rs.ltt.android.util.CharSequences;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRoleAndName;
 import rs.ltt.jmap.common.entity.Role;
 
@@ -39,8 +40,6 @@ import static androidx.room.ForeignKey.CASCADE;
         )
 )
 public class MailboxOverwriteEntity {
-
-    private static final String EMPTY_STRING = "";
 
     @NonNull
     public String threadId;
@@ -58,7 +57,7 @@ public class MailboxOverwriteEntity {
         MailboxOverwriteEntity entity = new MailboxOverwriteEntity();
         entity.threadId = threadId;
         entity.role = role.toString();
-        entity.name = EMPTY_STRING;
+        entity.name = CharSequences.EMPTY_STRING;
         entity.value = value;
         return entity;
     }
@@ -70,7 +69,7 @@ public class MailboxOverwriteEntity {
     public static MailboxOverwriteEntity of(String threadId, @NonNull String label, boolean value) {
         MailboxOverwriteEntity entity = new MailboxOverwriteEntity();
         entity.threadId = threadId;
-        entity.role = EMPTY_STRING;
+        entity.role = CharSequences.EMPTY_STRING;
         entity.name = label;
         entity.value = value;
         return entity;

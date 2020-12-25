@@ -21,7 +21,7 @@
 
         <variable
             name="label"
-            type="rs.ltt.jmap.mua.util.Label" />
+            type="rs.ltt.jmap.mua.util.LabelWithCount" />
     </data>
 
     <RelativeLayout

@@ -6,14 +6,19 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
 import rs.ltt.android.R;
+import rs.ltt.android.databinding.DialogViewNewLabelBinding;
 import rs.ltt.android.databinding.FragmentLabelAsBinding;
 import rs.ltt.android.entity.SelectableMailbox;
 import rs.ltt.android.ui.adapter.ChooseLabelsAdapter;
 import rs.ltt.android.ui.model.ChooseLabelsViewModel;
+import rs.ltt.android.util.CharSequences;
 
 public class ChooseLabelsFragment extends AbstractLttrsFragment implements ChooseLabelsAdapter.OnSelectableMailboxClickListener {
 
@@ -35,6 +40,8 @@ public class ChooseLabelsFragment extends AbstractLttrsFragment implements Choos
         binding.labelList.setAdapter(this.chooseLabelsAdapter);
 
         binding.cancel.setOnClickListener(this::onCancel);
+        binding.confirm.setOnClickListener(this::onConfirm);
+        binding.add.setOnClickListener(this::onAdd);
 
         final ChooseLabelsFragmentArgs arguments = ChooseLabelsFragmentArgs.fromBundle(requireArguments());
 
@@ -49,6 +56,36 @@ public class ChooseLabelsFragment extends AbstractLttrsFragment implements Choos
         this.viewModel = viewModelProvider.get(ChooseLabelsViewModel.class);
         this.viewModel.getSelectableMailboxesLiveData().observe(getViewLifecycleOwner(), this.chooseLabelsAdapter::submitList);
         return binding.getRoot();
+    }
+
+    private void onAdd(final View view) {
+        final MaterialAlertDialogBuilder materialAlertDialogBuilder = new MaterialAlertDialogBuilder(requireContext());
+        materialAlertDialogBuilder.setTitle(R.string.new_label);
+        materialAlertDialogBuilder.setNegativeButton(R.string.cancel, null);
+        final DialogViewNewLabelBinding dialogViewNewLabelBinding = DialogViewNewLabelBinding.inflate(getLayoutInflater());
+        materialAlertDialogBuilder.setView(dialogViewNewLabelBinding.getRoot());
+        materialAlertDialogBuilder.setPositiveButton(R.string.create, null);
+        final AlertDialog dialog = materialAlertDialogBuilder.create();
+        dialog.setOnShowListener(d -> {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+                final String name = CharSequences.nullToEmpty(
+                        dialogViewNewLabelBinding.name.getText()
+                ).trim();
+                if (name.length() == 0) {
+                    dialogViewNewLabelBinding.inputLayout.setError(
+                            requireContext().getString(R.string.no_name_specified)
+                    );
+                } else {
+                    viewModel.createLabel(name);
+                    dialog.dismiss();
+                }
+            });
+        });
+        dialog.show();
+    }
+
+    private void onConfirm(final View view) {
+        this.viewModel.applyChanges();
     }
 
     private void onCancel(final View view) {

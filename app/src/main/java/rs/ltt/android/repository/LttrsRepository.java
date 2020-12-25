@@ -142,6 +142,7 @@ public class LttrsRepository extends AbstractMuaRepository {
         });
     }
 
+    //TODO check if we can return LiveData<WorkInfo> directly by constructing the workRequest before the executor
     public ListenableFuture<LiveData<WorkInfo>> moveToTrash(final Collection<String> threadIds) {
         final SettableFuture<LiveData<WorkInfo>> future = SettableFuture.create();
         IO_EXECUTOR.execute(() -> {

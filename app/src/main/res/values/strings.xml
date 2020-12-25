@@ -97,4 +97,8 @@
     <string name="change_labels">Change labels</string>
     <string name="label_as">Label as</string>
     <string name="apply_changes">Apply changes</string>
+    <string name="enter_a_label_name">Type in a new label name</string>
+    <string name="no_name_specified">No name specified. Try again.</string>
+    <string name="new_label">New label</string>
+    <string name="create">Create</string>
 </resources>

@@ -46,13 +46,14 @@ import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.common.entity.Keyword;
 import rs.ltt.jmap.mua.util.Label;
 import rs.ltt.jmap.mua.util.LabelUtil;
+import rs.ltt.jmap.mua.util.LabelWithCount;
 
 public class LttrsViewModel extends AndroidViewModel {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LttrsViewModel.class);
 
-    private final LiveData<List<Label>> navigableLabels;
-    private final MutableLiveData<Label> selectedLabel = new MutableLiveData<>();
+    private final LiveData<List<LabelWithCount>> navigableLabels;
+    private final MutableLiveData<LabelWithCount> selectedLabel = new MutableLiveData<>();
     private final MutableLiveData<String> activityTitle = new MutableLiveData<>();
     private final MainRepository mainRepository;
     private final long accountId;
@@ -99,15 +100,15 @@ public class LttrsViewModel extends AndroidViewModel {
         return this.activityTitle;
     }
 
-    public void setSelectedLabel(final Label label) {
+    public void setSelectedLabel(final LabelWithCount label) {
         this.selectedLabel.postValue(label);
     }
 
-    public LiveData<Label> getSelectedLabel() {
+    public LiveData<LabelWithCount> getSelectedLabel() {
         return this.selectedLabel;
     }
 
-    public LiveData<List<Label>> getNavigableLabels() {
+    public LiveData<List<LabelWithCount>> getNavigableLabels() {
         return this.navigableLabels;
     }
 
