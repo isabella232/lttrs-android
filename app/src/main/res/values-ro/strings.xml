@@ -82,4 +82,7 @@
     <string name="reassign_role_question">Aveți deja o etichetă numită %1$s cu rolul %2$s. Doriți să-i reatribuiți rolul %3$s\?</string>
     <string name="assign_role">Atribuire rol</string>
     <string name="reassign_role">Reatribuire rol</string>
+    <string name="apply_changes">Aplicare modificări</string>
+    <string name="label_as">Etichetare ca</string>
+    <string name="change_labels">Modificare etichete</string>
 </resources>
