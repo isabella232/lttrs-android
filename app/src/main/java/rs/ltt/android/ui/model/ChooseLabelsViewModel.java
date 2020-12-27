@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,7 +37,7 @@ public class ChooseLabelsViewModel extends LttrsViewModel {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChooseLabelsViewModel.class);
 
-    private final String[] threadIds;
+    private final List<String> threadIds;
     private final MailboxRepository mailboxRepository;
     private final LiveData<List<MailboxWithRoleAndName>> existingLabels;
     private final LiveData<List<String>> mailboxes;
@@ -50,7 +51,7 @@ public class ChooseLabelsViewModel extends LttrsViewModel {
         super(application, accountId);
         Preconditions.checkNotNull(threadIds);
         Preconditions.checkArgument(threadIds.length > 0);
-        this.threadIds = threadIds;
+        this.threadIds = Arrays.asList(threadIds);
         this.mailboxRepository = new MailboxRepository(application, accountId);
         this.existingLabels = this.mailboxRepository.getLabels();
         this.mailboxes = this.mailboxRepository.getMailboxIdsForThreadsLiveData(threadIds);
@@ -87,11 +88,11 @@ public class ChooseLabelsViewModel extends LttrsViewModel {
         final List<MailboxWithRoleAndName> existingMailboxes = Objects.requireNonNull(this.existingLabels.getValue());
         final ImmutableList.Builder<IdentifiableMailboxWithRoleAndName> addBuilder = new ImmutableList.Builder<>();
         final ImmutableList.Builder<IdentifiableMailboxWithRoleAndName> removeBuilder = new ImmutableList.Builder<>();
-        for(final SelectableMailbox selectableMailbox : getSelectableMailboxes(mailboxes, mailboxOverwrites, existingMailboxes)) {
+        for (final SelectableMailbox selectableMailbox : getSelectableMailboxes(mailboxes, mailboxOverwrites, existingMailboxes)) {
             if (selectableMailbox.isSelected()) {
-                addBuilder.add(selectableMailbox.toMailboxWithRoleAndName());
-            } else if (isInMailbox(selectableMailbox,mailboxes,mailboxOverwrites)) {
-                removeBuilder.add(selectableMailbox.toMailboxWithRoleAndName());
+                addBuilder.add(selectableMailbox);
+            } else if (isInMailbox(selectableMailbox, mailboxes, mailboxOverwrites)) {
+                removeBuilder.add(selectableMailbox);
             }
         }
         final List<IdentifiableMailboxWithRoleAndName> add = addBuilder.build();
@@ -155,7 +156,7 @@ public class ChooseLabelsViewModel extends LttrsViewModel {
         return this.labels;
     }
 
-    private static class Selection {
+    private static class Selection implements IdentifiableMailboxWithRoleAndName {
         private final String id;
         private final String name;
         private final Role role;
@@ -166,21 +167,19 @@ public class ChooseLabelsViewModel extends LttrsViewModel {
             this.role = role;
         }
 
-        private boolean matches(final IdentifiableMailboxWithRoleAndName mailbox) {
-            if (id == null) {
-                return Objects.equals(name, mailbox.getName()) && Objects.equals(role, mailbox.getRole());
-            } else {
-                return id.equals(mailbox.getId());
-            }
+        @Override
+        public String getName() {
+            return name;
         }
 
-        private boolean matchesAny(final Collection<? extends IdentifiableMailboxWithRoleAndName> mailboxes) {
-            for (IdentifiableMailboxWithRoleAndName mailbox : mailboxes) {
-                if (matches(mailbox)) {
-                    return true;
-                }
-            }
-            return false;
+        @Override
+        public Role getRole() {
+            return role;
+        }
+
+        @Override
+        public String getId() {
+            return id;
         }
     }
 

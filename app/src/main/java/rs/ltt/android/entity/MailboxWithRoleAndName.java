@@ -15,9 +15,6 @@
 
 package rs.ltt.android.entity;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import java.util.Collection;
 
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRoleAndName;

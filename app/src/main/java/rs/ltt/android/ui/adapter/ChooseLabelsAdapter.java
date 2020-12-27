@@ -24,11 +24,7 @@ public class ChooseLabelsAdapter extends RecyclerView.Adapter<ChooseLabelsAdapte
     private static final DiffUtil.ItemCallback<SelectableMailbox> DIFF_ITEM_CALLBACK = new DiffUtil.ItemCallback<SelectableMailbox>() {
         @Override
         public boolean areItemsTheSame(@NonNull SelectableMailbox oldItem, @NonNull SelectableMailbox newItem) {
-            if (oldItem.getId() == null) {
-                return Objects.equals(oldItem.getName(), newItem.getName()) && Objects.equals(oldItem.getRole(), newItem.getRole());
-            } else {
-                return oldItem.getId().equals(newItem.getId());
-            }
+            return oldItem.matches(newItem);
         }
 
         @Override

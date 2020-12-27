@@ -1,5 +1,6 @@
 package rs.ltt.android.entity;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRoleAndName;
@@ -38,14 +39,6 @@ public class SelectableMailbox implements IdentifiableMailboxWithRoleAndName, La
         );
     }
 
-    public MailboxWithRoleAndName toMailboxWithRoleAndName() {
-        final MailboxWithRoleAndName mailbox = new MailboxWithRoleAndName();
-        mailbox.id = id;
-        mailbox.role = role;
-        mailbox.name = name;
-        return mailbox;
-    }
-
     @Override
     public String getName() {
         return name;
@@ -81,4 +74,13 @@ public class SelectableMailbox implements IdentifiableMailboxWithRoleAndName, La
         return Objects.hashCode(id, name, role, selected);
     }
 
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("id", id)
+                .add("name", name)
+                .add("role", role)
+                .add("selected", selected)
+                .toString();
+    }
 }

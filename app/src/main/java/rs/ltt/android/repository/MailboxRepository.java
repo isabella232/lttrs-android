@@ -12,6 +12,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -61,20 +62,50 @@ public class MailboxRepository extends AbstractMuaRepository {
         return workRequest.getId();
     }
 
-    public List<UUID> modifyLabels(final String[] threadIds,
+    public List<UUID> modifyLabels(final Collection<String> threadIds,
                                    final List<IdentifiableMailboxWithRoleAndName> add,
                                    final List<IdentifiableMailboxWithRoleAndName> remove) {
         if (add.size() == 0 && remove.size() == 0) {
             return Collections.emptyList();
         }
-        final List<OneTimeWorkRequest> workRequests = Arrays.stream(threadIds)
+        final List<OneTimeWorkRequest> workRequests = threadIds.stream()
                 .map(threadId -> new OneTimeWorkRequest.Builder(ModifyLabelsWorker.class)
                         .setConstraints(CONNECTED_CONSTRAINT)
                         .setInputData(ModifyLabelsWorker.data(accountId, threadId, add, remove))
                         .build())
                 .collect(Collectors.toList());
         IO_EXECUTOR.execute(() -> {
-            
+            if(add.size() > 0) {
+                deleteQueryItemOverwrite(threadIds, Role.TRASH);
+                database.overwriteDao().insertMailboxOverwrites(
+                            MailboxOverwriteEntity.of(threadIds, Role.TRASH, false)
+                    );
+            }
+            for(final IdentifiableMailboxWithRoleAndName mailbox : add) {
+                deleteQueryItemOverwrite(threadIds, mailbox);
+                if (mailbox.getRole() == Role.INBOX) {
+                    database.overwriteDao().insertMailboxOverwrites(
+                            MailboxOverwriteEntity.of(threadIds, Role.INBOX, true)
+                    );
+                    database.overwriteDao().insertMailboxOverwrites(
+                            MailboxOverwriteEntity.of(threadIds, Role.ARCHIVE, false)
+                    );
+                    database.overwriteDao().insertMailboxOverwrites(
+                            MailboxOverwriteEntity.of(threadIds, Role.TRASH, false)
+                    );
+                }
+            }
+            for(final IdentifiableMailboxWithRoleAndName mailbox : remove) {
+                insertQueryItemOverwrite(threadIds, mailbox);
+                if (mailbox.getRole() == Role.INBOX) {
+                    database.overwriteDao().insertMailboxOverwrites(
+                            MailboxOverwriteEntity.of(threadIds, Role.INBOX, false)
+                    );
+                    database.overwriteDao().insertMailboxOverwrites(
+                            MailboxOverwriteEntity.of(threadIds, Role.ARCHIVE, true)
+                    );
+                }
+            }
         });
         return workRequests.stream().map(WorkRequest::getId).collect(Collectors.toList());
     }
