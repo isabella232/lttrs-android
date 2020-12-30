@@ -78,4 +78,7 @@
     <string name="reassign_role_question">Hai già un\'etichetta chiamata %1$s con il ruolo di %2$s. Vuoi riassegnarle il ruolo di %3$s\?</string>
     <string name="assign_role">Assegna ruolo</string>
     <string name="reassign_role">Riassegna ruolo</string>
+    <string name="label_as">Etichetta come</string>
+    <string name="apply_changes">Applica modifiche</string>
+    <string name="change_labels">Cambia etichette</string>
 </resources>
