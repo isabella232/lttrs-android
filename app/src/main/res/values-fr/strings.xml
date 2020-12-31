@@ -71,4 +71,14 @@
     <string name="mark_read">Marquer comme lu</string>
     <string name="mark_unread">Marquer comme non lu</string>
     <string name="archive">Archiver</string>
+    <string name="apply_changes">Appliquer les changements</string>
+    <string name="label_as">Labelliser comme</string>
+    <string name="change_labels">Changer les labels</string>
+    <string name="cancel">Annuler</string>
+    <string name="confirm">Confirmer</string>
+    <string name="assign_role_detailed_explanation">Ltt.rs a besoin d\'un label (boîte aux lettres) avec le rôle de %1$s pour fonctionner correctement. Si vous ne souhaitez pas utiliser le label appelé %2$s à cette fin, vous pouvez appuyer sur Annuler et utiliser votre ordinateur ou votre client Web pour créer un libellé différent avec le rôle %1$s.</string>
+    <string name="assign_role_question">Vous avez déjà un label appelé %1$s. Souhaitez-vous lui attribuer le rôle de %2$s \?</string>
+    <string name="reassign_role_question">Vous avez déjà un label appelé %1$s avec le rôle de %2$s. Souhaitez-vous lui réaffecter le rôle de %3$s \?</string>
+    <string name="assign_role">Assigner le rôle</string>
+    <string name="reassign_role">Réassigner le rôle</string>
 </resources>
