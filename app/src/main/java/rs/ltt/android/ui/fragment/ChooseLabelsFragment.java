@@ -74,13 +74,11 @@ public class ChooseLabelsFragment extends AbstractLttrsFragment implements Choos
                 final String name = CharSequences.nullToEmpty(
                         dialogViewNewLabelBinding.name.getText()
                 ).trim();
-                if (name.length() == 0) {
-                    dialogViewNewLabelBinding.inputLayout.setError(
-                            requireContext().getString(R.string.no_name_specified)
-                    );
-                } else {
+                try {
                     viewModel.createLabel(name);
                     dialog.dismiss();
+                } catch (final IllegalArgumentException e) {
+                    dialogViewNewLabelBinding.inputLayout.setError(e.getMessage());
                 }
             });
         });

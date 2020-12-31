@@ -1,7 +1,6 @@
 package rs.ltt.android.ui.adapter;
 
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -11,7 +10,6 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
-import java.util.Objects;
 
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.ItemMailboxSelectableBinding;

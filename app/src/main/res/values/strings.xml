@@ -99,6 +99,7 @@
     <string name="apply_changes">Apply changes</string>
     <string name="enter_a_label_name">Type in a new label name</string>
     <string name="no_name_specified">No name specified. Try again.</string>
+    <string name="reserved_mailbox_name">Reserved name. Try a different name.</string>
     <string name="new_label">New label</string>
     <string name="create">Create</string>
 </resources>

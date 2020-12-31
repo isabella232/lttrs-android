@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -25,6 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import rs.ltt.android.R;
 import rs.ltt.android.entity.MailboxOverwriteEntity;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.SelectableMailbox;
@@ -32,6 +32,7 @@ import rs.ltt.android.repository.MailboxRepository;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRoleAndName;
 import rs.ltt.jmap.common.entity.Role;
 import rs.ltt.jmap.mua.util.LabelUtil;
+import rs.ltt.jmap.mua.util.MailboxUtil;
 
 public class ChooseLabelsViewModel extends LttrsViewModel {
 
@@ -218,6 +219,12 @@ public class ChooseLabelsViewModel extends LttrsViewModel {
     }
 
     public void createLabel(final String name) {
+        if (name.length() == 0) {
+            throw new IllegalArgumentException(getApplication().getString(R.string.no_name_specified));
+        }
+        if (MailboxUtil.RESERVED_MAILBOX_NAMES.contains(name)) {
+            throw new IllegalArgumentException(getApplication().getString(R.string.reserved_mailbox_name));
+        }
         setSelectionOverwrite(new StubLabel(name), true);
     }
 
