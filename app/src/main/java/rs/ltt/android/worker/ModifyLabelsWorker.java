@@ -93,7 +93,7 @@ public class ModifyLabelsWorker extends AbstractMailboxModificationWorker {
 
     @Override
     protected ListenableFuture<Boolean> modify(final List<EmailWithMailboxes> emails) {
-        return null;
+        return getMua().modifyLabels(emails, add, remove);
     }
 
     public static Data data(Long account, String threadId, List<IdentifiableMailboxWithRoleAndName> add, List<IdentifiableMailboxWithRoleAndName> remove) {

@@ -46,6 +46,8 @@ import androidx.work.WorkInfo;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.slf4j.Logger;
@@ -84,6 +86,12 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
             R.id.inbox,
             R.id.mailbox,
             R.id.keyword
+    );
+    private static final List<Integer> QUERY_DESTINATIONS = Arrays.asList(
+            R.id.inbox,
+            R.id.mailbox,
+            R.id.keyword,
+            R.id.search
     );
     private static final List<Integer> FULL_SCREEN_DIALOG = Arrays.asList(
             R.id.label_as
@@ -174,7 +182,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
     @Override
     public boolean onCreateOptionsMenu(@NonNull Menu menu) {
         final int currentDestination = getCurrentDestinationId();
-        final boolean showSearch = MAIN_DESTINATIONS.contains(currentDestination) || currentDestination == R.id.search;
+        final boolean showSearch = QUERY_DESTINATIONS.contains(currentDestination);
 
         getMenuInflater().inflate(R.menu.activity_main, menu);
 
@@ -431,9 +439,6 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
     @Override
     public void onDestinationChanged(@NonNull NavController controller, @NonNull NavDestination destination, @Nullable Bundle arguments) {
         LOGGER.debug("onDestinationChanged({})", destination.getLabel());
-        if (destination.getId() == R.id.thread) {
-            endActionMode();
-        }
         configureActionBarForDestination(destination);
     }
 

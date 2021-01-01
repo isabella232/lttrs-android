@@ -78,8 +78,8 @@ public class MailboxRepository extends AbstractMuaRepository {
             if(add.size() > 0) {
                 deleteQueryItemOverwrite(threadIds, Role.TRASH);
                 database.overwriteDao().insertMailboxOverwrites(
-                            MailboxOverwriteEntity.of(threadIds, Role.TRASH, false)
-                    );
+                        MailboxOverwriteEntity.of(threadIds, Role.TRASH, false)
+                );
             }
             for(final IdentifiableMailboxWithRoleAndName mailbox : add) {
                 deleteQueryItemOverwrite(threadIds, mailbox);
@@ -90,9 +90,7 @@ public class MailboxRepository extends AbstractMuaRepository {
                     database.overwriteDao().insertMailboxOverwrites(
                             MailboxOverwriteEntity.of(threadIds, Role.ARCHIVE, false)
                     );
-                    database.overwriteDao().insertMailboxOverwrites(
-                            MailboxOverwriteEntity.of(threadIds, Role.TRASH, false)
-                    );
+                    //TODO insert query item overwrites for trash and archive
                 }
             }
             for(final IdentifiableMailboxWithRoleAndName mailbox : remove) {
@@ -106,6 +104,12 @@ public class MailboxRepository extends AbstractMuaRepository {
                     );
                 }
             }
+            final WorkManager workManager = WorkManager.getInstance(application);
+            workManager.enqueueUniqueWork(
+                    ModifyLabelsWorker.uniqueName(accountId),
+                    ExistingWorkPolicy.APPEND_OR_REPLACE,
+                    workRequests
+            );
         });
         return workRequests.stream().map(WorkRequest::getId).collect(Collectors.toList());
     }

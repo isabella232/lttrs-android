@@ -117,6 +117,11 @@ public class DatabaseCache implements Cache {
     }
 
     @Override
+    public List<? extends IdentifiableMailboxWithRoleAndName> getMailboxesByNames(String[] names) {
+        return database.mailboxDao().getMailboxesByNames(names);
+    }
+
+    @Override
     public void setThreadsAndEmails(final TypedState<Thread> threadState,
                                     final Thread[] threads,
                                     final TypedState<Email> emailState,

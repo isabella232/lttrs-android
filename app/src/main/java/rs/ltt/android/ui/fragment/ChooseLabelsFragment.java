@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -88,6 +89,10 @@ public class ChooseLabelsFragment extends AbstractLttrsFragment implements Choos
     private void onConfirm(final View view) {
         final List<UUID> workRequests = this.viewModel.applyChanges();
         getLttrsViewModel().observeForFailure(workRequests);
+        final NavController navController = getNavController();
+        if (navController.getCurrentDestination().getId() == R.id.label_as) {
+            getNavController().navigateUp();
+        }
     }
 
     private void onCancel(final View view) {

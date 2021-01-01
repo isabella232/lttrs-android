@@ -287,7 +287,6 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
 
     @Override
     public boolean onCreateActionMode(final ActionMode mode, final Menu menu) {
-        LOGGER.debug("onCreateActionMode()");
         this.actionMode = mode;
         this.actionMode.getMenuInflater().inflate(R.menu.thread_item_action_mode, menu);
         this.actionMode.setTitle(String.valueOf(tracker.getSelection().size()));
@@ -344,44 +343,38 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
 
     @Override
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        final int itemId = item.getItemId();
         final Collection<String> threadIds = Sets.newHashSet(tracker.getSelection());
-        switch (item.getItemId()) {
-            case R.id.action_archive:
-                archive(threadIds);
-                tracker.clearSelection();
-                return true;
-            case R.id.action_remove_label:
-                removeLabel(threadIds);
-                tracker.clearSelection();
-                return true;
-            case R.id.action_mark_read:
-                getThreadModifier().markRead(threadIds);
-                return true;
-            case R.id.action_mark_unread:
-                getThreadModifier().markUnread(threadIds);
-                return true;
-            case R.id.action_move_to_inbox:
-                getThreadModifier().moveToInbox(threadIds);
-                tracker.clearSelection();
-            case R.id.action_mark_important:
-                getThreadModifier().markImportant(threadIds);
-                return true;
-            case R.id.action_mark_not_important:
-                getThreadModifier().markNotImportant(threadIds);
-                return true;
-            case R.id.action_add_flag:
-                getThreadModifier().addFlag(threadIds);
-                return true;
-            case R.id.action_remove_flag:
-                getThreadModifier().removeFlag(threadIds);
-                return true;
-            case R.id.action_move_to_trash:
-                getThreadModifier().moveToTrash(threadIds);
-                tracker.clearSelection();
-                return true;
-            default:
-                return onActionItemClicked(mode, item);
+        if (itemId == R.id.action_archive) {
+            archive(threadIds);
+            tracker.clearSelection();
+        } else if (itemId == R.id.action_remove_label) {
+            removeLabel(threadIds);
+            tracker.clearSelection();
+        } else if (itemId == R.id.action_mark_read) {
+            getThreadModifier().markRead(threadIds);
+        } else if (itemId == R.id.action_mark_unread) {
+            getThreadModifier().markUnread(threadIds);
+        } else if (itemId == R.id.action_change_labels) {
+            getNavController().navigate(LttrsNavigationDirections.actionChangeLabels(
+                    threadIds.toArray(new String[0])
+            ));
+        } else if (itemId == R.id.action_move_to_inbox) {
+            getThreadModifier().moveToInbox(threadIds);
+            tracker.clearSelection();
+        } else if (itemId == R.id.action_mark_important) {
+            getThreadModifier().markImportant(threadIds);
+        } else if (itemId == R.id.action_mark_not_important) {
+            getThreadModifier().markNotImportant(threadIds);
+        } else if (itemId == R.id.action_add_flag) {
+            getThreadModifier().addFlag(threadIds);
+        } else if (itemId == R.id.action_remove_flag) {
+            getThreadModifier().removeFlag(threadIds);
+        } else if (itemId == R.id.action_move_to_trash) {
+            getThreadModifier().moveToTrash(threadIds);
+            tracker.clearSelection();
         }
+        return true;
     }
 
     abstract void removeLabel(Collection<String> threadIds);
