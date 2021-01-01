@@ -439,6 +439,9 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
     @Override
     public void onDestinationChanged(@NonNull NavController controller, @NonNull NavDestination destination, @Nullable Bundle arguments) {
         LOGGER.debug("onDestinationChanged({})", destination.getLabel());
+        if (!QUERY_DESTINATIONS.contains(destination.getId())) {
+            endActionMode();
+        }
         configureActionBarForDestination(destination);
     }
 

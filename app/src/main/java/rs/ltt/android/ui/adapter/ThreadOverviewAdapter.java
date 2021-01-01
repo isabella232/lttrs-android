@@ -169,25 +169,22 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
         }
     }
 
-    private void setInitialLoadComplete(final boolean initialLoadComplete) {
-        final boolean before = isLoading();
-        this.initialLoadComplete = initialLoadComplete;
-        refreshLoadingIndicator(before);
-    }
-
     private boolean isLoading() {
         return this.isLoading || !initialLoadComplete;
     }
 
     @Override
     public void submitList(final PagedList<ThreadOverviewItem> pagedList) {
-        setInitialLoadComplete(true);
-        super.submitList(pagedList);
+        submitList(pagedList, null);
     }
 
     @Override
     public void submitList(final PagedList<ThreadOverviewItem> pagedList, final Runnable runnable) {
-        setInitialLoadComplete(true);
+        final boolean before = isLoading();
+        this.initialLoadComplete = true;
+        if (pagedList != null && pagedList.size() == 0) {
+            refreshLoadingIndicator(before);
+        }
         super.submitList(pagedList, runnable);
     }
 
