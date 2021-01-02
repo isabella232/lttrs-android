@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -82,7 +83,9 @@ public class MailboxRepository extends AbstractMuaRepository {
                 );
             }
             for(final IdentifiableMailboxWithRoleAndName mailbox : add) {
-                deleteQueryItemOverwrite(threadIds, mailbox);
+                if (Objects.nonNull(mailbox.getId())) {
+                    deleteQueryItemOverwrite(threadIds, mailbox);
+                }
                 if (mailbox.getRole() == Role.INBOX) {
                     database.overwriteDao().insertMailboxOverwrites(
                             MailboxOverwriteEntity.of(threadIds, Role.INBOX, true)
