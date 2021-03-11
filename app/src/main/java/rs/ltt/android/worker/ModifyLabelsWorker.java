@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import rs.ltt.android.entity.EmailWithMailboxes;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
@@ -93,6 +94,15 @@ public class ModifyLabelsWorker extends AbstractMailboxModificationWorker {
 
     @Override
     protected ListenableFuture<Boolean> modify(final List<EmailWithMailboxes> emails) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info(
+                    "Add {} and remove {} from {} emails in thread {}",
+                    add.stream().map(IdentifiableMailboxWithRoleAndName::getName).collect(Collectors.toList()),
+                    remove.stream().map(IdentifiableMailboxWithRoleAndName::getName).collect(Collectors.toList()),
+                    emails.size(),
+                    threadId
+            );
+        }
         return getMua().modifyLabels(emails, add, remove);
     }
 

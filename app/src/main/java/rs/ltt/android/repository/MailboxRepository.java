@@ -76,13 +76,13 @@ public class MailboxRepository extends AbstractMuaRepository {
                         .build())
                 .collect(Collectors.toList());
         IO_EXECUTOR.execute(() -> {
-            if(add.size() > 0) {
-                deleteQueryItemOverwrite(threadIds, Role.TRASH);
+            if (add.size() > 0) {
+                insertQueryItemOverwrite(threadIds, Role.TRASH);
                 database.overwriteDao().insertMailboxOverwrites(
                         MailboxOverwriteEntity.of(threadIds, Role.TRASH, false)
                 );
             }
-            for(final IdentifiableMailboxWithRoleAndName mailbox : add) {
+            for (final IdentifiableMailboxWithRoleAndName mailbox : add) {
                 if (Objects.nonNull(mailbox.getId())) {
                     deleteQueryItemOverwrite(threadIds, mailbox);
                 }
@@ -93,10 +93,10 @@ public class MailboxRepository extends AbstractMuaRepository {
                     database.overwriteDao().insertMailboxOverwrites(
                             MailboxOverwriteEntity.of(threadIds, Role.ARCHIVE, false)
                     );
-                    //TODO insert query item overwrites for trash and archive
+                    insertQueryItemOverwrite(threadIds, Role.ARCHIVE);
                 }
             }
-            for(final IdentifiableMailboxWithRoleAndName mailbox : remove) {
+            for (final IdentifiableMailboxWithRoleAndName mailbox : remove) {
                 insertQueryItemOverwrite(threadIds, mailbox);
                 if (mailbox.getRole() == Role.INBOX) {
                     database.overwriteDao().insertMailboxOverwrites(
@@ -105,14 +105,18 @@ public class MailboxRepository extends AbstractMuaRepository {
                     database.overwriteDao().insertMailboxOverwrites(
                             MailboxOverwriteEntity.of(threadIds, Role.ARCHIVE, true)
                     );
+                    deleteQueryItemOverwrite(threadIds, Role.ARCHIVE);
                 }
             }
             final WorkManager workManager = WorkManager.getInstance(application);
-            workManager.enqueueUniqueWork(
-                    ModifyLabelsWorker.uniqueName(accountId),
-                    ExistingWorkPolicy.APPEND_OR_REPLACE,
-                    workRequests
-            );
+            for (final OneTimeWorkRequest workRequest : workRequests) {
+                workManager.enqueueUniqueWork(
+                        ModifyLabelsWorker.uniqueName(accountId),
+                        ExistingWorkPolicy.APPEND_OR_REPLACE,
+                        workRequest
+                );
+            }
+
         });
         return workRequests.stream().map(WorkRequest::getId).collect(Collectors.toList());
     }
