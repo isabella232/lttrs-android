@@ -33,6 +33,7 @@ import androidx.paging.PagedList;
 import androidx.recyclerview.selection.SelectionPredicates;
 import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.selection.StorageStrategy;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -164,6 +165,7 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
             } else {
                 atTop = false;
             }
+            configureItemAnimator();
             threadOverviewAdapter.submitList(threadOverviewItems, () -> {
                 if (atTop && binding != null) {
                     binding.threadList.scrollToPosition(0);
@@ -173,6 +175,22 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
                 }
             });
         });
+    }
+
+    /**
+     * The RecyclerView displays a spinning wheel while waiting for the initial load from database.
+     * However we don’t want to animate the change from one item with spinning wheel to multiple real
+     * items (Threads). Therefor we disable the animator during the first submission and re-add it later
+     */
+    private void configureItemAnimator() {
+        final RecyclerView.ItemAnimator itemAnimator = this.binding.threadList.getItemAnimator();
+        if (this.threadOverviewAdapter.isInitialLoad()) {
+            LOGGER.info("Disable item animator");
+            this.binding.threadList.setItemAnimator(null);
+        } else if (itemAnimator == null) {
+            LOGGER.info("Enable default item animator");
+            this.binding.threadList.setItemAnimator(new DefaultItemAnimator());
+        }
     }
 
     @Override

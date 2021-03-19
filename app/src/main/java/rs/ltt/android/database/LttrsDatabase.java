@@ -81,6 +81,7 @@ import rs.ltt.android.entity.ThreadItemEntity;
 public abstract class LttrsDatabase extends RoomDatabase {
 
     @SuppressLint("UseSparseArrays")
+    //TODO use Guava cache - for multi account environments we don’t need to keep old ones around for ever
     private static final Map<Long, LttrsDatabase> INSTANCES = new HashMap<>();
 
     public abstract ThreadAndEmailDao threadAndEmailDao();
