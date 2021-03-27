@@ -55,6 +55,7 @@ import rs.ltt.android.databinding.FragmentThreadListBinding;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
 import rs.ltt.android.entity.ThreadOverviewItem;
 import rs.ltt.android.ui.ActionModeMenuConfiguration;
+import rs.ltt.android.ui.ItemAnimators;
 import rs.ltt.android.ui.QueryItemTouchHelper;
 import rs.ltt.android.ui.activity.ComposeActivity;
 import rs.ltt.android.ui.adapter.OnFlaggedToggled;
@@ -100,8 +101,8 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
                 ContextCompat.getColor(requireContext(), R.color.colorSurface)
         );
 
-        //TODO: do we want to get rid of flicker on changes
-        //((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
+
+        ItemAnimators.disableChangeAnimation(binding.threadList.getItemAnimator());
 
         viewModel.isRunningPagingRequest().observe(getViewLifecycleOwner(), threadOverviewAdapter::setLoading);
 
@@ -189,7 +190,7 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
             this.binding.threadList.setItemAnimator(null);
         } else if (itemAnimator == null) {
             LOGGER.info("Enable default item animator");
-            this.binding.threadList.setItemAnimator(new DefaultItemAnimator());
+            this.binding.threadList.setItemAnimator(ItemAnimators.createDefault());
         }
     }
 
