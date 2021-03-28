@@ -17,6 +17,8 @@ package rs.ltt.android.repository;
 
 import android.app.Application;
 
+import androidx.lifecycle.LiveData;
+
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
@@ -35,6 +37,7 @@ import rs.ltt.android.LttrsApplication;
 import rs.ltt.android.cache.DatabaseCache;
 import rs.ltt.android.database.AppDatabase;
 import rs.ltt.android.database.LttrsDatabase;
+import rs.ltt.android.entity.AccountName;
 import rs.ltt.android.entity.AccountWithCredentials;
 import rs.ltt.android.entity.SearchSuggestionEntity;
 import rs.ltt.jmap.client.session.FileSessionCache;
@@ -95,5 +98,14 @@ public class MainRepository {
                 .build();
         mua.refreshIdentities();
         return mua.refreshMailboxes();
+    }
+
+
+    public LiveData<AccountName> getAccountName(final Long id) {
+        return this.appDatabase.accountDao().getAccountName(id);
+    }
+
+    public LiveData<List<AccountName>> getAccountNames() {
+        return this.appDatabase.accountDao().getAccountNames();
     }
 }

@@ -42,12 +42,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.SimpleItemAnimator;
 import androidx.work.WorkInfo;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.slf4j.Logger;
@@ -64,10 +63,11 @@ import rs.ltt.android.R;
 import rs.ltt.android.databinding.ActivityLttrsBinding;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
+import rs.ltt.android.ui.ItemAnimators;
 import rs.ltt.android.ui.Theme;
 import rs.ltt.android.ui.ThreadModifier;
 import rs.ltt.android.ui.WeakActionModeCallback;
-import rs.ltt.android.ui.adapter.LabelListAdapter;
+import rs.ltt.android.ui.adapter.NavigationAdapter;
 import rs.ltt.android.ui.model.LttrsViewModel;
 import rs.ltt.android.util.Event;
 import rs.ltt.android.util.MainThreadExecutor;
@@ -96,7 +96,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
     private static final List<Integer> FULL_SCREEN_DIALOG = Arrays.asList(
             R.id.label_as
     );
-    final LabelListAdapter labelListAdapter = new LabelListAdapter();
+    final NavigationAdapter navigationAdapter = new NavigationAdapter();
     private ActivityLttrsBinding binding;
     private LttrsViewModel lttrsViewModel;
     private MenuItem mSearchItem;
@@ -134,7 +134,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
 
         binding.drawerLayout.addDrawerListener(this);
 
-        labelListAdapter.setOnMailboxOverviewItemSelectedListener((label, currentlySelected) -> {
+        navigationAdapter.setOnMailboxOverviewItemSelectedListener((label, currentlySelected) -> {
             binding.drawerLayout.closeDrawer(GravityCompat.START);
             if (currentlySelected && MAIN_DESTINATIONS.contains(getCurrentDestinationId())) {
                 return;
@@ -157,10 +157,16 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
             //currently unused should remain here in case we bring scrollable toolbar back
             binding.appBarLayout.setExpanded(true, false);
         });
-        binding.mailboxList.setAdapter(labelListAdapter);
-        lttrsViewModel.getNavigableLabels().observe(this, labelListAdapter::submitList);
+        navigationAdapter.setOnAccountViewToggledListener(()-> {
+            lttrsViewModel.toggleAccountSelectionVisibility();
+        });
+        binding.mailboxList.setAdapter(navigationAdapter);
+        ItemAnimators.disableChangeAnimation(binding.mailboxList.getItemAnimator());
+        lttrsViewModel.getNavigableItems().observe(this, navigationAdapter::submitList);
         lttrsViewModel.getFailureEvent().observe(this, this::onFailureEvent);
-        lttrsViewModel.getSelectedLabel().observe(this, labelListAdapter::setSelectedLabel);
+        lttrsViewModel.getSelectedLabel().observe(this, navigationAdapter::setSelectedLabel);
+        lttrsViewModel.isAccountSelectionVisible().observe(this, navigationAdapter::setAccountSelectionVisible);
+        lttrsViewModel.getAccountName().observe(this, navigationAdapter::setAccountInformation);
         lttrsViewModel.getActivityTitle().observe(this, this::setTitle);
     }
 

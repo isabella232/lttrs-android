@@ -27,33 +27,38 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.work.WorkInfo;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import rs.ltt.android.repository.MainRepository;
+import rs.ltt.android.entity.AccountName;
 import rs.ltt.android.repository.LttrsRepository;
+import rs.ltt.android.repository.MainRepository;
+import rs.ltt.android.ui.AdditionalNavigationItem;
 import rs.ltt.android.util.Event;
 import rs.ltt.android.worker.Failure;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.common.entity.Keyword;
-import rs.ltt.jmap.mua.util.Label;
 import rs.ltt.jmap.mua.util.LabelUtil;
 import rs.ltt.jmap.mua.util.LabelWithCount;
+import rs.ltt.jmap.mua.util.Navigable;
 
 public class LttrsViewModel extends AndroidViewModel {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LttrsViewModel.class);
 
-    private final LiveData<List<LabelWithCount>> navigableLabels;
+    private final LiveData<List<Navigable>> navigableItems;
     private final MutableLiveData<LabelWithCount> selectedLabel = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> accountSelectionVisible = new MutableLiveData<>(false);
     private final MutableLiveData<String> activityTitle = new MutableLiveData<>();
     private final MainRepository mainRepository;
     private final long accountId;
@@ -66,10 +71,27 @@ public class LttrsViewModel extends AndroidViewModel {
         this.mainRepository = new MainRepository(application);
         this.accountId = accountId;
         this.lttrsRepository = new LttrsRepository(application, accountId);
-        this.navigableLabels = Transformations.map(
+        final LiveData<List<Navigable>> labels = Transformations.map(
                 this.lttrsRepository.getMailboxes(),
-                LabelUtil::fillUpAndSort
+                boxes -> ImmutableList.copyOf(LabelUtil.fillUpAndSort(boxes))
         );
+        final LiveData<List<Navigable>> accounts = Transformations.map(
+                this.mainRepository.getAccountNames(),
+                names -> {
+                    final ImmutableList.Builder<Navigable> builder = new ImmutableList.Builder<>();
+                    builder.addAll(names);
+                    builder.add(new AdditionalNavigationItem(AdditionalNavigationItem.Type.MANAGE_ACCOUNT));
+                    return builder.build();
+                }
+        );
+        this.navigableItems = Transformations.switchMap(this.accountSelectionVisible, input -> {
+            if (Boolean.TRUE.equals(input)) {
+                return accounts;
+            } else {
+                return labels;
+            }
+        });
+
     }
 
     public LiveData<Event<Failure>> getFailureEvent() {
@@ -78,6 +100,10 @@ public class LttrsViewModel extends AndroidViewModel {
 
     public long getAccountId() {
         return this.accountId;
+    }
+
+    public LiveData<AccountName> getAccountName() {
+        return this.mainRepository.getAccountName(this.accountId);
     }
 
     public String getCurrentSearchTerm() {
@@ -108,8 +134,17 @@ public class LttrsViewModel extends AndroidViewModel {
         return this.selectedLabel;
     }
 
-    public LiveData<List<LabelWithCount>> getNavigableLabels() {
-        return this.navigableLabels;
+    public void toggleAccountSelectionVisibility() {
+        final boolean current = Boolean.TRUE.equals(this.accountSelectionVisible.getValue());
+        this.accountSelectionVisible.postValue(!current);
+    }
+
+    public LiveData<Boolean> isAccountSelectionVisible() {
+        return Transformations.distinctUntilChanged(this.accountSelectionVisible);
+    }
+
+    public LiveData<List<Navigable>> getNavigableItems() {
+        return this.navigableItems;
     }
 
 

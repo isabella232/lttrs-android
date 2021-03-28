@@ -30,6 +30,7 @@ import java.util.Map;
 import okhttp3.HttpUrl;
 import rs.ltt.android.entity.AccountEntity;
 import rs.ltt.android.entity.AccountWithCredentials;
+import rs.ltt.android.entity.AccountName;
 import rs.ltt.android.entity.CredentialsEntity;
 import rs.ltt.jmap.common.entity.Account;
 
@@ -41,6 +42,12 @@ public abstract class AccountDao {
 
     @Query("select account.id as id, username,password,sessionResource,accountId from credentials join account on credentialsId = credentials.id where account.id=:id limit 1")
     public abstract AccountWithCredentials getAccount(Long id);
+
+    @Query("select id,name from account where id=:id limit 1")
+    public abstract LiveData<AccountName> getAccountName(Long id);
+
+    @Query("select id,name from account")
+    public abstract LiveData<List<AccountName>> getAccountNames();
 
     @Query("select id from account")
     public abstract  LiveData<List<Long>> getAccountIds();
