@@ -37,11 +37,9 @@ public class MainActivity extends AppCompatActivity {
         final long start = SystemClock.elapsedRealtime();
         final Long accountId = LttrsApplication.get(this).getMostRecentlySelectedAccountId();
         if (accountId != null) {
-            final Intent intent = new Intent(this, LttrsActivity.class);
-            intent.putExtra(LttrsActivity.EXTRA_ACCOUNT_ID, accountId);
-            startActivity(intent);
+            LttrsActivity.launch(this, accountId);
         } else {
-            startActivity(new Intent(this, SetupActivity.class));
+            SetupActivity.launch(this);
         }
         finish();
         LOGGER.debug("splash screen was visible for {}ms", (SystemClock.elapsedRealtime() - start));

@@ -20,9 +20,7 @@ import android.app.Activity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 
-import rs.ltt.android.R;
 import rs.ltt.android.ui.ThreadModifier;
 import rs.ltt.android.ui.activity.LttrsActivity;
 import rs.ltt.android.ui.model.LttrsViewModel;

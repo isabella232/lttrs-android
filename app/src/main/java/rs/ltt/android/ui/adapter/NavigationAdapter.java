@@ -33,6 +33,9 @@ import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 
 import rs.ltt.android.R;
@@ -51,6 +54,8 @@ import rs.ltt.jmap.mua.util.Navigable;
 
 public class NavigationAdapter extends RecyclerView.Adapter<NavigationAdapter.AbstractNavigationItemViewHolder> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(NavigationAdapter.class);
+
     private static final int HEADER_VIEW_TYPE = 1;
     private static final int LABEL_VIEW_TYPE = 2;
     private static final int ACCOUNT_VIEW_TYPE = 3;
@@ -59,34 +64,36 @@ public class NavigationAdapter extends RecyclerView.Adapter<NavigationAdapter.Ab
     private static final DiffUtil.ItemCallback<Navigable> ITEM_CALLBACK = new DiffUtil.ItemCallback<Navigable>() {
         @Override
         public boolean areItemsTheSame(@NonNull Navigable oldItem, @NonNull Navigable newItem) {
-            return false;
+            if (oldItem instanceof LabelWithCount && newItem instanceof LabelWithCount) {
+                return same((LabelWithCount) oldItem, (LabelWithCount) newItem);
+            }
+            if (oldItem instanceof AccountName && newItem instanceof AccountName) {
+                return ((AccountName) oldItem).id.equals(((AccountName) newItem).id);
+            }
+            if (oldItem instanceof AdditionalNavigationItem && newItem instanceof AdditionalNavigationItem) {
+                return ((AdditionalNavigationItem) oldItem).type == ((AdditionalNavigationItem) newItem).type;
+            }
+            return oldItem.equals(newItem);
         }
 
         @Override
         public boolean areContentsTheSame(@NonNull Navigable oldItem, @NonNull Navigable newItem) {
-            return false;
-        }
-
-
-        /*@Override
-        public boolean areItemsTheSame(@NonNull LabelWithCount oldItem, @NonNull LabelWithCount newItem) {
-            return NavigationAdapter.same(oldItem, newItem);
-        }
-
-        @Override
-        public boolean areContentsTheSame(@NonNull LabelWithCount oldItem, @NonNull LabelWithCount newItem) {
             return oldItem.equals(newItem);
-        }*/
+        }
     };
 
     private final AsyncListDiffer<Navigable> mDiffer = new AsyncListDiffer<>(new OffsetListUpdateCallback<>(this, 1), new AsyncDifferConfig.Builder<>(ITEM_CALLBACK).build());
 
+    //current state
     private LabelWithCount selectedLabel = null;
     private boolean accountSelectionVisible = false;
+    private AccountName accountName;
 
+    //callbacks
     private OnLabelSelected onLabelSelected = null;
     private OnAccountViewToggled onAccountViewToggled = null;
-    private AccountName accountName;
+    private OnAccountSelected onAccountSelected = null;
+    private OnAdditionalNavigationItemSelected onAdditionalNavigationItemSelected = null;
 
     public NavigationAdapter() {
         super();
@@ -131,6 +138,7 @@ public class NavigationAdapter extends RecyclerView.Adapter<NavigationAdapter.Ab
             onBindViewHolder((AdditionalItemViewHolder) abstractHolder, (AdditionalNavigationItem) navigable);
             return;
         }
+        throw new IllegalStateException(String.format("Unable to bind %s", abstractHolder.getClass().getName()));
     }
 
     private void onBindViewHolder(final AdditionalItemViewHolder viewHolder, final AdditionalNavigationItem item) {
@@ -142,20 +150,29 @@ public class NavigationAdapter extends RecyclerView.Adapter<NavigationAdapter.Ab
                 icon = R.drawable.ic_baseline_manage_accounts_24;
             }
             break;
+            case ADD_ACCOUNT: {
+                string = R.string.add_another_account;
+                icon = R.drawable.ic_baseline_add_account_24;
+            }
+            break;
             default:
                 throw new IllegalStateException(String.format("Unable to draw %s", item.type));
         }
         viewHolder.binding.icon.setImageResource(icon);
         viewHolder.binding.label.setText(string);
-        viewHolder.binding.item.setOnClickListener((v)-> {
-
+        viewHolder.binding.item.setOnClickListener((v) -> {
+            if (onAdditionalNavigationItemSelected != null) {
+                onAdditionalNavigationItemSelected.onAdditionalNavigationItemSelected(item.type);
+            }
         });
     }
 
-    private void onBindViewHolder(AccountViewHolder viewHolder, AccountName accountName) {
+    private void onBindViewHolder(final AccountViewHolder viewHolder, final AccountName accountName) {
         viewHolder.binding.setAccount(accountName);
         viewHolder.binding.item.setOnClickListener((v) -> {
-
+            if (onAccountSelected != null) {
+                onAccountSelected.onAccountSelected(accountName.id);
+            }
         });
     }
 
@@ -176,6 +193,7 @@ public class NavigationAdapter extends RecyclerView.Adapter<NavigationAdapter.Ab
     }
 
     private void onBindViewHolder(final LabelViewHolder viewHolder, final LabelWithCount label) {
+        LOGGER.info("painting {}" + label.getName());
         final Context context = viewHolder.binding.getRoot().getContext();
         viewHolder.binding.setLabel(label);
         viewHolder.binding.item.setOnClickListener(v -> {
@@ -263,12 +281,20 @@ public class NavigationAdapter extends RecyclerView.Adapter<NavigationAdapter.Ab
         this.mDiffer.submitList(items);
     }
 
-    public void setOnMailboxOverviewItemSelectedListener(OnLabelSelected listener) {
+    public void setOnLabelSelectedListener(final OnLabelSelected listener) {
         this.onLabelSelected = listener;
     }
 
     public void setOnAccountViewToggledListener(final OnAccountViewToggled listener) {
         this.onAccountViewToggled = listener;
+    }
+
+    public void setOnAccountSelected(final OnAccountSelected listener) {
+        this.onAccountSelected = listener;
+    }
+
+    public void setOnAdditionalNavigationItemSelected(final OnAdditionalNavigationItemSelected listener) {
+        this.onAdditionalNavigationItemSelected = listener;
     }
 
     private static boolean same(final Label a, final Label b) {
@@ -287,6 +313,14 @@ public class NavigationAdapter extends RecyclerView.Adapter<NavigationAdapter.Ab
 
     public interface OnAccountViewToggled {
         void onAccountViewToggled();
+    }
+
+    public interface OnAccountSelected {
+        void onAccountSelected(long id);
+    }
+
+    public interface OnAdditionalNavigationItemSelected {
+        void onAdditionalNavigationItemSelected(AdditionalNavigationItem.Type type);
     }
 
     static abstract class AbstractNavigationItemViewHolder extends RecyclerView.ViewHolder {

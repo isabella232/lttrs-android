@@ -42,7 +42,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
-import androidx.recyclerview.widget.SimpleItemAnimator;
 import androidx.work.WorkInfo;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -104,6 +103,17 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
     private ActionMode actionMode;
     private WeakReference<Snackbar> mostRecentSnackbar;
 
+    public static void launch(final AppCompatActivity activity, final long accountId) {
+        final Intent intent = new Intent(activity, LttrsActivity.class);
+        intent.putExtra(LttrsActivity.EXTRA_ACCOUNT_ID, accountId);
+        //the default launch mode of the this activity is set to 'singleTask'
+        //to view a new account we want to force recreate the activity
+        //the accountId is essentially a final variable and should not be changed during a lifetime
+        //of an activity
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        activity.startActivity(intent);
+    }
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -134,7 +144,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
 
         binding.drawerLayout.addDrawerListener(this);
 
-        navigationAdapter.setOnMailboxOverviewItemSelectedListener((label, currentlySelected) -> {
+        navigationAdapter.setOnLabelSelectedListener((label, currentlySelected) -> {
             binding.drawerLayout.closeDrawer(GravityCompat.START);
             if (currentlySelected && MAIN_DESTINATIONS.contains(getCurrentDestinationId())) {
                 return;
@@ -157,9 +167,27 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
             //currently unused should remain here in case we bring scrollable toolbar back
             binding.appBarLayout.setExpanded(true, false);
         });
-        navigationAdapter.setOnAccountViewToggledListener(()-> {
+        navigationAdapter.setOnAccountViewToggledListener(() -> {
             lttrsViewModel.toggleAccountSelectionVisibility();
         });
+        navigationAdapter.setOnAccountSelected((id -> {
+            binding.drawerLayout.closeDrawer(GravityCompat.START);
+            lttrsViewModel.setAccountSelectionVisibility(false);
+            if (id != lttrsViewModel.getAccountId()) {
+                lttrsViewModel.setSelectedAccount(id);
+                launch(this, id);
+            }
+        }));
+        navigationAdapter.setOnAdditionalNavigationItemSelected((type -> {
+            switch (type) {
+                case ADD_ACCOUNT: {
+                    SetupActivity.launch(this);
+                }
+                break;
+                default:
+                    throw new IllegalStateException(String.format("Not set up to handle %s", type));
+            }
+        }));
         binding.mailboxList.setAdapter(navigationAdapter);
         ItemAnimators.disableChangeAnimation(binding.mailboxList.getItemAnimator());
         lttrsViewModel.getNavigableItems().observe(this, navigationAdapter::submitList);
@@ -463,7 +491,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
             animateCloseSearchToolbar();
         }
         if (getCurrentDestinationId() == R.id.search) {
-            getNavController() .navigateUp();
+            getNavController().navigateUp();
         }
         return true;
     }
@@ -478,6 +506,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
     }
 
     public void animateCloseSearchToolbar() {
+        //TODO hide title during animation?
         final int toolbarIconWidth = getResources().getDimensionPixelSize(R.dimen.toolbar_icon_width);
         final int width = binding.toolbar.getWidth() - ((toolbarIconWidth * NUM_TOOLBAR_ICON) / 2);
         Animator createCircularReveal = ViewAnimationUtils.createCircularReveal(binding.toolbar, Theme.isRtl(this) ? binding.toolbar.getWidth() - width : width, binding.toolbar.getHeight() / 2, (float) width, 0.0f);

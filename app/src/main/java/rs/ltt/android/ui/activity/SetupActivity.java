@@ -37,6 +37,11 @@ public class SetupActivity extends AppCompatActivity {
 
     public static String EXTRA_NEXT_ACTION = "rs.ltt.android.extras.next-action";
 
+    public static void launch(AppCompatActivity activity) {
+        final Intent intent = new Intent(activity, SetupActivity.class);
+        activity.startActivity(intent);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,13 +59,6 @@ public class SetupActivity extends AppCompatActivity {
             if (targetEvent.isConsumable()) {
                 final SetupViewModel.Target target = targetEvent.consume();
                 switch (target) {
-                    case LTTRS:
-                        final Long[] ids = setupViewModel.getRecentlyAddedIds();
-                        if (ids == null || ids.length < 1) {
-                            throw new IllegalStateException("No recently added account ids for redirection event");
-                        }
-                        redirectToLttrs(ids[0]);
-                        break;
                     case ENTER_PASSWORD:
                         navController.navigate(SetupNavigationDirections.enterPassword());
                         break;
@@ -71,6 +69,11 @@ public class SetupActivity extends AppCompatActivity {
                         throw new IllegalStateException(String.format("Unable to navigate to target %s", target));
 
                 }
+            }
+        });
+        setupViewModel.getSetupComplete().observe(this, event -> {
+            if (event.isConsumable()) {
+                redirectToLttrs(event.consume());
             }
         });
         setupViewModel.getWarningMessage().observe(this, event -> {
@@ -85,16 +88,11 @@ public class SetupActivity extends AppCompatActivity {
         final Intent currentIntent = getIntent();
         final String uri = currentIntent == null ? null : currentIntent.getStringExtra(EXTRA_NEXT_ACTION);
         final MailToUri mailToUri = uri == null ? null : MailToUri.parse(uri);
-        final Intent nextIntent;
         if (mailToUri != null) {
-            nextIntent = new Intent(this, ComposeActivity.class);
-            nextIntent.setAction(Intent.ACTION_VIEW);
-            nextIntent.setData(Uri.parse(uri));
+            ComposeActivity.launch(this, Uri.parse(uri));
         } else {
-            nextIntent = new Intent(this, LttrsActivity.class);
-            nextIntent.putExtra(LttrsActivity.EXTRA_ACCOUNT_ID, accountId);
+            LttrsActivity.launch(this, accountId);
         }
-        startActivity(nextIntent);
         finish();
     }
 }

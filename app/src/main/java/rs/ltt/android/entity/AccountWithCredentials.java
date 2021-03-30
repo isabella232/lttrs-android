@@ -32,4 +32,12 @@ public class AccountWithCredentials {
         this.password = password;
         this.sessionResource = sessionResource;
     }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public String getAccountId() {
+        return this.accountId;
+    }
 }

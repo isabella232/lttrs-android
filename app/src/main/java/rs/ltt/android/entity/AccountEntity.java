@@ -40,12 +40,12 @@ public class AccountEntity {
 
     public String name;
 
-    public long lastSelectedAt;
+    public boolean selected;
 
-    public AccountEntity(@NonNull Long credentialsId, String accountId, String name, long lastSelectedAt) {
+    public AccountEntity(@NonNull Long credentialsId, String accountId, String name) {
         this.credentialsId = credentialsId;
         this.accountId = accountId;
         this.name = name;
-        this.lastSelectedAt = lastSelectedAt;
+        this.selected = false;
     }
 }

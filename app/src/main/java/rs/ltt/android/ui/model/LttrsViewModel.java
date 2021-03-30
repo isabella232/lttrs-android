@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import rs.ltt.android.LttrsApplication;
 import rs.ltt.android.entity.AccountName;
 import rs.ltt.android.repository.LttrsRepository;
 import rs.ltt.android.repository.MainRepository;
@@ -80,7 +81,7 @@ public class LttrsViewModel extends AndroidViewModel {
                 names -> {
                     final ImmutableList.Builder<Navigable> builder = new ImmutableList.Builder<>();
                     builder.addAll(names);
-                    builder.add(new AdditionalNavigationItem(AdditionalNavigationItem.Type.MANAGE_ACCOUNT));
+                    builder.addAll(AdditionalNavigationItem.ACCOUNT_SELECTOR_ITEMS);
                     return builder.build();
                 }
         );
@@ -137,6 +138,10 @@ public class LttrsViewModel extends AndroidViewModel {
     public void toggleAccountSelectionVisibility() {
         final boolean current = Boolean.TRUE.equals(this.accountSelectionVisible.getValue());
         this.accountSelectionVisible.postValue(!current);
+    }
+
+    public void setAccountSelectionVisibility(final boolean visibility) {
+        this.accountSelectionVisible.postValue(visibility);
     }
 
     public LiveData<Boolean> isAccountSelectionVisible() {
@@ -218,6 +223,11 @@ public class LttrsViewModel extends AndroidViewModel {
 
     public void observeForFailure(final List<UUID> ids) {
         this.lttrsRepository.observeForFailure(ids);
+    }
+
+    public void setSelectedAccount(long id) {
+        this.mainRepository.setSelectedAccount(id);
+        LttrsApplication.get(getApplication()).invalidateMostRecentlySelectedAccountId();
     }
 
     public static class Factory implements ViewModelProvider.Factory {

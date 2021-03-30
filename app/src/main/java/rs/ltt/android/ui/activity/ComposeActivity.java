@@ -94,6 +94,12 @@ public class ComposeActivity extends AppCompatActivity {
         fragment.startActivityForResult(intent, REQUEST_EDIT_DRAFT);
     }
 
+    public static void launch(AppCompatActivity activity, final Uri uri) {
+        final Intent nextIntent = new Intent(activity, ComposeActivity.class);
+        nextIntent.setAction(Intent.ACTION_VIEW);
+        nextIntent.setData(uri);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
