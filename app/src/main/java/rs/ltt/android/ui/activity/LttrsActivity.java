@@ -231,7 +231,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
                 mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
             }
             if (currentDestination == R.id.search) {
-                setSearchToolbarColors();
+                prepareToolbarForSearch();
                 mSearchItem.expandActionView();
                 mSearchView.setQuery(lttrsViewModel.getCurrentSearchTerm(), false);
                 mSearchView.clearFocus();
@@ -240,7 +240,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
         } else {
             mSearchItem = null;
             mSearchView = null;
-            resetToolbarColors();
+            resetToolbar();
         }
 
         return super.onCreateOptionsMenu(menu);
@@ -497,7 +497,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
     }
 
     public void animateShowSearchToolbar() {
-        setSearchToolbarColors();
+        prepareToolbarForSearch();
         final int toolbarIconWidth = getResources().getDimensionPixelSize(R.dimen.toolbar_icon_width);
         final int width = binding.toolbar.getWidth() - ((toolbarIconWidth * NUM_TOOLBAR_ICON) / 2);
         Animator createCircularReveal = ViewAnimationUtils.createCircularReveal(binding.toolbar, Theme.isRtl(this) ? binding.toolbar.getWidth() - width : width, binding.toolbar.getHeight() / 2, 0.0f, (float) width);
@@ -506,7 +506,6 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
     }
 
     public void animateCloseSearchToolbar() {
-        //TODO hide title during animation?
         final int toolbarIconWidth = getResources().getDimensionPixelSize(R.dimen.toolbar_icon_width);
         final int width = binding.toolbar.getWidth() - ((toolbarIconWidth * NUM_TOOLBAR_ICON) / 2);
         Animator createCircularReveal = ViewAnimationUtils.createCircularReveal(binding.toolbar, Theme.isRtl(this) ? binding.toolbar.getWidth() - width : width, binding.toolbar.getHeight() / 2, (float) width, 0.0f);
@@ -515,20 +514,31 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                resetToolbarColors();
+                resetToolbar();
             }
         });
         createCircularReveal.start();
     }
 
-    private void resetToolbarColors() {
+    private void resetToolbar() {
+        setDisplayShowTitleEnable(true);
         binding.toolbar.setBackgroundColor(Theme.getColor(LttrsActivity.this, R.attr.colorPrimary));
         binding.drawerLayout.setStatusBarBackgroundColor(Theme.getColor(LttrsActivity.this, R.attr.colorPrimaryDark));
     }
 
-    private void setSearchToolbarColors() {
+    private void prepareToolbarForSearch() {
+        setDisplayShowTitleEnable(false);
         binding.toolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.colorSurface));
         binding.drawerLayout.setStatusBarBackgroundColor(ContextCompat.getColor(this, R.color.colorStatusBarSearch));
+    }
+
+
+    private void setDisplayShowTitleEnable(final boolean enabled) {
+        final ActionBar actionBar = getSupportActionBar();
+        if (actionBar == null) {
+            throw new IllegalStateException("SupportActionBar has not been set");
+        }
+        actionBar.setDisplayShowTitleEnabled(enabled);
     }
 
     public ActionMode beginActionMode(final ActionMode.Callback callback) {
