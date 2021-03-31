@@ -464,6 +464,10 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
     @Override
     public void onBackPressed() {
         if (binding != null && binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            if (Boolean.TRUE.equals(lttrsViewModel.isAccountSelectionVisible().getValue())) {
+                lttrsViewModel.setAccountSelectionVisibility(false);
+                return;
+            }
             binding.drawerLayout.closeDrawer(GravityCompat.START);
             return;
         }
@@ -565,7 +569,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
 
     @Override
     public void onDrawerClosed(@NonNull View drawerView) {
-
+        lttrsViewModel.setAccountSelectionVisibility(false);
     }
 
     @Override

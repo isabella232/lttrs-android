@@ -145,7 +145,7 @@ public class LttrsViewModel extends AndroidViewModel {
     }
 
     public LiveData<Boolean> isAccountSelectionVisible() {
-        return Transformations.distinctUntilChanged(this.accountSelectionVisible);
+        return this.accountSelectionVisible;
     }
 
     public LiveData<List<Navigable>> getNavigableItems() {
