@@ -46,6 +46,7 @@ import rs.ltt.android.databinding.ItemNavigationLabelBinding;
 import rs.ltt.android.entity.AccountName;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.ui.AdditionalNavigationItem;
+import rs.ltt.android.util.ConsistentColorGeneration;
 import rs.ltt.jmap.mua.util.AccountUtil;
 import rs.ltt.jmap.mua.util.KeywordLabel;
 import rs.ltt.jmap.mua.util.Label;
@@ -174,6 +175,9 @@ public class NavigationAdapter extends RecyclerView.Adapter<NavigationAdapter.Ab
                 onAccountSelected.onAccountSelected(accountName.id);
             }
         });
+        viewHolder.binding.icon.setImageTintList(
+                ColorStateList.valueOf(ConsistentColorGeneration.rgbFromKey(accountName.name))
+        );
     }
 
     private void onBindViewHolder(final NavigationHeaderViewHolder viewHolder) {
@@ -193,7 +197,6 @@ public class NavigationAdapter extends RecyclerView.Adapter<NavigationAdapter.Ab
     }
 
     private void onBindViewHolder(final LabelViewHolder viewHolder, final LabelWithCount label) {
-        LOGGER.info("painting {}" + label.getName());
         final Context context = viewHolder.binding.getRoot().getContext();
         viewHolder.binding.setLabel(label);
         viewHolder.binding.item.setOnClickListener(v -> {
