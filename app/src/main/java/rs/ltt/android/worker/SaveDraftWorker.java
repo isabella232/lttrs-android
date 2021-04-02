@@ -44,7 +44,7 @@ public class SaveDraftWorker extends AbstractCreateEmailWorker {
         try {
             final String emailId = getMua().draft(email).get();
             return refreshAndFetchThreadId(emailId);
-        } catch (ExecutionException e) {
+        } catch (final ExecutionException e) {
             LOGGER.warn("Unable to safe email as draft", e);
             return Result.failure(Failure.of(e.getCause()));
         } catch (InterruptedException e) {
