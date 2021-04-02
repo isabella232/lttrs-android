@@ -28,7 +28,7 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import rs.ltt.android.util.XEP0392Helper;
+import rs.ltt.android.util.ConsistentColorGeneration;
 
 public class AvatarDrawable extends ColorDrawable {
 
@@ -37,11 +37,11 @@ public class AvatarDrawable extends ColorDrawable {
 
     private final Paint paint;
     private final Paint textPaint;
-    private String letter;
+    private final String letter;
 
     AvatarDrawable(String name, String key) {
         paint = new Paint();
-        paint.setColor(key == null ? 0xff757575 : XEP0392Helper.rgbFromKey(key));
+        paint.setColor(key == null ? 0xff757575 : ConsistentColorGeneration.rgbFromKey(key));
         paint.setAntiAlias(true);
         textPaint = new Paint();
         textPaint.setColor(Color.WHITE);
