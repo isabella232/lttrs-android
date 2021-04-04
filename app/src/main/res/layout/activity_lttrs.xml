@@ -68,7 +68,7 @@
             android:fitsSystemWindows="true">
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/mailbox_list"
+                android:id="@+id/navigation"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />

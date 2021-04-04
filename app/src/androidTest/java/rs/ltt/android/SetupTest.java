@@ -1,6 +1,7 @@
 package rs.ltt.android;
 
 import androidx.test.espresso.IdlingRegistry;
+import androidx.test.espresso.contrib.DrawerActions;
 import androidx.test.espresso.intent.Intents;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -88,6 +89,30 @@ public class SetupTest {
         onView(withId(R.id.thread_list))
                 .perform(scrollToPosition(0))
                 .check(matches(atPosition(0, hasDescendant(withText("Sandra Anderson")))));
+    }
+
+    @Test
+    public void drawerLayoutShowsAccount() throws InterruptedException {
+        onView(withId(R.id.email_address)).perform(typeText(mockMailServer.getUsername()));
+        onView(withId(R.id.next)).perform(click());
+
+        onView(withId(R.id.header)).check(matches(withText("Info required")));
+
+        onView(withId(R.id.url)).perform(typeText(mockWebServer.url(JmapDispatcher.WELL_KNOWN_PATH).toString()));
+        onView(withId(R.id.next)).perform(click());
+
+        onView(withId(R.id.password)).perform(typeText(JmapDispatcher.PASSWORD));
+        onView(withId(R.id.next)).perform(click());
+
+        Thread.sleep(3000);
+
+        intended(hasComponent(LttrsActivity.class.getName()));
+
+        onView(withId(R.id.drawer_layout)).perform(DrawerActions.open());
+
+        onView(withId(R.id.navigation))
+                .perform(scrollToPosition(0))
+                .check(matches(atPosition(0, hasDescendant(withText(mockMailServer.account.getName())))));
     }
 
     @Test

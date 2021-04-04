@@ -188,8 +188,8 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
                     throw new IllegalStateException(String.format("Not set up to handle %s", type));
             }
         }));
-        binding.mailboxList.setAdapter(navigationAdapter);
-        ItemAnimators.disableChangeAnimation(binding.mailboxList.getItemAnimator());
+        binding.navigation.setAdapter(navigationAdapter);
+        ItemAnimators.disableChangeAnimation(binding.navigation.getItemAnimator());
         lttrsViewModel.getNavigableItems().observe(this, navigationAdapter::submitList);
         lttrsViewModel.getFailureEvent().observe(this, this::onFailureEvent);
         lttrsViewModel.getSelectedLabel().observe(this, navigationAdapter::setSelectedLabel);
@@ -311,7 +311,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
                 mSearchView.setQuery(query, false);
                 mSearchView.clearFocus(); //this does not work on all phones / android versions; therefor we have this followed by a requestFocus() on the list
             }
-            binding.mailboxList.requestFocus();
+            binding.navigation.requestFocus();
 
             lttrsViewModel.insertSearchSuggestion(query);
             getNavController().navigate(LttrsNavigationDirections.actionSearch(query));
