@@ -46,8 +46,6 @@ import androidx.work.WorkInfo;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import org.slf4j.Logger;
@@ -64,10 +62,11 @@ import rs.ltt.android.R;
 import rs.ltt.android.databinding.ActivityLttrsBinding;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.MailboxWithRoleAndName;
+import rs.ltt.android.ui.ItemAnimators;
 import rs.ltt.android.ui.Theme;
 import rs.ltt.android.ui.ThreadModifier;
 import rs.ltt.android.ui.WeakActionModeCallback;
-import rs.ltt.android.ui.adapter.LabelListAdapter;
+import rs.ltt.android.ui.adapter.NavigationAdapter;
 import rs.ltt.android.ui.model.LttrsViewModel;
 import rs.ltt.android.util.Event;
 import rs.ltt.android.util.MainThreadExecutor;
@@ -96,13 +95,24 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
     private static final List<Integer> FULL_SCREEN_DIALOG = Arrays.asList(
             R.id.label_as
     );
-    final LabelListAdapter labelListAdapter = new LabelListAdapter();
+    final NavigationAdapter navigationAdapter = new NavigationAdapter();
     private ActivityLttrsBinding binding;
     private LttrsViewModel lttrsViewModel;
     private MenuItem mSearchItem;
     private SearchView mSearchView;
     private ActionMode actionMode;
     private WeakReference<Snackbar> mostRecentSnackbar;
+
+    public static void launch(final AppCompatActivity activity, final long accountId) {
+        final Intent intent = new Intent(activity, LttrsActivity.class);
+        intent.putExtra(LttrsActivity.EXTRA_ACCOUNT_ID, accountId);
+        //the default launch mode of the this activity is set to 'singleTask'
+        //to view a new account we want to force recreate the activity
+        //the accountId is essentially a final variable and should not be changed during a lifetime
+        //of an activity
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        activity.startActivity(intent);
+    }
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -134,7 +144,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
 
         binding.drawerLayout.addDrawerListener(this);
 
-        labelListAdapter.setOnMailboxOverviewItemSelectedListener((label, currentlySelected) -> {
+        navigationAdapter.setOnLabelSelectedListener((label, currentlySelected) -> {
             binding.drawerLayout.closeDrawer(GravityCompat.START);
             if (currentlySelected && MAIN_DESTINATIONS.contains(getCurrentDestinationId())) {
                 return;
@@ -157,10 +167,34 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
             //currently unused should remain here in case we bring scrollable toolbar back
             binding.appBarLayout.setExpanded(true, false);
         });
-        binding.mailboxList.setAdapter(labelListAdapter);
-        lttrsViewModel.getNavigableLabels().observe(this, labelListAdapter::submitList);
+        navigationAdapter.setOnAccountViewToggledListener(() -> {
+            lttrsViewModel.toggleAccountSelectionVisibility();
+        });
+        navigationAdapter.setOnAccountSelected((id -> {
+            binding.drawerLayout.closeDrawer(GravityCompat.START);
+            lttrsViewModel.setAccountSelectionVisibility(false);
+            if (id != lttrsViewModel.getAccountId()) {
+                lttrsViewModel.setSelectedAccount(id);
+                launch(this, id);
+            }
+        }));
+        navigationAdapter.setOnAdditionalNavigationItemSelected((type -> {
+            switch (type) {
+                case ADD_ACCOUNT: {
+                    SetupActivity.launch(this);
+                }
+                break;
+                default:
+                    throw new IllegalStateException(String.format("Not set up to handle %s", type));
+            }
+        }));
+        binding.mailboxList.setAdapter(navigationAdapter);
+        ItemAnimators.disableChangeAnimation(binding.mailboxList.getItemAnimator());
+        lttrsViewModel.getNavigableItems().observe(this, navigationAdapter::submitList);
         lttrsViewModel.getFailureEvent().observe(this, this::onFailureEvent);
-        lttrsViewModel.getSelectedLabel().observe(this, labelListAdapter::setSelectedLabel);
+        lttrsViewModel.getSelectedLabel().observe(this, navigationAdapter::setSelectedLabel);
+        lttrsViewModel.isAccountSelectionVisible().observe(this, navigationAdapter::setAccountSelectionVisible);
+        lttrsViewModel.getAccountName().observe(this, navigationAdapter::setAccountInformation);
         lttrsViewModel.getActivityTitle().observe(this, this::setTitle);
     }
 
@@ -197,7 +231,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
                 mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
             }
             if (currentDestination == R.id.search) {
-                setSearchToolbarColors();
+                prepareToolbarForSearch();
                 mSearchItem.expandActionView();
                 mSearchView.setQuery(lttrsViewModel.getCurrentSearchTerm(), false);
                 mSearchView.clearFocus();
@@ -206,7 +240,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
         } else {
             mSearchItem = null;
             mSearchView = null;
-            resetToolbarColors();
+            resetToolbar();
         }
 
         return super.onCreateOptionsMenu(menu);
@@ -430,6 +464,10 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
     @Override
     public void onBackPressed() {
         if (binding != null && binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            if (Boolean.TRUE.equals(lttrsViewModel.isAccountSelectionVisible().getValue())) {
+                lttrsViewModel.setAccountSelectionVisibility(false);
+                return;
+            }
             binding.drawerLayout.closeDrawer(GravityCompat.START);
             return;
         }
@@ -457,13 +495,13 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
             animateCloseSearchToolbar();
         }
         if (getCurrentDestinationId() == R.id.search) {
-            getNavController() .navigateUp();
+            getNavController().navigateUp();
         }
         return true;
     }
 
     public void animateShowSearchToolbar() {
-        setSearchToolbarColors();
+        prepareToolbarForSearch();
         final int toolbarIconWidth = getResources().getDimensionPixelSize(R.dimen.toolbar_icon_width);
         final int width = binding.toolbar.getWidth() - ((toolbarIconWidth * NUM_TOOLBAR_ICON) / 2);
         Animator createCircularReveal = ViewAnimationUtils.createCircularReveal(binding.toolbar, Theme.isRtl(this) ? binding.toolbar.getWidth() - width : width, binding.toolbar.getHeight() / 2, 0.0f, (float) width);
@@ -480,20 +518,31 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                resetToolbarColors();
+                resetToolbar();
             }
         });
         createCircularReveal.start();
     }
 
-    private void resetToolbarColors() {
+    private void resetToolbar() {
+        setDisplayShowTitleEnable(true);
         binding.toolbar.setBackgroundColor(Theme.getColor(LttrsActivity.this, R.attr.colorPrimary));
         binding.drawerLayout.setStatusBarBackgroundColor(Theme.getColor(LttrsActivity.this, R.attr.colorPrimaryDark));
     }
 
-    private void setSearchToolbarColors() {
+    private void prepareToolbarForSearch() {
+        setDisplayShowTitleEnable(false);
         binding.toolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.colorSurface));
         binding.drawerLayout.setStatusBarBackgroundColor(ContextCompat.getColor(this, R.color.colorStatusBarSearch));
+    }
+
+
+    private void setDisplayShowTitleEnable(final boolean enabled) {
+        final ActionBar actionBar = getSupportActionBar();
+        if (actionBar == null) {
+            throw new IllegalStateException("SupportActionBar has not been set");
+        }
+        actionBar.setDisplayShowTitleEnabled(enabled);
     }
 
     public ActionMode beginActionMode(final ActionMode.Callback callback) {
@@ -520,7 +569,7 @@ public class LttrsActivity extends AppCompatActivity implements ThreadModifier, 
 
     @Override
     public void onDrawerClosed(@NonNull View drawerView) {
-
+        lttrsViewModel.setAccountSelectionVisibility(false);
     }
 
     @Override

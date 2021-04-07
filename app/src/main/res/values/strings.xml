@@ -102,4 +102,6 @@
     <string name="reserved_mailbox_name">Reserved name. Try a different name.</string>
     <string name="new_label">New label</string>
     <string name="create">Create</string>
+    <string name="manage_accounts">Manage accounts</string>
+    <string name="add_another_account">Add another account</string>
 </resources>

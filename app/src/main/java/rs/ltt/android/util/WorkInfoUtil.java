@@ -24,6 +24,8 @@ import com.google.common.collect.Iterables;
 import java.util.Collection;
 import java.util.List;
 
+
+//TODO: Rename to WorkInfos?
 public class WorkInfoUtil {
 
 
@@ -31,6 +33,8 @@ public class WorkInfoUtil {
         return Collections2.transform(info, input -> input == null ? null : input.getState());
     }
 
+
+    //TODO use isFinished() instead?
     public static boolean allDone(List<WorkInfo> info) {
         return Iterables.all(
                 transform(info),

@@ -44,7 +44,8 @@ public class SendEmailWorker extends AbstractCreateEmailWorker {
         try {
             final String emailId = getMua().send(email, identity).get();
             return refreshAndFetchThreadId(emailId);
-        } catch (ExecutionException e) {
+        } catch (final ExecutionException e) {
+            //TODO we might have a weird corner case here where saving the draft works but submission fails. Do we need to handle that somehow?
             LOGGER.warn("Unable to send email", e);
             return Result.failure();
         } catch (InterruptedException e) {

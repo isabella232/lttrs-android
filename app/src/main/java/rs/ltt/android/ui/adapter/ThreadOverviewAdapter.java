@@ -219,6 +219,9 @@ public class ThreadOverviewAdapter extends PagedListAdapter<ThreadOverviewItem, 
         return super.getItemCount() + 1;
     }
 
+    public boolean isInitialLoad() {
+        return !this.initialLoadComplete;
+    }
 
     abstract static class AbstractThreadOverviewViewHolder extends RecyclerView.ViewHolder {
 

@@ -44,6 +44,8 @@
                 android:resource="@xml/shortcuts" />
         </activity>
 
+        <!-- LttrsActivity uses singleTask to cause search queries to arrive in onNewIntent() instead
+         of creating a new activity. -->
         <activity
             android:name=".ui.activity.LttrsActivity"
             android:launchMode="singleTask"

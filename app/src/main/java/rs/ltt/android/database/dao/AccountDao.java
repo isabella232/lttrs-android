@@ -30,6 +30,7 @@ import java.util.Map;
 import okhttp3.HttpUrl;
 import rs.ltt.android.entity.AccountEntity;
 import rs.ltt.android.entity.AccountWithCredentials;
+import rs.ltt.android.entity.AccountName;
 import rs.ltt.android.entity.CredentialsEntity;
 import rs.ltt.jmap.common.entity.Account;
 
@@ -42,10 +43,16 @@ public abstract class AccountDao {
     @Query("select account.id as id, username,password,sessionResource,accountId from credentials join account on credentialsId = credentials.id where account.id=:id limit 1")
     public abstract AccountWithCredentials getAccount(Long id);
 
-    @Query("select id from account")
-    public abstract  LiveData<List<Long>> getAccountIds();
+    @Query("select id,name from account where id=:id limit 1")
+    public abstract LiveData<AccountName> getAccountName(Long id);
 
-    @Query("select id from account order by lastSelectedAt desc limit 1")
+    @Query("select id,name from account order by name")
+    public abstract LiveData<List<AccountName>> getAccountNames();
+
+    @Query("select id from account")
+    public abstract LiveData<List<Long>> getAccountIds();
+
+    @Query("select id from account order by selected desc limit 1")
     public abstract Long getMostRecentlySelectedAccountId();
 
     @Query("select exists (select 1 from account)")
@@ -61,23 +68,20 @@ public abstract class AccountDao {
     public List<AccountWithCredentials> insert(String username,
                                                String password,
                                                HttpUrl sessionResource,
-                                               String primaryAccountId,
                                                Map<String, Account> accounts) {
         final ImmutableList.Builder<AccountWithCredentials> builder = ImmutableList.builder();
-        final long now = System.currentTimeMillis();
         final Long credentialId = insert(new CredentialsEntity(
                 username,
                 password,
                 sessionResource
         ));
-        for (Map.Entry<String, Account> entry : accounts.entrySet()) {
+        for (final Map.Entry<String, Account> entry : accounts.entrySet()) {
             final String accountId = entry.getKey();
             final String name = entry.getValue().getName();
             final Long id = insert(new AccountEntity(
                     credentialId,
                     accountId,
-                    name,
-                    accountId.equals(primaryAccountId) ? now + 1 : now
+                    name
             ));
             builder.add(new AccountWithCredentials(
                     id,
@@ -88,5 +92,17 @@ public abstract class AccountDao {
             ));
         }
         return builder.build();
+    }
+
+    @Query("update account set selected=1 where id=:id")
+    abstract void setSelected(final Long id);
+
+    @Query("update account set selected=0 where id is not :id")
+    abstract void setNotSelected(final Long id);
+
+    @Transaction
+    public void selectAccount(final Long id) {
+        setSelected(id);
+        setNotSelected(id);
     }
 }

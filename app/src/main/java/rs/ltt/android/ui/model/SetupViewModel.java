@@ -19,6 +19,7 @@ import android.app.Application;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.Network;
+import android.net.NetworkCapabilities;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -47,6 +48,7 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 
 import okhttp3.HttpUrl;
 import rs.ltt.android.BuildConfig;
+import rs.ltt.android.LttrsApplication;
 import rs.ltt.android.R;
 import rs.ltt.android.repository.MainRepository;
 import rs.ltt.android.util.Event;
@@ -72,10 +74,10 @@ public class SetupViewModel extends AndroidViewModel {
     private final MutableLiveData<String> sessionResourceError = new MutableLiveData<>();
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
     private final MutableLiveData<Event<Target>> redirection = new MutableLiveData<>();
+    private final MutableLiveData<Event<Long>> setupComplete = new MutableLiveData<>();
     private final MutableLiveData<Event<String>> warningMessage = new MutableLiveData<>();
 
     private final MainRepository mainRepository;
-    private Long[] recentlyAddedIds = null;
 
     public SetupViewModel(@NonNull Application application) {
         super(application);
@@ -286,18 +288,19 @@ public class SetupViewModel extends AndroidViewModel {
         final Map<String, Account> accounts = session.getAccounts(MailAccountCapability.class);
         LOGGER.info("found {} accounts with mail capability", accounts.size());
         if (accounts.size() == 1) {
-            final ListenableFuture<Long[]> insertFuture = mainRepository.insertAccountsRefreshMailboxes(
+            final ListenableFuture<Long> insertFuture = mainRepository.insertAccountsRefreshMailboxes(
                     Strings.nullToEmpty(emailAddress.getValue()),
                     Strings.nullToEmpty(password.getValue()),
                     getHttpSessionResource(),
                     session.getPrimaryAccount(MailAccountCapability.class),
                     accounts
             );
-            Futures.addCallback(insertFuture, new FutureCallback<Long[]>() {
+            Futures.addCallback(insertFuture, new FutureCallback<Long>() {
                 @Override
-                public void onSuccess(@Nullable Long[] ids) {
-                    recentlyAddedIds = ids;
-                    redirection.postValue(new Event<>(Target.LTTRS));
+                public void onSuccess(@Nullable Long id) {
+                    LttrsApplication.get(getApplication()).invalidateMostRecentlySelectedAccountId();
+                    mainRepository.setSelectedAccount(id);
+                    setupComplete.postValue(new Event<>(id));
                 }
 
                 @Override
@@ -314,10 +317,6 @@ public class SetupViewModel extends AndroidViewModel {
             redirection.postValue(new Event<>(Target.SELECT_ACCOUNTS));
             //store accounts in view model
         }
-    }
-
-    public Long[] getRecentlyAddedIds() {
-        return recentlyAddedIds;
     }
 
     private void reportUnableToFetchSession(final Throwable throwable) {
@@ -337,7 +336,8 @@ public class SetupViewModel extends AndroidViewModel {
     private boolean isNetworkAvailable() {
         final ConnectivityManager cm = getApplication().getSystemService(ConnectivityManager.class);
         final Network activeNetwork = cm == null ? null : cm.getActiveNetwork();
-        return activeNetwork != null;
+        final NetworkCapabilities capabilities = activeNetwork == null ? null : cm.getNetworkCapabilities(activeNetwork);
+        return capabilities != null && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
     }
 
     private HttpUrl getHttpSessionResource() {
@@ -372,11 +372,14 @@ public class SetupViewModel extends AndroidViewModel {
         throw new IllegalArgumentException();
     }
 
+    public LiveData<Event<Long>> getSetupComplete() {
+        return this.setupComplete;
+    }
+
 
     public enum Target {
         ENTER_PASSWORD,
         ENTER_URL,
-        SELECT_ACCOUNTS,
-        LTTRS
+        SELECT_ACCOUNTS
     }
 }
