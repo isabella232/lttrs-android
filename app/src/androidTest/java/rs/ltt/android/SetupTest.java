@@ -2,6 +2,7 @@ package rs.ltt.android;
 
 import androidx.test.espresso.IdlingRegistry;
 import androidx.test.espresso.contrib.DrawerActions;
+import androidx.test.espresso.contrib.RecyclerViewActions;
 import androidx.test.espresso.intent.Intents;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -24,7 +25,9 @@ import rs.ltt.jmap.mock.server.MockMailServer;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.action.ViewActions.pressImeActionButton;
 import static androidx.test.espresso.action.ViewActions.swipeDown;
+import static androidx.test.espresso.action.ViewActions.swipeRight;
 import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.contrib.RecyclerViewActions.scrollToPosition;
@@ -89,6 +92,44 @@ public class SetupTest {
         onView(withId(R.id.thread_list))
                 .perform(scrollToPosition(0))
                 .check(matches(atPosition(0, hasDescendant(withText("Sandra Anderson")))));
+    }
+
+    @Test
+    public void setupAndArchive() throws InterruptedException {
+        onView(withId(R.id.email_address)).perform(typeText(mockMailServer.getUsername()));
+        onView(withId(R.id.email_address)).perform(pressImeActionButton());
+        Thread.sleep(1000);
+        //onView(withId(R.id.next)).perform(click());
+        onView(withId(R.id.url)).perform(typeText(mockWebServer.url(JmapDispatcher.WELL_KNOWN_PATH).toString()));
+        onView(withId(R.id.url)).perform(pressImeActionButton());
+        //onView(withId(R.id.next)).perform(click());
+        Thread.sleep(1000);
+
+        onView(withId(R.id.password)).perform(typeText(JmapDispatcher.PASSWORD));
+        onView(withId(R.id.password)).perform(pressImeActionButton());
+        //onView(withId(R.id.next)).perform(click());
+
+        Thread.sleep(5000);
+
+        intended(hasComponent(LttrsActivity.class.getName()));
+
+        onView(withId(R.id.thread_list))
+                .perform(scrollToPosition(0))
+                .check(matches(atPosition(0, hasDescendant(withText("Mary Smith")))));
+
+        onView(withId(R.id.thread_list)).perform(RecyclerViewActions.actionOnItemAtPosition(0, swipeRight()));
+
+        Thread.sleep(1000);
+
+        onView(withId(R.id.drawer_layout)).perform(DrawerActions.open());
+
+        onView(withText("Archive")).perform(click());
+
+        Thread.sleep(3000);
+
+        onView(withId(R.id.thread_list))
+                .perform(scrollToPosition(0))
+                .check(matches(atPosition(0, hasDescendant(withText("Mary Smith")))));
     }
 
     @Test

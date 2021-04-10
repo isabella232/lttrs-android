@@ -117,10 +117,10 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
                 deleteAllThreadItem(thread.getId());
                 insert(ThreadItemEntity.of(thread));
             } else {
-                LOGGER.debug("skipping update to thread "+thread.getId());
+                LOGGER.debug("skipping update to thread " + thread.getId());
             }
         }
-        for(final String id : update.getDestroyed()) {
+        for (final String id : update.getDestroyed()) {
             delete(ThreadEntity.of(id));
         }
         throwOnUpdateConflict(EntityType.THREAD, update.getOldTypedState(), update.getNewTypedState());
@@ -186,7 +186,7 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
     public abstract List<EmailWithMailboxes> getEmailsWithMailboxes(Collection<String> threadIds);
 
     @Transaction
-     @Query("select id from email where id=:id")
+    @Query("select id from email where id=:id")
     public abstract EmailWithKeywords getEmailWithKeyword(String id);
 
     @Transaction
@@ -254,7 +254,7 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
     protected abstract boolean emailExists(String emailId);
 
     private void insertEmails(final Email[] emails) {
-        for (Email email : emails) {
+        for (final Email email : emails) {
             insert(EmailEntity.of(email));
             insertInReplyTo(EmailInReplyToEntity.of(email));
             insertMessageId(EmailMessageIdEntity.of(email));
@@ -267,10 +267,10 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
     }
 
     @Transaction
-    public void updateEmails(Update<Email> update, String[] updatedProperties) {
+    public void updateEmails(final Update<Email> update, final String[] updatedProperties) {
         final String newState = update.getNewTypedState().getState();
         if (newState != null && newState.equals(getState(EntityType.EMAIL))) {
-            LOGGER.debug( "nothing to do. emails already at newest state");
+            LOGGER.debug("nothing to do. emails already at newest state");
             return;
         }
         final Email[] created = update.getCreated();
@@ -283,7 +283,7 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
                     LOGGER.warn("skipping updates to email {} because we don’t have that", email.getId());
                     continue;
                 }
-                for (String property : updatedProperties) {
+                for (final String property : updatedProperties) {
                     switch (property) {
                         case "keywords":
                             deleteKeywords(email.getId());
