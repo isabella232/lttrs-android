@@ -67,13 +67,26 @@ public abstract class StateDao {
     @Query("update `query` set valid=0 where queryString=:queryString")
     public abstract void invalidateQueryState(String queryString);
 
+    @Query("update `query` set valid=0")
+    abstract void invalidateQueryStates();
+
     @Query("delete from entity_state where type=:entityType")
     public abstract void deleteState(EntityType entityType);
+
+    @Query("delete from entity_state where type in(:entityTypes)")
+    abstract void deleteStates(EntityType... entityTypes);
+
+    @Transaction
+    public void invalidateEmailThreadAndQueryStates() {
+        deleteStates(EntityType.EMAIL, EntityType.THREAD);
+        invalidateQueryStates();
+    }
 
     @Transaction
     public QueryStateWrapper getQueryStateWrapper(String queryString) {
         final QueryState queryState = getQueryState(queryString);
         final ObjectsState objectsState = getObjectsState();
+        //TODO we maybe want to include upTo even if no queryState was found to make cache invalidation more graceful
         final QueryStateWrapper.UpTo upTo;
         if (queryState == null) {
             return new QueryStateWrapper(null, false, null, objectsState);

@@ -152,15 +152,10 @@ public class DatabaseCache implements Cache {
     }
 
     @Override
-    public void invalidateEmails() {
-        database.stateDao().deleteState(EntityType.EMAIL);
+    public void invalidateEmailThreadsAndQueries() {
+        database.stateDao().invalidateEmailThreadAndQueryStates();
     }
-
-    @Override
-    public void invalidateThreads() {
-        database.stateDao().deleteState(EntityType.THREAD);
-    }
-
+    
     @Override
     public void invalidateMailboxes() {
         database.stateDao().deleteState(EntityType.MAILBOX);
