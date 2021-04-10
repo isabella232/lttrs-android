@@ -77,10 +77,6 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
     abstract void deleteAllThread();
 
     private void set(Thread[] threads, String state) {
-        if (state != null && state.equals(getState(EntityType.THREAD))) {
-            LOGGER.debug("nothing to do. threads with this state have already been set");
-            return;
-        }
         deleteAllThread();
         if (threads.length > 0) {
             insertThreads(threads);
@@ -112,11 +108,11 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
             LOGGER.debug("nothing to do. threads already at newest state");
             return;
         }
-        Thread[] created = update.getCreated();
+        final Thread[] created = update.getCreated();
         if (created.length > 0) {
             insertThreads(created);
         }
-        for (Thread thread : update.getUpdated()) {
+        for (final Thread thread : update.getUpdated()) {
             if (threadExists(thread.getId())) {
                 deleteAllThreadItem(thread.getId());
                 insert(ThreadItemEntity.of(thread));
@@ -124,7 +120,7 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
                 LOGGER.debug("skipping update to thread "+thread.getId());
             }
         }
-        for(String id : update.getDestroyed()) {
+        for(final String id : update.getDestroyed()) {
             delete(ThreadEntity.of(id));
         }
         throwOnUpdateConflict(EntityType.THREAD, update.getOldTypedState(), update.getNewTypedState());
@@ -219,10 +215,6 @@ public abstract class ThreadAndEmailDao extends AbstractEntityDao {
     abstract void deleteAllEmail();
 
     private void set(final Email[] emails, final String state) {
-        if (state != null && state.equals(getState(EntityType.EMAIL))) {
-            LOGGER.debug( "nothing to do. emails with this state have already been set");
-            return;
-        }
         deleteAllEmail();
         if (emails.length > 0) {
             insertEmails(emails);
