@@ -15,7 +15,6 @@
 
 package rs.ltt.android.ui.activity;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.SystemClock;
 

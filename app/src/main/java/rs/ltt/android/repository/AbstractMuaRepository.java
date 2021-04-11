@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -44,9 +43,7 @@ import rs.ltt.android.entity.QueryEntity;
 import rs.ltt.android.entity.QueryItemOverwriteEntity;
 import rs.ltt.jmap.client.session.FileSessionCache;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
-import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRoleAndName;
 import rs.ltt.jmap.common.entity.Role;
-import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 import rs.ltt.jmap.mua.Mua;
 import rs.ltt.jmap.mua.util.StandardQueries;
@@ -77,6 +74,10 @@ public abstract class AbstractMuaRepository {
                 .sessionCache(new FileSessionCache(application.getCacheDir()))
                 .queryPageSize(20L)
                 .build(), MoreExecutors.directExecutor());
+    }
+
+    public long getAccountId() {
+        return this.accountId;
     }
 
     public ListenableFuture<AccountWithCredentials> getAccount() {

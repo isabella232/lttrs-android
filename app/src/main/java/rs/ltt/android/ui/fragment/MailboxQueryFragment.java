@@ -18,16 +18,12 @@ package rs.ltt.android.ui.fragment;
 
 import android.os.Bundle;
 
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.Collection;
 
 import rs.ltt.android.LttrsNavigationDirections;
-import rs.ltt.android.R;
 import rs.ltt.android.entity.MailboxOverviewItem;
 import rs.ltt.android.entity.ThreadOverviewItem;
 

@@ -35,7 +35,6 @@ import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 public class CopyToMailboxWorker extends AbstractMailboxModificationWorker {
 
     private static final String THREAD_ID_KEY = "threadId";
-    private static final String MAILBOX_ID_KEY = "mailboxId";
     private static final Logger LOGGER = LoggerFactory.getLogger(CopyToMailboxWorker.class);
     private final String mailboxId;
 

@@ -34,7 +34,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -49,6 +48,7 @@ import rs.ltt.android.util.Event;
 import rs.ltt.android.worker.Failure;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.common.entity.Keyword;
+import rs.ltt.jmap.common.entity.StateChange;
 import rs.ltt.jmap.mua.util.LabelUtil;
 import rs.ltt.jmap.mua.util.LabelWithCount;
 import rs.ltt.jmap.mua.util.Navigable;
@@ -97,6 +97,15 @@ public class LttrsViewModel extends AndroidViewModel {
 
     public LiveData<Event<Failure>> getFailureEvent() {
         return this.lttrsRepository.getFailureEvent();
+    }
+
+    public LiveData<Event<StateChange>> getStateChangeEvent() {
+        return this.lttrsRepository.getStateChangeEvent();
+    }
+
+    @Override
+    public void onCleared() {
+        this.lttrsRepository.stopEventMonitor();
     }
 
     public long getAccountId() {

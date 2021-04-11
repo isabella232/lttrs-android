@@ -20,8 +20,6 @@ import android.app.Application;
 import androidx.lifecycle.LiveData;
 
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -38,7 +36,6 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import okhttp3.HttpUrl;
-import rs.ltt.android.LttrsApplication;
 import rs.ltt.android.cache.DatabaseCache;
 import rs.ltt.android.database.AppDatabase;
 import rs.ltt.android.database.LttrsDatabase;

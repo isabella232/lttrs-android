@@ -131,8 +131,7 @@ public class QueryRepository extends AbstractMuaRepository {
                 LOGGER.debug("skipping background refresh");
                 return;
             }
-            LOGGER.info("started background refresh");
-            Futures.transformAsync(mua, mua -> mua.query(emailQuery), MoreExecutors.directExecutor());
+            LOGGER.info("schedule background refresh");
         }
     }
 
@@ -173,7 +172,8 @@ public class QueryRepository extends AbstractMuaRepository {
         }, MoreExecutors.directExecutor());
     }
 
-    public LiveData<MailboxOverviewItem> getMailboxOverviewItem(final String mailboxId) {
+    public LiveData<MailboxOverviewItem>
+    getMailboxOverviewItem(final String mailboxId) {
         if (mailboxId == null) {
             return database.mailboxDao().getMailboxOverviewItemLiveData(Role.INBOX);
         } else {

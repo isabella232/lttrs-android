@@ -23,8 +23,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.work.OneTimeWorkRequest;
 
-import rs.ltt.jmap.common.entity.filter.EmailFilterCondition;
+import rs.ltt.android.worker.KeywordQueryRefreshWorker;
 import rs.ltt.jmap.common.entity.query.EmailQuery;
 import rs.ltt.jmap.mua.util.StandardQueries;
 
@@ -46,6 +47,13 @@ public class KeywordQueryViewModel extends AbstractQueryViewModel {
 
     public String getKeyword() {
         return this.keyword;
+    }
+
+    @Override
+    protected OneTimeWorkRequest getRefreshWorkRequest() {
+        return new OneTimeWorkRequest.Builder(KeywordQueryRefreshWorker.class)
+                .setInputData(KeywordQueryRefreshWorker.data(queryRepository.getAccountId(), keyword))
+                .build();
     }
 
     @Override

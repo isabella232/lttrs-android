@@ -5,6 +5,7 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.work.Data;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
@@ -13,7 +14,9 @@ import androidx.work.WorkManager;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 
 import org.slf4j.Logger;
@@ -40,9 +43,11 @@ import rs.ltt.android.worker.ModifyKeywordWorker;
 import rs.ltt.android.worker.MoveToInboxWorker;
 import rs.ltt.android.worker.MoveToTrashWorker;
 import rs.ltt.android.worker.RemoveFromMailboxWorker;
+import rs.ltt.jmap.client.event.PushService;
 import rs.ltt.jmap.common.entity.IdentifiableMailboxWithRole;
 import rs.ltt.jmap.common.entity.Keyword;
 import rs.ltt.jmap.common.entity.Role;
+import rs.ltt.jmap.common.entity.StateChange;
 import rs.ltt.jmap.mua.util.KeywordUtil;
 
 public class LttrsRepository extends AbstractMuaRepository {
@@ -50,9 +55,16 @@ public class LttrsRepository extends AbstractMuaRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(LttrsRepository.class);
 
     private final MediatorLiveData<Event<Failure>> failureEventMediator = new MediatorLiveData<>();
+    private final MutableLiveData<Event<StateChange>> stateChangeEvent = new MutableLiveData<>();
+    private final ListenableFuture<PushService> eventMonitorFuture;
 
     public LttrsRepository(Application application, long accountId) {
         super(application, accountId);
+        this.eventMonitorFuture = Futures.transformAsync(
+                this.mua,
+                input -> input.getJmapClient().monitorEvents(this::onStateChange),
+                MoreExecutors.directExecutor()
+        );
     }
 
     public LiveData<List<MailboxOverviewItem>> getMailboxes() {
@@ -61,6 +73,10 @@ public class LttrsRepository extends AbstractMuaRepository {
 
     public LiveData<Event<Failure>> getFailureEvent() {
         return this.failureEventMediator;
+    }
+
+    public LiveData<Event<StateChange>> getStateChangeEvent() {
+        return this.stateChangeEvent;
     }
 
     public void removeFromMailbox(final Collection<String> threadIds, final IdentifiableMailboxWithRole mailbox) {
@@ -155,7 +171,7 @@ public class LttrsRepository extends AbstractMuaRepository {
                 insertQueryItemOverwrite(threadIds, keyword);
             }
             final AppDatabase appDatabase = AppDatabase.getInstance(application);
-            for(final String searchQuery : appDatabase.searchSuggestionDao().getSearchQueries()) {
+            for (final String searchQuery : appDatabase.searchSuggestionDao().getSearchQueries()) {
                 insertSearchQueryItemOverwrite(threadIds, searchQuery);
             }
             database.overwriteDao().insertMailboxOverwrites(
@@ -287,7 +303,7 @@ public class LttrsRepository extends AbstractMuaRepository {
     }
 
     public void observeForFailure(List<UUID> ids) {
-        for(final UUID id : ids) {
+        for (final UUID id : ids) {
             observeForFailure(id);
         }
     }
@@ -309,5 +325,19 @@ public class LttrsRepository extends AbstractMuaRepository {
             }
         }));
         return workInfoLiveData;
+    }
+
+    private boolean onStateChange(final StateChange stateChange) {
+        LOGGER.info("onStateChange({})", stateChange);
+        this.stateChangeEvent.postValue(new Event<>(stateChange));
+        return false;
+    }
+
+    public void stopEventMonitor() {
+        try {
+            this.eventMonitorFuture.get().stop();
+        } catch (final Exception e) {
+            LOGGER.warn("Unable to stop EventMonitor", e);
+        }
     }
 }

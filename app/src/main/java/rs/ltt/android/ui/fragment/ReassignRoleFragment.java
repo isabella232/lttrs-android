@@ -8,14 +8,11 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 
 import java.util.UUID;
 
 import rs.ltt.android.R;
 import rs.ltt.android.databinding.FragmentReassignRoleBinding;
-import rs.ltt.android.databinding.FragmentReassignRoleBindingImpl;
 import rs.ltt.android.ui.model.ReassignRoleViewModel;
 import rs.ltt.android.util.Event;
 import rs.ltt.jmap.common.entity.Role;

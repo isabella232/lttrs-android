@@ -37,7 +37,6 @@ public class ModifyKeywordWorker extends AbstractMuaWorker {
     private static final Logger LOGGER = LoggerFactory.getLogger(ModifyKeywordWorker.class);
 
     private static final String THREAD_ID_KEY = "threadId";
-    private static final String KEYWORD_KEY = "keyword";
     private static final String TARGET_STATE_KEY = "target";
 
     private final String threadId;

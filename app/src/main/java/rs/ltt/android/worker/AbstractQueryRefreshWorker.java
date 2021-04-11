@@ -20,20 +20,30 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.work.WorkerParameters;
 
-public class RefreshWorker extends AbstractMuaWorker {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    public RefreshWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+import rs.ltt.jmap.common.entity.query.EmailQuery;
+
+public abstract class AbstractQueryRefreshWorker extends AbstractMuaWorker {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractQueryRefreshWorker.class);
+
+    public AbstractQueryRefreshWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
     }
+
+    abstract EmailQuery getEmailQuery();
 
     @NonNull
     @Override
     public Result doWork() {
+        LOGGER.info("doWork()");
         try {
-            getMua().refresh().get();
+            getMua().query(getEmailQuery()).get();
             return Result.success();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.info("Unable to refresh query", e);
             return Result.failure();
         }
     }
