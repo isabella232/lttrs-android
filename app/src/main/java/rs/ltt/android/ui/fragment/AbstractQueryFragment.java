@@ -106,8 +106,6 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
 
         viewModel.isRunningPagingRequest().observe(getViewLifecycleOwner(), threadOverviewAdapter::setLoading);
 
-        viewModel.getEmailModificationWorkInfo().observe(getViewLifecycleOwner(), this::emailModification);
-
         this.itemTouchHelper = new ItemTouchHelper(new QueryItemTouchHelper(this));
         this.itemTouchHelper.attachToRecyclerView(binding.threadList);
 
@@ -222,12 +220,6 @@ public abstract class AbstractQueryFragment extends AbstractLttrsFragment implem
             }
         } else if (actionMode != null) {
             requireLttrsActivity().endActionMode();
-        }
-    }
-
-    private void emailModification(boolean allDone) {
-        if (allDone) {
-            getQueryViewModel().refreshInBackground();
         }
     }
 

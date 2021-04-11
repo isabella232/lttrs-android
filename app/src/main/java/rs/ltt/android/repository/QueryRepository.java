@@ -124,14 +124,10 @@ public class QueryRepository extends AbstractMuaRepository {
         }, MoreExecutors.directExecutor());
     }
 
-    public void refreshInBackground(final EmailQuery emailQuery) {
+    public boolean isRefreshing(final EmailQuery emailQuery) {
         final String queryString = emailQuery.asHash();
         synchronized (this) {
-            if (runningQueries.contains(queryString) || runningPagingRequests.contains(queryString)) {
-                LOGGER.debug("skipping background refresh");
-                return;
-            }
-            LOGGER.info("schedule background refresh");
+            return runningQueries.contains(queryString) || runningPagingRequests.contains(queryString);
         }
     }
 

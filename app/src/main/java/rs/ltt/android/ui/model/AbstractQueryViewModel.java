@@ -45,26 +45,22 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractQueryViewModel.class);
 
     final QueryRepository queryRepository;
-    private final LiveData<Boolean> emailModificationWorkInfo;
     private LiveData<PagedList<ThreadOverviewItem>> threads;
     private LiveData<Boolean> refreshing;
     private LiveData<Boolean> runningPagingRequest;
-    private ListenableFuture<MailboxWithRoleAndName> important;
+    private final ListenableFuture<MailboxWithRoleAndName> important;
 
     AbstractQueryViewModel(@NonNull Application application, final long accountId) {
         super(application);
-
-        final WorkManager workManager = WorkManager.getInstance(application);
-
         this.queryRepository = new QueryRepository(application, accountId);
         this.important = this.queryRepository.getImportant();
-        this.emailModificationWorkInfo = Transformations.map(workManager.getWorkInfosByTagLiveData(AbstractMuaWorker.TAG_EMAIL_MODIFICATION), WorkInfoUtil::allDone);
     }
 
     void init() {
         this.threads = Transformations.switchMap(getQuery(), queryRepository::getThreadOverviewItems);
         this.refreshing = Transformations.switchMap(getQuery(), queryRepository::isRunningQueryFor);
         this.runningPagingRequest = Transformations.switchMap(getQuery(), queryRepository::isRunningPagingRequestFor);
+        refreshInBackground();
     }
 
     public LiveData<Boolean> isRefreshing() {
@@ -95,10 +91,6 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
         return liveData;
     }
 
-    public LiveData<Boolean> getEmailModificationWorkInfo() {
-        return emailModificationWorkInfo;
-    }
-
     public void onRefresh() {
         final EmailQuery emailQuery = getQuery().getValue();
         if (emailQuery != null) {
@@ -107,6 +99,11 @@ public abstract class AbstractQueryViewModel extends AndroidViewModel {
     }
 
     public void refreshInBackground() {
+        final EmailQuery emailQuery = getQuery().getValue();
+        if (emailQuery != null && queryRepository.isRefreshing(emailQuery)) {
+            LOGGER.info("Skipping background refresh");
+            return;
+        }
         LOGGER.info("refreshInBackground()");
         final WorkManager workManager = WorkManager.getInstance(getApplication());
         final OneTimeWorkRequest workRequest = getRefreshWorkRequest();
