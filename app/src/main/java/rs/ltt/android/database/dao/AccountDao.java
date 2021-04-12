@@ -31,6 +31,7 @@ import okhttp3.HttpUrl;
 import rs.ltt.android.entity.AccountEntity;
 import rs.ltt.android.entity.AccountName;
 import rs.ltt.android.entity.AccountWithCredentials;
+import rs.ltt.android.entity.AccountName;
 import rs.ltt.android.entity.CredentialsEntity;
 import rs.ltt.jmap.common.entity.Account;
 
